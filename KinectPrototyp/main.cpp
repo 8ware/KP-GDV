@@ -132,6 +132,7 @@ int main(int argc, char **argv) {
 		device.getDepth(depthMat);
 		cv::imshow("rgb", rgbMat);
 		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
+		cv::medianBlur(depthf, depthf, 7);
 		cv::imshow("depth",depthf);
 		char k = cvWaitKey(5);
 		if( k == 27 ){
@@ -145,7 +146,7 @@ int main(int argc, char **argv) {
 			cv::imwrite(file.str(),rgbMat);
 			i_snap++;
 		}
-		if(iter >= 1000) break;
+	//	if(iter >= 1000) break;
 		iter++;
 	}
 	
