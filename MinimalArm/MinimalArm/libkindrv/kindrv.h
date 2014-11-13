@@ -28,7 +28,9 @@
 #include "types.h"
 #include "exception.h"
 
-#include <boost\thread\mutex.hpp>
+#ifdef KINDRV_THREAD_SAFE
+#include <boost/thread/mutex.hpp>
+#endif
 
 
 struct libusb_device;
@@ -79,7 +81,9 @@ class JacoArm
 
  private:
    libusb_device_handle *__devh;
+#ifdef KINDRV_THREAD_SAFE
    boost::mutex          __lock;
+#endif
    bool                  __auto_ctx;
 
   inline void _usb_header(usb_packet_t &p, unsigned short pid, unsigned short pquant, unsigned short cmdid, unsigned short cmdsize);

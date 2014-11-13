@@ -26,8 +26,11 @@
 
 #include <libusb.h>
 #include <stdio.h>
+#include <cstring>
 
+#ifdef KINDRV_THREAD_SAFE
 #include <boost/thread/locks.hpp>
+#endif
 
 #define VENDOR_ID     0x22CD
 #define PRODUCT_ID    0x0000
@@ -223,7 +226,9 @@ JacoArm::_cmd_out_in(usb_packet_t &p)
   int r, transferred;
   unsigned short exp = p.header.command_id;
 
+#ifdef KINDRV_THREAD_SAFE
   boost::lock_guard<boost::mutex> lock(__lock);
+#endif
 
   r = _usb_out(p, transferred);
   if( r < 0 )
@@ -254,7 +259,9 @@ JacoArm::_cmd_out(short cmd)
   usb_packet_t p;
   _usb_header(p, 1, 1, cmd, 1);
 
+#ifdef KINDRV_THREAD_SAFE
   boost::lock_guard<boost::mutex> lock(__lock);
+#endif
 
   r = _usb_out(p, transferred);
   if( r < 0 )

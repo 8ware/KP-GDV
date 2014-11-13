@@ -2,13 +2,13 @@
 //
 #include <iostream>           // std::cout
 #include <memory>             // std::unique_ptr
-#include "libkindrv\kindrv.h" // KinDrv::JacoArm
+#include "libkindrv/kindrv.h" // KinDrv::JacoArm
 
 int main(int argc, char* argv[])
 {
 	KinDrv::init_usb();
 	std::unique_ptr<KinDrv::JacoArm> arm;
-	try{
+/*	try{
 		arm = std::unique_ptr<KinDrv::JacoArm>(new KinDrv::JacoArm());		
 	}
 	catch (KinDrv::KinDrvException e){
@@ -27,6 +27,6 @@ int main(int argc, char* argv[])
 	arm->start_api_ctrl();
 	arm->set_target_cart(Pos1.position, Pos1.finger_position);
 
-	std::cin.ignore();
+	std::cin.ignore(); */
 	return 0;
 }
