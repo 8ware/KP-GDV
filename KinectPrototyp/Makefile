@@ -1,6 +1,6 @@
 ll: test
 
-CFLAGS=-fPIC -g -Wall `pkg-config --cflags opencv` -lpthread
+CFLAGS=-fPIC -g -Wall -pthread `pkg-config --cflags opencv` 
 LIBS = `pkg-config --libs opencv`
 INCLUDE = -I/usr/include/libfreenect
 FREE_LIBS = -L/usr/lib -lfreenect
