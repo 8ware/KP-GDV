@@ -293,7 +293,7 @@ JacoArm::JacoArm() :
   ssize_t cnt;
   cnt = libusb_get_device_list(__ctx, &__devices);
   
-  libusb_device_handle *me;
+  //libusb_device_handle *me;
 
 	  int errorcode;
   if (cnt<0) {

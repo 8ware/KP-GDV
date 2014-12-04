@@ -35,7 +35,7 @@ namespace KinDrv {
 KinDrvException::KinDrvException() throw()
 {
  __err = ERROR_UNKNOWN;
- __msg = strdup("Unknown exception");
+ __msg = _strdup("Unknown exception");
 }
 
 /** Constructor.
@@ -46,7 +46,7 @@ KinDrvException::KinDrvException() throw()
 KinDrvException::KinDrvException(const char *msg) throw()
 {
  __err = ERROR_UNKNOWN;
- __msg = strdup(msg);
+ __msg = _strdup(msg);
 }
 
 /** Constructor.
@@ -57,7 +57,7 @@ KinDrvException::KinDrvException(const char *msg) throw()
 KinDrvException::KinDrvException(error_t err, const char *msg) throw()
 {
  __err = err;
- __msg = strdup(msg);
+ __msg = _strdup(msg);
 }
 
 /** Destructor. */
