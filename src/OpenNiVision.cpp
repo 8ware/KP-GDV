@@ -1,6 +1,6 @@
 #pragma once
 
-#include <kinjo/Vision.hpp>
+#include <kinjo/OpenNiVision.hpp>
 
 namespace kinjo {
 

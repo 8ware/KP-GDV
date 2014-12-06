@@ -2,6 +2,7 @@
 **/Release
 *.swp
 *.log
+*.sdf
 
 # Compiled Object files
 *.slo
