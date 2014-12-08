@@ -2,12 +2,26 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-
 namespace kinjo {
 
+	/**
+	* this is a Arm of any kind
+	* not our Special Jaco
+	**/
 	class Arm {
+		
 
 	public:
+		/**
+		* CTOR
+		**/
+		Arm(){
+		}
+		/**
+		* DTOR
+		**/
+		~Arm(){
+		}
 		/**
 		 * \param vector the absolute position in centimetres.
 		 */

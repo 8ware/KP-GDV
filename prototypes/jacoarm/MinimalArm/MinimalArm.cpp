@@ -7,8 +7,6 @@
 
 
 KinDrv::jaco_position_t ArmMoveTo(KinDrv::JacoArm* arm, float Position[3], float Rotation[3], float Finger[3]){
-	arm->start_api_ctrl();
-
 	KinDrv::jaco_position_t Pos1 = arm->get_cart_pos();
 	Position[0] = Position[0] * 0.01;
 	Position[1] = Position[1] * 0.01;
@@ -17,13 +15,13 @@ KinDrv::jaco_position_t ArmMoveTo(KinDrv::JacoArm* arm, float Position[3], float
 	Pos1.position[1] = Position[1];
 	Pos1.position[2] = Position[2];
 
-	Pos1.rotation[0] = Position[0];
-	Pos1.rotation[1] = Position[1];
-	Pos1.rotation[2] = Position[2];
+	Pos1.rotation[0] = Rotation[0];
+	Pos1.rotation[1] = Rotation[1];
+	Pos1.rotation[2] = Rotation[2];
 
-	Pos1.finger_position[0] = Position[0];
-	Pos1.finger_position[1] = Position[1];
-	Pos1.finger_position[2] = Position[2];
+	Pos1.finger_position[0] = Finger[0];
+	Pos1.finger_position[1] = Finger[1];
+	Pos1.finger_position[2] = Finger[2];
 
 	KinDrv::jaco_position_t PosNow = arm->get_cart_pos();
 	float Diff_Position[3] = { 5, 5, 5 };

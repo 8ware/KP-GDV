@@ -2,11 +2,22 @@
 
 #include <kinjo/Arm.hpp>
 
+#include "libkindrv/kindrv.h" // KinDrv::JacoArm
+
 namespace kinjo {
 
 	class JacoArm : public Arm {
 
+
 	public:
+		JacoArm()
+		{
+		TheJacoArm = new KinDrv::JacoArm();
+		}
+
+		~JacoArm(){
+			delete TheJacoArm;
+		}
 		/**
 		 * \param vector the absolute position in centimetres.
 		 */
@@ -21,8 +32,8 @@ namespace kinjo {
 		virtual cv::Vec3f getPosition() const override;
 		virtual void openFingers() override;
 		virtual void closeFingers() override;
-
-	};
-
-}
+	private:
+		KinDrv::JacoArm* TheJacoArm;
+	};//class
+} //namespace
 
