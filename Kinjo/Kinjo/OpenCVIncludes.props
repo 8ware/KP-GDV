@@ -3,14 +3,24 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <OpenCVInclude>D:\Sync\KP GDV\OpenCV\opencv\build\include</OpenCVInclude>
+    <LibUsb>D:\Sync\KP GDV\libusb</LibUsb>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(OpenCVInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(LibUsb)\;$(SolutionDir)Kinjo\include;$(OpenCVInclude);$(IncludePath)</IncludePath>
+    <_PropertySheetDisplayName>KinjoRequirements</_PropertySheetDisplayName>
   </PropertyGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(LibUsb)\Win32\Release\dll;$(LibUsb)\Win32\Debug\dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libusb-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="OpenCVInclude">
       <Value>$(OpenCVInclude)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LibUsb">
+      <Value>$(LibUsb)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
