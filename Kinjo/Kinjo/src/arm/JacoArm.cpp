@@ -12,15 +12,7 @@ namespace kinjo {
 
         JacoArm::JacoArm()
         {
-            try
-            {
-                TheJacoArm = std::shared_ptr<KinDrv::JacoArm>();
-            }
-            catch(KinDrv::KinDrvException e)
-            {
-                std::cout << e.what() << std::endl;
-                std::cin.ignore();
-            }
+			TheJacoArm = std::shared_ptr<KinDrv::JacoArm>();
         }
 
         void JacoArm::moveTo(cv::Vec3f vector)
