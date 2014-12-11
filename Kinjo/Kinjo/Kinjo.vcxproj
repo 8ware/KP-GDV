@@ -56,6 +56,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>external;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -73,6 +74,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>external;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,20 +85,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\libkindrv\exception.cpp" />
-    <ClCompile Include="include\libkindrv\kindrv.cpp" />
-    <ClCompile Include="Kinjo.cpp" />
-    <ClCompile Include="src\JacoArm.cpp" />
-    <ClCompile Include="src\OpenNiVision.cpp" />
+    <ClCompile Include="external\libkindrv\exception.cpp" />
+    <ClCompile Include="external\libkindrv\ex_ctrl.cpp" />
+    <ClCompile Include="external\libkindrv\kindrv.cpp" />
+    <ClCompile Include="src\arm\JacoArm.cpp" />
+    <ClCompile Include="src\Kinjo.cpp" />
+    <ClCompile Include="src\vision\OpenNiVision.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\kinjo\Arm.hpp" />
-    <ClInclude Include="include\kinjo\ArmFactory.hpp" />
-    <ClInclude Include="include\kinjo\JacoArm.hpp" />
-    <ClInclude Include="include\kinjo\OpenNiVision.hpp" />
-    <ClInclude Include="include\kinjo\Vision.hpp" />
-    <ClInclude Include="include\libkindrv\exception.h" />
-    <ClInclude Include="include\libkindrv\kindrv.h" />
+    <ClInclude Include="external\libkindrv\exception.h" />
+    <ClInclude Include="external\libkindrv\kindrv.h" />
+    <ClInclude Include="external\libkindrv\types.h" />
+    <ClInclude Include="include\kinjo\arm\Arm.hpp" />
+    <ClInclude Include="include\kinjo\arm\ArmFactory.hpp" />
+    <ClInclude Include="include\kinjo\arm\JacoArm.hpp" />
+    <ClInclude Include="include\kinjo\vision\OpenNiVision.hpp" />
+    <ClInclude Include="include\kinjo\vision\Vision.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

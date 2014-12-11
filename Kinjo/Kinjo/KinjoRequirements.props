@@ -7,7 +7,7 @@
     <OpenCVLib>D:\Sync\KP GDV\OpenCV\opencv\build\x86\v12\lib\</OpenCVLib>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(LibUsb)\;$(SolutionDir)Kinjo\include;$(OpenCVInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(LibUsb)\;$(OpenCVInclude);$(IncludePath)</IncludePath>
     <_PropertySheetDisplayName>KinjoRequirements</_PropertySheetDisplayName>
     <LibraryPath>D:\Sync\KP GDV\OpenCV\opencv\build\x86\vc12\lib;$(OpenCVLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
