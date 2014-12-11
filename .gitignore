@@ -1,8 +1,10 @@
 **/Debug
 **/Release
+**/build
 *.swp
 *.log
 *.sdf
+*.opensdf
 
 # Compiled Object files
 *.slo
@@ -33,4 +35,3 @@
 *.exe
 *.out
 *.app
-*.opensdf
