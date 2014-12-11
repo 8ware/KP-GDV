@@ -53,6 +53,7 @@ namespace kinjo {
             position[2] = TheJacoArm->get_cart_pos().position[2]*100;
             return position;
         }
+
         void JacoArm::openFingers()
         {
             KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
@@ -61,11 +62,7 @@ namespace kinjo {
             position.finger_position[1] = 55;
             position.finger_position[2] = 55;
             TheJacoArm->set_target_cart(position.position, position.finger_position);
-            while(isArmMoving())
-            {
-                //don't fire too many commands at the arm
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            }
+            waitArmFinishMovement();
         }
         void JacoArm::closeFingers()
         {
@@ -75,18 +72,18 @@ namespace kinjo {
             position.finger_position[1] = 0;
             position.finger_position[2] = 0;
             TheJacoArm->set_target_cart(position.position, position.finger_position);
+            waitArmFinishMovement();
+        }
+
+        void JacoArm::waitArmFinishMovement() const
+        {
             while(isArmMoving())
             {
                 //don't fire too many commands at the arm
                 std::this_thread::sleep_for(std::chrono::milliseconds(200));
             }
         }
-
-        /**
-        * helper to find out if the arm is Moving
-        * \return bool is true if the arm is Moving(or tries to move)
-        **/
-        bool JacoArm::isArmMoving()
+        bool JacoArm::isArmMoving() const
         {
             KinDrv::jaco_position_t position1 = TheJacoArm->get_ang_pos();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -10,7 +10,7 @@ namespace kinjo {
             // TODO: implement!
             return cv::Mat();
         }
-        cv::Mat OpenNiVision::getImage() const
+        cv::Mat OpenNiVision::getRgb() const
         {
             // TODO: implement!
             return cv::Mat();

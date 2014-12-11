@@ -13,7 +13,7 @@ namespace kinjo {
              * \return the depth values normalized to centimetres.
              */
             virtual cv::Mat getDepth() const = 0;
-            virtual cv::Mat getImage() const = 0;
+            virtual cv::Mat getRgb() const = 0;
 
         };
 

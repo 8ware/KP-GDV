@@ -14,18 +14,6 @@ namespace kinjo {
 
         public:
             /**
-            * CTOR
-            **/
-            Arm()
-            {
-            }
-            /**
-            * DTOR
-            **/
-            ~Arm()
-            {
-            }
-            /**
             * \param vector the absolute position in centimetres.
             */
             virtual void moveTo(cv::Vec3f vector) = 0;

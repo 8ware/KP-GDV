@@ -13,7 +13,7 @@ namespace kinjo {
              * \return the depth values normalized to centimetres.
              */
             virtual cv::Mat getDepth() const override;
-            virtual cv::Mat getImage() const override;
+            virtual cv::Mat getRgb() const override;
 
         };
 

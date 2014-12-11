@@ -41,12 +41,23 @@ namespace kinjo {
             * \return the absolute rotation in degree
             **/
             cv::Vec3f getRotation() const override;
+
             void openFingers() override;
             void closeFingers() override;
 
         private:
+            /**
+            * Helper to wait for the arm finish moving.
+            **/
+            void waitArmFinishMovement() const;
+            /**
+            * Helper to find out if the arm is moving.
+            * \return True if the arm is moving (or tries to move).
+            **/
+            bool isArmMoving() const;
+
+        private:
             std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
-            bool isArmMoving();
         };//class
     
     }
