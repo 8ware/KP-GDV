@@ -4,6 +4,11 @@
 
 #include <memory>
 
+// forward declarations
+namespace KinDrv {
+    class JacoArm;
+}
+
 namespace kinjo {
     namespace arm {
 
