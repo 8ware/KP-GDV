@@ -4,6 +4,7 @@
 #include <libkindrv/kindrv.h>       // KinDrv::JacoArm
 
 #include <memory>                   // std::shared_ptr
+#include <iostream>					// std::cout
 
 namespace kinjo {
     namespace arm {
@@ -17,23 +18,19 @@ namespace kinjo {
             ArmFactory() = delete;
             ~ArmFactory() = default;
 
-            static std::shared_ptr<kinjo::arm::Arm> getInstance(int ArmKey)
+            static std::shared_ptr<kinjo::arm::Arm> getInstance()
             {
                 std::shared_ptr<kinjo::arm::Arm> Product;
-
-                switch(ArmKey)
-                {
-                case 1:
-                    Product = std::make_shared<kinjo::arm::JacoArm>();
-                    break;
-                    // How to add other Arm types:
-                    //case 2:
-                    //	Product = std::make_shared<kinjo::phantasieArm>();
-                    //	break;
-                default:
-                    Product = std::make_shared<kinjo::arm::JacoArm>();
-                    break;
-                }
+				try {
+					Product = std::make_shared<kinjo::arm::JacoArm>();
+					std::cout << "JacoArm found, using Jaco Arm." << std::endl;
+				}
+				catch (KinDrv::KinDrvException e)
+				{
+					std::cout << e.what() << std::endl;
+					throw e;
+				}
+                
 
                 return Product;
             } //getInstance

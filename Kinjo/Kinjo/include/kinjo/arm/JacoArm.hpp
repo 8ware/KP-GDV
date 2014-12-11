@@ -61,6 +61,8 @@ namespace kinjo {
             **/
             bool isArmMoving() const;
 
+			float pi = 3.14159265358979323846;
+
         private:
             std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
         };//class
