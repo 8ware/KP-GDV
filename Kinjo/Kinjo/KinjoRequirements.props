@@ -1,18 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <OpenCVInclude>D:\Sync\KP GDV\OpenCV\opencv\build\include</OpenCVInclude>
     <LibUsb>D:\Sync\KP GDV\libusb</LibUsb>
+    <OpenCVLib>D:\Sync\KP GDV\OpenCV\opencv\build\x86\v12\lib\</OpenCVLib>
   </PropertyGroup>
   <PropertyGroup>
     <IncludePath>$(LibUsb)\;$(SolutionDir)Kinjo\include;$(OpenCVInclude);$(IncludePath)</IncludePath>
     <_PropertySheetDisplayName>KinjoRequirements</_PropertySheetDisplayName>
+    <LibraryPath>D:\Sync\KP GDV\OpenCV\opencv\build\x86\vc12\lib;$(OpenCVLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
       <AdditionalLibraryDirectories>$(LibUsb)\Win32\Release\dll;$(LibUsb)\Win32\Debug\dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libusb-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libusb-1.0.lib;opencv_core2410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -21,6 +23,9 @@
     </BuildMacro>
     <BuildMacro Include="LibUsb">
       <Value>$(LibUsb)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OpenCVLib">
+      <Value>$(OpenCVLib)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

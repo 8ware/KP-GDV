@@ -21,6 +21,11 @@ namespace kinjo {
 	{
 		// TODO: implement!
 	}
+
+	cv::Vec3f JacoArm::getRotation() const
+	{
+		return cv::Vec3f();
+	}
 	cv::Vec3f JacoArm::getPosition() const
 	{
 		cv::Vec3f position;

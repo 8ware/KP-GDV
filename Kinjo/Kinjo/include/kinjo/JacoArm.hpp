@@ -3,6 +3,7 @@
 #include <kinjo/Arm.hpp>
 
 #include "libkindrv/kindrv.h" // KinDrv::JacoArm
+#include <iostream>
 
 namespace kinjo {
 
@@ -12,7 +13,14 @@ namespace kinjo {
 	public:
 		JacoArm()
 		{
-		TheJacoArm = new KinDrv::JacoArm();
+			try
+			{
+				TheJacoArm = new KinDrv::JacoArm();
+			}
+			catch (KinDrv::KinDrvException e){
+				std::cout << e.what() << std::endl;
+				std::cin.ignore();
+			}
 		}
 
 		~JacoArm(){
