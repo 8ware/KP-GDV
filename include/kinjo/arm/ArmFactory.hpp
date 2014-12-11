@@ -1,10 +1,9 @@
 #pragma once
 #include <kinjo/arm/Arm.hpp>
-#include <kinjo/arm/JacoArm.hpp>
 #include <libkindrv/kindrv.h>       // KinDrv::JacoArm
 
 #include <memory>                   // std::shared_ptr
-#include <iostream>					// std::cout
+
 
 namespace kinjo {
     namespace arm {
@@ -18,22 +17,12 @@ namespace kinjo {
             ArmFactory() = delete;
             ~ArmFactory() = default;
 
-            static std::shared_ptr<kinjo::arm::Arm> getInstance()
-            {
-                std::shared_ptr<kinjo::arm::Arm> Product;
-				try {
-					Product = std::make_shared<kinjo::arm::JacoArm>();
-					std::cout << "JacoArm found, using Jaco Arm." << std::endl;
-				}
-				catch (KinDrv::KinDrvException e)
-				{
-					std::cout << e.what() << std::endl;
-					throw e;
-				}
+			/**
+			* \returns a Instance of kinjo::arm::Arm in our case thats a Jaco Arm
+			**/
+			static std::shared_ptr<kinjo::arm::Arm> getInstance();
+            
                 
-
-                return Product;
-            } //getInstance
         }; //class
     
     }
