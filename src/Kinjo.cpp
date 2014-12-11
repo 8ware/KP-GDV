@@ -3,7 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-int main(int argc, char* argv[]){
+int main(/*int argc, char* argv[]*/){
 
 	try
 	{

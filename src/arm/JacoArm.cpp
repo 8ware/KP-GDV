@@ -7,7 +7,9 @@
 #include <thread>
 
 namespace kinjo {
-    namespace arm {
+	namespace arm {
+
+		static const float pi = 3.14159265358979323846f;
 
         JacoArm::JacoArm()
         {

@@ -287,7 +287,7 @@ JacoArm::JacoArm() :
   
   //libusb_device_handle *me;
 
-	  int errorcode;
+  int errorcode;
   if (cnt<0) {
 	  fprintf(stderr, "Get_device_list error: %i \n", cnt);
   }
@@ -504,8 +504,8 @@ JacoArm::get_status()
 
   usb_packet_t p;
   error_t e;
-  for( unsigned int i=1; i<=19; ++i ) {
-    _usb_header(p, i, 1, CMD_GET_ARM_INFO, 1);
+  for( unsigned short i=1; i<=19; ++i ) {
+    _usb_header(p, i, 1u, CMD_GET_ARM_INFO, 1u);
     e = _cmd_out_in(p);
     if( e != ERROR_NONE )
       throw KinDrvException(e, "Could not get arm status! libusb error.");
@@ -687,3 +687,7 @@ JacoArm::set_target_ang(float j1, float j2, float j3, float j4, float j5, float 
   set_target(traj);
 }
 } // end namespace KinDrv
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif

@@ -25,6 +25,11 @@
 #ifndef __KINDRV_TYPES_H_
 #define __KINDRV_TYPES_H_
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4201)	// nonstandard extension used : nameless struct/union
+#endif
+
 namespace KinDrv {
 
 typedef enum {
@@ -135,4 +140,9 @@ typedef struct {
 
 
 } // end namespace KinDrv
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 #endif

@@ -26,6 +26,11 @@
 
 #include <string.h>
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4996)	// 'strdup': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _strdup. See online help for details.
+#endif
+
 namespace KinDrv {
 
 /** Constructor.
@@ -35,7 +40,7 @@ namespace KinDrv {
 KinDrvException::KinDrvException() throw()
 {
  __err = ERROR_UNKNOWN;
- __msg = _strdup("Unknown exception");
+ __msg = strdup("Unknown exception");
 }
 
 /** Constructor.
@@ -46,7 +51,7 @@ KinDrvException::KinDrvException() throw()
 KinDrvException::KinDrvException(const char *msg) throw()
 {
  __err = ERROR_UNKNOWN;
- __msg = _strdup(msg);
+ __msg = strdup(msg);
 }
 
 /** Constructor.
@@ -57,7 +62,7 @@ KinDrvException::KinDrvException(const char *msg) throw()
 KinDrvException::KinDrvException(error_t err, const char *msg) throw()
 {
  __err = err;
- __msg = _strdup(msg);
+ __msg = strdup(msg);
 }
 
 /** Destructor. */
@@ -83,3 +88,7 @@ KinDrvException::error() const throw()
 }
 
 } // end namespace KinDrv
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
