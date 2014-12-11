@@ -33,9 +33,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="external\libkindrv\ex_ctrl.cpp">
-      <Filter>Quelldateien\libkindrv</Filter>
-    </ClCompile>
     <ClCompile Include="external\libkindrv\exception.cpp">
       <Filter>Quelldateien\libkindrv</Filter>
     </ClCompile>

@@ -2,30 +2,43 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <OpenCVInclude>D:\Sync\KP GDV\OpenCV\opencv\build\include</OpenCVInclude>
-    <LibUsb>D:\Sync\KP GDV\libusb</LibUsb>
-    <OpenCVLib>D:\Sync\KP GDV\OpenCV\opencv\build\x86\v12\lib\</OpenCVLib>
+    <LibUsbIncDirs>C:\dev\libusb-1.0.19\include\libusb-1.0;</LibUsbIncDirs>
+    <LibUsbLibDirs>C:\dev\libusb-1.0.19\MS32\dll;</LibUsbLibDirs>
+    <LibUsbLibs>libusb-1.0.lib;</LibUsbLibs>
+    <OpenCVIncDirs>C:\dev\opencv\build\include;</OpenCVIncDirs>
+    <OpenCVLibDirs>C:\dev\opencv\build\x86\vc12\lib;</OpenCVLibDirs>
+    <OpenCVLibs>opencv_core2410.lib;opencv_highgui2410.lib</OpenCVLibs>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(LibUsb)\;$(OpenCVInclude);$(IncludePath)</IncludePath>
     <_PropertySheetDisplayName>KinjoRequirements</_PropertySheetDisplayName>
-    <LibraryPath>D:\Sync\KP GDV\OpenCV\opencv\build\x86\vc12\lib;$(OpenCVLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(LibUsbIncDirs);$(OpenCVIncDirs);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(LibUsb)\Win32\Release\dll;$(LibUsb)\Win32\Debug\dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libusb-1.0.lib;opencv_core2410.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(LibUsbLibDirs);$(OpenCVLibDirs);(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(LibUsbLibs);$(OpenCVLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <BuildMacro Include="OpenCVInclude">
-      <Value>$(OpenCVInclude)</Value>
+    <BuildMacro Include="LibUsbIncDirs">
+      <Value>$(LibUsbIncDirs)</Value>
     </BuildMacro>
-    <BuildMacro Include="LibUsb">
-      <Value>$(LibUsb)</Value>
+    <BuildMacro Include="LibUsbLibDirs">
+      <Value>$(LibUsbLibDirs)</Value>
     </BuildMacro>
-    <BuildMacro Include="OpenCVLib">
-      <Value>$(OpenCVLib)</Value>
+    <BuildMacro Include="LibUsbLibs">
+      <Value>$(LibUsbLibs)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OpenCVIncDirs">
+      <Value>$(OpenCVIncDirs)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OpenCVLibDirs">
+      <Value>$(OpenCVLibDirs)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OpenCVLibs">
+      <Value>$(OpenCVLibs)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

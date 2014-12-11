@@ -86,7 +86,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="external\libkindrv\exception.cpp" />
-    <ClCompile Include="external\libkindrv\ex_ctrl.cpp" />
     <ClCompile Include="external\libkindrv\kindrv.cpp" />
     <ClCompile Include="src\arm\JacoArm.cpp" />
     <ClCompile Include="src\Kinjo.cpp" />
