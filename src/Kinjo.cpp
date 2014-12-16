@@ -17,12 +17,18 @@ void jacoMove(std::shared_ptr<kinjo::arm::Arm> Arm){
 		cv::getTrackbarPos("Y", "kinjo"),
 		cv::getTrackbarPos("Z", "kinjo")
 	);
-	Arm->moveTo(vector);
-	std::printf("moving to %i,%i,%i is done done.\n", 
-		cv::getTrackbarPos("X", "kinjo"),
-		cv::getTrackbarPos("Y", "kinjo"),
-		cv::getTrackbarPos("Z", "kinjo")
-	);
+	if (Arm->initialized){
+		Arm->moveTo(vector);
+		std::printf("moving to %i,%i,%i is done done.\n",
+			cv::getTrackbarPos("X", "kinjo"),
+			cv::getTrackbarPos("Y", "kinjo"),
+			cv::getTrackbarPos("Z", "kinjo")
+			);
+	}
+	else
+	{
+		std::printf("Arm not Connected");
+	}
 
 }
 

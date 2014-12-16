@@ -17,10 +17,12 @@ namespace kinjo {
 			try {
 				TheJacoArm = std::make_shared<KinDrv::JacoArm>();
 				std::cout << "JacoArm found, using Jaco Arm." << std::endl;
+				initialized = true;
 			}
 			catch (KinDrv::KinDrvException e)
 			{
 				std::cout << "No Jaco Arm found." << std::endl;
+				initialized = false;
 			}
         }
 
