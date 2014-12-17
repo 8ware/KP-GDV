@@ -99,7 +99,8 @@ int main(void) {
 
 		Mat depth, rgb;
 		depth_mat.copyTo(depth);
-		rgb_mat.copyTo(rgb);
+//		rgb_mat.copyTo(rgb);
+		cvtColor(rgb_mat, rgb, CV_RGB2BGR);
 
 		if (0 <= point.x && point.x < depth_mat.cols
 				&& 0 <= point.y && point.y < depth_mat.rows) {
