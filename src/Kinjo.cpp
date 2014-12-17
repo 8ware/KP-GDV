@@ -22,53 +22,58 @@ void jacoMove(std::shared_ptr<kinjo::arm::Arm> Arm){
 		cv::getTrackbarPos("Y", "kinjo"),
 		cv::getTrackbarPos("Z", "kinjo")
 		);
-	if (Arm != nullptr){
-		Arm->moveTo(vector);
-
-	}
 	
-	std::printf("moving done. New \"exact\" Position: %f,%f,%f\n",
-		Arm->getPosition()[0], 
-		Arm->getPosition()[1], 
-		Arm->getPosition()[2]
-		);
+	if (Arm->initialized){
+		Arm->moveTo(vector);
+		std::printf("moving done. New \"exact\" Position: %f,%f,%f\n",
+			Arm->getPosition()[0],
+			Arm->getPosition()[1],
+			Arm->getPosition()[2]
+			);
+	}
+	else
+	{
+		std::printf("Arm not Connected");
+	}
 
 }
 
 
 
 int main(int argc, char* argv[]){
-	
-	int posX;
-	int posY;
-	int posZ;
+
+	int posX = 0;
+	int posY = 0;
+	int posZ = 0;
 
 
 	cv::namedWindow("kinjo", cv::WINDOW_AUTOSIZE);
-	
+
 	std::shared_ptr<kinjo::arm::Arm> Arm;
 
 	try
 	{
-		Arm = kinjo::arm::ArmFactory::getInstance();	
-		
-		//return 0;
-    }
-    catch(std::exception const & e)
-    {
-        std::cerr << e.what() << std::endl;
-		//return 1;
-    }
-    catch(...)
-    {
-        std::cerr << "Unknown exception!" << std::endl;
-		//return 1;
-    }
+		Arm = kinjo::arm::ArmFactory::getInstance();
 
-	posX = (int)Arm->getPosition()[0];
-	posY = (int)Arm->getPosition()[1];
-	posZ = (int)Arm->getPosition()[2];
-	
+		//return 0;
+	}
+	catch (std::exception const & e)
+	{
+		std::cerr << e.what() << std::endl;
+		//return 1;
+	}
+	catch (...)
+	{
+		std::cerr << "Unknown exception!" << std::endl;
+		//return 1;
+	}
+
+	if (Arm->initialized){
+		posX = (int)Arm->getPosition()[0];
+		posY = (int)Arm->getPosition()[1];
+		posZ = (int)Arm->getPosition()[2];
+	}
+
 	cv::createTrackbar("X", "kinjo", &posX, slider_max, on_trackbar);
 	cv::createTrackbar("Y", "kinjo", &posY, slider_max, on_trackbar);
 	cv::createTrackbar("Z", "kinjo", &posZ, slider_max, on_trackbar);
