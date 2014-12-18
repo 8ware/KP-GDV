@@ -3,10 +3,8 @@
 #include <vector>		// std::vector
 #include <cstdint>		// std::uint16_t
 
-#ifdef _DEBUG
-	#include <opencv2/highgui/highgui.hpp>
-	#include <iostream>
-#endif
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
 
 namespace kinjo
 {
@@ -29,10 +27,8 @@ namespace kinjo
 			// 1: Make a copy of the image and convert RGB to HSV color space.
 			cv::Mat matHsv(matRgb.rows, matRgb.cols, CV_8UC3);
 			cv::cvtColor(matRgb, matHsv, CV_BGR2HSV);
-#ifdef _DEBUG
-			cv::namedWindow("HSV");
-			cv::imshow("HSV", matHsv);
-#endif
+
+			//cv::imshow("HSV", matHsv);
 
 			// 2: Mask the calibration object.
 			// TODO:	Get a good color.
@@ -44,16 +40,14 @@ namespace kinjo
 				cv::Scalar(0.14*256, 1.00*256, 1.00*256, 0),
 				matMask);
 			matHsv.release();
-#ifdef _DEBUG
-			cv::namedWindow("Mask");
+
 			cv::imshow("Mask", matMask);
-#endif
 
 			// 3: Morphological operations to enhance the mask.
 			// CV_SHAPE_RECT is faster but a circle could lead to beter results.
 			// TODO: Set morph size adaptively depending on image size.
 			// Close.
-			int const iMorphSizeClose(10);
+			/*int const iMorphSizeClose(10);
 			cv::Mat matStructureElementClose(cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(2*iMorphSizeClose+1, 2*iMorphSizeClose+1), cv::Point(iMorphSizeClose, iMorphSizeClose)));
 			morphologyEx(matMask, matMask, cv::MORPH_OPEN, matStructureElementClose);
 			matStructureElementClose.release();
@@ -61,19 +55,15 @@ namespace kinjo
 			int const iMorphSizeOpen(5);
 			cv::Mat matStructureElementOpen(cv::getStructuringElement(CV_SHAPE_RECT, cv::Size(2*iMorphSizeOpen+1, 2*iMorphSizeOpen+1), cv::Point(iMorphSizeOpen, iMorphSizeOpen)));
 			morphologyEx(matMask, matMask, cv::MORPH_OPEN, matStructureElementOpen);
-			matStructureElementOpen.release();
-#ifdef _DEBUG
-			cv::namedWindow("MaskFilter");
-			cv::imshow("MaskFilter", matMask);
-#endif
+			matStructureElementOpen.release();*/
+
+			//cv::imshow("MaskFilter", matMask);
 
 			// 4: Smooth the mask, otherwise a lot of false circles would be detected.
 			// TODO: Play with the blur sizes.
-			cv::GaussianBlur(matMask, matMask, cv::Size(15, 15), 0.0, 0.0);
-#ifdef _DEBUG
-			cv::namedWindow("MaskFilterBlur");
+			cv::GaussianBlur(matMask, matMask, cv::Size(19, 19), 0.0, 0.0);
+
 			cv::imshow("MaskFilterBlur", matMask);
-#endif
 
 			// 5: Run the Hough transform.
 			std::vector<cv::Vec3f> vv3fCircles;		// (x, y, radius)
@@ -84,12 +74,12 @@ namespace kinjo
 				2,									// TODO: Play with this parameter. Inverse ratio of the accumulator size. 1=input image res, 2=half res, ...
 				matMask.rows/10,					// TODO: Play with tis parameter. Minimum circle distance. OpenCV example uses /4 but we only want one circle. Is it better to use high value?
 				200,								// Canny edge detector threshold.
-				100,								// TODO: Play with this parameter. Accumulator threshold. Higher->Less circles.
+				40,									// TODO: Play with this parameter. Accumulator threshold. Higher->Less circles.
 				2,									// Minimum circle radius.
 				0);									// Maximum circle radius.
 
-#ifdef _DEBUG
-			cv::Mat matRgbCopy(matRgb);
+			cv::Mat matRgbCopy(matRgb.rows, matRgb.cols, CV_8UC3);
+			matRgb.copyTo(matRgbCopy);
 			typedef std::vector<cv::Vec3f>::const_iterator TIterator;
 			TIterator const itCirclesEnd(vv3fCircles.end());
 			for(TIterator itCircles(vv3fCircles.begin()); itCircles != itCirclesEnd; ++itCircles)
@@ -102,25 +92,28 @@ namespace kinjo
 				// Draw the whole circle.
 				cv::circle(matRgbCopy, v2iCenter, iRadius, cv::Scalar(255, 0, 0, 0), 3, CV_AA, 0);
 			}
-			cv::namedWindow("Circles");
-			cv::imshow("Circles", matRgb);
-#endif
+			cv::imshow("Recognition", matRgbCopy);
 
-#ifdef _DEBUG
-			std::cout << "Recognized calibration object count: " << vv3fCircles.size() << std::endl;
-#endif
+			//std::cout << "Recognized calibration object count: " << vv3fCircles.size() << std::endl;
 
-			// 6: Just take the first circle because they are sorted by confidence.
-			cv::Vec3f const v3fCircle(vv3fCircles[0]);
-			// Get its center and radius.
-			cv::Point const v2iCenter(cvRound(v3fCircle[0]), cvRound(v3fCircle[1]));
-			//int const iRadius(cvRound(v3fCircle[2]));
+			if(vv3fCircles.size()>0)
+			{
+				// 6: Just take the first circle because they are sorted by confidence.
+				cv::Vec3f const v3fCircle(vv3fCircles[0]);
+				// Get its center and radius.
+				cv::Point const v2iCenter(cvRound(v3fCircle[0]), cvRound(v3fCircle[1]));
+				//int const iRadius(cvRound(v3fCircle[2]));
 
-			// Look up th depth at this position.
-			std::uint16_t const fDepth(matDepth.at<std::uint16_t>(v2iCenter.y, v2iCenter.x));
-			// FIXME: How to get the real x,y coordinates in vision?.
-			// FIXME: How to scale z?
-			return cv::Vec3f(v3fCircle[0], v3fCircle[1], fDepth);
+				// Look up th depth at this position.
+				std::uint16_t const fDepth(matDepth.at<std::uint16_t>(v2iCenter.y, v2iCenter.x));
+				// FIXME: How to get the real x,y coordinates in vision?.
+				// FIXME: How to scale z?
+				return cv::Vec3f(v3fCircle[0], v3fCircle[1], fDepth);
+			}
+			else
+			{
+				return cv::Vec3f(0.0f, 0.0f, 0.0f);
+			}
         }
     }
 }
