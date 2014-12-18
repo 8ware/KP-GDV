@@ -33,8 +33,10 @@ namespace kinjo {
 			position.position[0] = vector[0]/100;
 			position.position[1] = vector[1]/100;
 			position.position[2] = vector[2]/100;
+			TheJacoArm->start_api_ctrl();
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
+			TheJacoArm->stop_api_ctrl();
         }
         void JacoArm::rotateTo(cv::Vec3f vector)
         {
