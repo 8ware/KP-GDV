@@ -97,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 		// Create the vision.
 		std::shared_ptr<kinjo::vision::Vision> vision = std::make_shared<kinjo::vision::OpenNiVision>();
 
-		cv::Point point;
+		cv::Point point(-1, -1);
 		cv::namedWindow(g_sWindowTitleDepth);
 		cv::namedWindow(g_sWindowTitleColor);
 		setMouseCallback(g_sWindowTitleDepth, updateCoordinates, &point);
