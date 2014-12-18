@@ -14,32 +14,23 @@ static const int g_iRefreshIntervallMs(100);
 //not yet needed::eventHandler for slider(s)
 void on_trackbar(int, void*){}
 
-void jacoMove(kinjo::arm::Arm * Arm){
-
-	cv::Vec3f vector = cv::Vec3f(
-		static_cast<float>(cv::getTrackbarPos("X", "kinjo")),
-		static_cast<float>(cv::getTrackbarPos("Y", "kinjo")),
-		static_cast<float>(cv::getTrackbarPos("Z", "kinjo"))
-	);
-	std::printf("moving to %i,%i,%i ...\n",
-		static_cast<float>(cv::getTrackbarPos("X", "kinjo")),
-		static_cast<float>(cv::getTrackbarPos("Y", "kinjo")),
-		static_cast<float>(cv::getTrackbarPos("Z", "kinjo"))
-	);
-	
-	if (Arm->initialized){
-		Arm->moveTo(vector);
-		std::printf("moving done. New \"exact\" Position: %f,%f,%f\n",
-			Arm->getPosition()[0],
-			Arm->getPosition()[1],
-			Arm->getPosition()[2]
-			);
-	}
-	else
-	{
+void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
+	if (!Arm->initialized) {
 		std::printf("Arm not Connected");
+		return;
 	}
 
+	std::printf("moving to %i,%i,%i ...\n", x, y, z);
+
+	float fx = static_cast<float>(x);
+	float fy = static_cast<float>(y);
+	float fz = static_cast<float>(z);
+	cv::Vec3f position = cv::Vec3f(fx, fy, fz);
+
+	Arm->moveTo(position);
+	cv::Vec3f actual = Arm->getPosition();
+	std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
+		actual[0], actual[1], actual[2]);
 }
 
 void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
@@ -62,7 +53,7 @@ void displayCoordinates(cv::Mat& image, cv::Point const & point, cv::Scalar cons
 
 void displayDistance(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, ushort distance)
 {
-	float dist_cm = static_cast<float>(distance / 10);
+	float dist_cm = static_cast<float>(distance) / 10.0f;
 	std::stringstream stream;
 	stream << "[ " << dist_cm << "cm ]";
 	cv::Point shifted = point + cv::Point(15, -5);
@@ -84,9 +75,10 @@ int main(int /*argc*/, char* /*argv*/[]){
 
 		// Get the current arm position.
 		if (Arm->initialized){
-			posX = (int)Arm->getPosition()[0];
-			posY = (int)Arm->getPosition()[1];
-			posZ = (int)Arm->getPosition()[2];
+			cv::Vec3f initial = Arm->getPosition();
+			posX = (int) initial[0];
+			posY = (int) initial[1];
+			posZ = (int) initial[2];
 		}
 
 		int const slider_max = 50;
@@ -100,8 +92,8 @@ int main(int /*argc*/, char* /*argv*/[]){
 		cv::Point point(-1, -1);
 		cv::namedWindow(g_sWindowTitleDepth);
 		cv::namedWindow(g_sWindowTitleColor);
-		setMouseCallback(g_sWindowTitleDepth, updateCoordinates, &point);
-		setMouseCallback(g_sWindowTitleColor, updateCoordinates, &point);
+		cv::setMouseCallback(g_sWindowTitleDepth, updateCoordinates, &point);
+		cv::setMouseCallback(g_sWindowTitleColor, updateCoordinates, &point);
 
 		cv::Scalar const depthColor = cv::Scalar(255 << 8);
 		cv::Scalar const rgbColor = cv::Scalar(0, 255, 0);
@@ -116,7 +108,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			rgb = vision->getRgb();
 
 			// Find the yellow ball.
-			kinjo::recognition::getCalibrationObjectVisionPosition(rgb, depth);
+//			kinjo::recognition::getCalibrationObjectVisionPosition(rgb, depth);
 
 			// Show depth, color and depth of selected point.
 			if(0 <= point.x && point.x < depth.cols
@@ -140,7 +132,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			// Move the arm when pressing space.
 			if(key == 32)
 			{
-				jacoMove(Arm.get());
+				jacoMove(Arm.get(), posX, posY, posZ);
 			}
 
 		} while(key != 27);
