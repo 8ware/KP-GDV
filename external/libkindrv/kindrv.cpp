@@ -311,6 +311,8 @@ JacoArm::JacoArm() :
 				  libusb_get_bus_number(dev), libusb_get_device_address(dev));
 			  errorcode = libusb_open(dev, &__devh);
 			  libusb_error e = libusb_error(errorcode);
+			  if (e != LIBUSB_SUCCESS)
+				  printf("Error detected: %s\n", libusb_strerror(e));
 			  errorcode = 0;
 		  }
 		  
