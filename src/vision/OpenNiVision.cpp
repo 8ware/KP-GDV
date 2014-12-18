@@ -23,6 +23,9 @@ namespace kinjo {
 
 			depthImageSize = getImageSize(depthGenerator);
 			rgbImageSize = getImageSize(rgbGenerator);
+
+			// Align the depth image center to the color image center.
+			depthGenerator.GetAlternativeViewPointCap().SetViewPoint(rgbGenerator);
 		}
 
 
@@ -66,8 +69,9 @@ namespace kinjo {
 		{
 			if (status != XN_STATUS_OK) {
 				std::string cause = xnGetStatusString(status);
-				std::cout << action << " failed: " << cause << std::endl;
-				exit(-1);
+				std::stringstream ss;
+				ss << action << " failed: " << cause << std::endl;
+				throw std::runtime_error(ss.str().c_str());
 			}
 		}
 
