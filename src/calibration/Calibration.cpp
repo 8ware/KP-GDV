@@ -67,11 +67,11 @@ namespace kinjo
 			for(std::size_t j(0); j<uiCalibrationRotationCount; ++j)
             {
                 // Rotate the arm around the point.
-                auto const v3fArmRotation(getRandomArmRotation());
+				cv::Vec3f const v3fArmRotation(getRandomArmRotation());
                 m_pArm->rotateTo(v3fArmRotation);
 
                 // Get current calibration object vision position.
-                v3fVisionPosition += recognition::getCalibrationObjectVisionPosition(m_pVision->getRgb());
+				v3fVisionPosition += recognition::getCalibrationObjectVisionPosition(m_pVision->getRgb(), m_pVision->getDepth());
             }
 			// Average the positions.
 			v3fVisionPosition *= (1.0 / static_cast<float>(uiCalibrationRotationCount));
@@ -94,8 +94,9 @@ namespace kinjo
 			// Compute centers.
 			cv::Vec3f v3CenterLeft;
 			cv::Vec3f v3CenterRight;
-			auto const itCorrEnd(vv2v3fCorrespondences.cend());
-			for(auto itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
+			typedef std::vector<std::pair<cv::Vec3f, cv::Vec3f>>::const_iterator TIterator;
+			TIterator const itCorrEnd(vv2v3fCorrespondences.end());
+			for(TIterator itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
 			{
 				v3CenterLeft += itCorr->first;
 				v3CenterRight += itCorr->second;
@@ -105,19 +106,19 @@ namespace kinjo
 
 			// Create a vector with the centered correspondences.
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> vv2v3fCenteredCorrespondences;
-			for(auto itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
+			for(TIterator itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
 			{
 				vv2v3fCenteredCorrespondences.push_back(std::make_pair(itCorr->first-v3CenterLeft, itCorr->second-v3CenterRight));
 			}
 
 			// Fill the covariance matrix.
 			cv::Matx33f H(cv::Matx33f::zeros());
-			for(size_t i(0); i<3; ++i)
+			for(std::size_t i(0); i<3; ++i)
 			{
-				for(size_t j(0); j<3; ++j)
+				for(std::size_t j(0); j<3; ++j)
 				{
-					auto const itCentCorrEnd(vv2v3fCenteredCorrespondences.cend());
-					for(auto itCorr(vv2v3fCenteredCorrespondences.begin()); itCorr != itCentCorrEnd; ++itCorr)
+					TIterator const itCentCorrEnd(vv2v3fCenteredCorrespondences.end());
+					for(TIterator itCorr(vv2v3fCenteredCorrespondences.begin()); itCorr != itCentCorrEnd; ++itCorr)
 					{
 						H(i, j) += (*itCorr).second(i) * (*itCorr).first(j);
 					}

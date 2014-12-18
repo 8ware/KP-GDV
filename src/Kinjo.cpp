@@ -13,14 +13,14 @@ void jacoMove(std::shared_ptr<kinjo::arm::Arm> Arm){
 
 	
 	cv::Vec3f vector = cv::Vec3f(
-		cv::getTrackbarPos("X", "kinjo"),
-		cv::getTrackbarPos("Y", "kinjo"),
-		cv::getTrackbarPos("Z", "kinjo")
+		static_cast<float>(cv::getTrackbarPos("X", "kinjo")),
+		static_cast<float>(cv::getTrackbarPos("Y", "kinjo")),
+		static_cast<float>(cv::getTrackbarPos("Z", "kinjo"))
 	);
 	std::printf("moving to %i,%i,%i ...\n",
-		cv::getTrackbarPos("X", "kinjo"),
-		cv::getTrackbarPos("Y", "kinjo"),
-		cv::getTrackbarPos("Z", "kinjo")
+		static_cast<float>(cv::getTrackbarPos("X", "kinjo")),
+		static_cast<float>(cv::getTrackbarPos("Y", "kinjo")),
+		static_cast<float>(cv::getTrackbarPos("Z", "kinjo"))
 		);
 	
 	if (Arm->initialized){
