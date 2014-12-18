@@ -17,17 +17,15 @@ IF (UNIX)
     ENDIF()
   ENDIF()
 
-	# Use pkg-config to get hints about paths
-	libfind_pkg_check_modules(OpenNI_PKGCONF libOpenNI)
 	# Include dir
 	find_path(OpenNI_INCLUDE_DIR
 	  NAMES XnOpenNI.h
-	  PATHS ${OpenNI_PKGCONF_INCLUDE_DIRS} ${OPEN_NI_ROOT}/include/ni
+	  PATHS ${OPEN_NI_ROOT}/include/ni
 	)
 	# Finally the library itself
 	find_library(OpenNI_LIBRARY
 	  NAMES OpenNI
-	  PATHS ${OpenNI_PKGCONF_LIBRARY_DIRS} ${OPEN_NI_ROOT}/lib
+	  PATHS ${OPEN_NI_ROOT}/lib
 	)
 ELSEIF (WIN32)
 	find_path(OpenNI_INCLUDE_DIR
