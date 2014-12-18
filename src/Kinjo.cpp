@@ -11,12 +11,10 @@ static std::string const g_sWindowTitleColor("Vision (RGB)");
 static std::string const g_sWindowTitleArm("Arm");
 static const int g_iRefreshIntervallMs(100);
 
-//not yet needed::eventHandler for slider(s)
-void on_trackbar(int, void*){}
 
 void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
 	if (!Arm->initialized) {
-		std::printf("Arm not Connected");
+		std::cerr << "Arm not Connected!\n";
 		return;
 	}
 
@@ -82,9 +80,9 @@ int main(int /*argc*/, char* /*argv*/[]){
 		}
 
 		int const slider_max = 50;
-		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max, on_trackbar);
-		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max, on_trackbar);
-		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max, on_trackbar);
+		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max);
+		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max);
+		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max);
 
 		// Create the vision.
 		std::shared_ptr<kinjo::vision::Vision> vision = std::make_shared<kinjo::vision::OpenNiVision>();
