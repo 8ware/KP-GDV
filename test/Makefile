@@ -1,11 +1,19 @@
 
 SRC = ../src
 INC = ../include
+EXT = ../external
 
 GCC   = g++
-FLAGS = `pkg-config --cflags libopenni opencv` -I$(INC)
-LIBS  = `pkg-config --libs libopenni opencv`
+FLAGS = `pkg-config --cflags libopenni opencv libusb-1.0` -I$(INC) -I$(EXT)
+LIBS  = `pkg-config --libs libopenni opencv libusb-1.0`
 
 OpenNiVisionTest:
-	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o OpenNiVisionTest OpenNiVisionTest.cpp $(SRC)/vision/OpenNiVision.cpp
+	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o OpenNiVisionTest \
+		OpenNiVisionTest.cpp $(SRC)/vision/OpenNiVision.cpp
+
+TestdataGenerator:
+	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o TestdataGenerator \
+		TestdataGenerator.cpp $(SRC)/vision/OpenNiVision.cpp \
+		$(SRC)/arm/ArmFactory.cpp $(SRC)/arm/JacoArm.cpp \
+		$(EXT)/libkindrv/exception.cpp $(EXT)/libkindrv/kindrv.cpp
 
