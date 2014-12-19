@@ -33,8 +33,10 @@ namespace kinjo {
 			position.position[0] = vector[0]/100;
 			position.position[1] = vector[1]/100;
 			position.position[2] = vector[2]/100;
+			TheJacoArm->start_api_ctrl();
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
+			TheJacoArm->stop_api_ctrl();
         }
         void JacoArm::rotateTo(cv::Vec3f vector)
         {
@@ -109,7 +111,7 @@ namespace kinjo {
         }
         bool JacoArm::isArmMoving() const
         {
-            KinDrv::jaco_position_t position1 = TheJacoArm->get_ang_pos();
+			KinDrv::jaco_position_t position1 = TheJacoArm->get_ang_pos();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             KinDrv::jaco_position_t position2 = TheJacoArm->get_ang_pos();
             //usualy the arm returns exact the same coordinates if it did not move
@@ -124,12 +126,6 @@ namespace kinjo {
             X_diff = static_cast<int> ((position1.rotation[0] * 1000) - (position2.rotation[0] * 1000));
             Y_diff = static_cast<int> ((position1.rotation[1] * 1000) - (position2.rotation[1] * 1000));
             Z_diff = static_cast<int> ((position1.rotation[2] * 1000) - (position2.rotation[2] * 1000));
-            if(X_diff != 0 || Y_diff != 0 || Z_diff != 0)
-                return true;
-            /////Fingers
-            X_diff = static_cast<int> ((position1.finger_position[0] * 1000) - (position2.finger_position[0] * 1000));
-            Y_diff = static_cast<int> ((position1.finger_position[1] * 1000) - (position2.finger_position[1] * 1000));
-            Z_diff = static_cast<int> ((position1.finger_position[2] * 1000) - (position2.finger_position[2] * 1000));
             if(X_diff != 0 || Y_diff != 0 || Z_diff != 0)
                 return true;
             return false;

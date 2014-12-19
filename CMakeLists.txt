@@ -6,6 +6,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
+
 ################################################################################
 # Settings
 ################################################################################
@@ -28,6 +30,13 @@ SET(KINJO_COMMON_FUNCTIONS_FILE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/common.cma
 INCLUDE(${KINJO_COMMON_FUNCTIONS_FILE_PATH})
 
 ################################################################################
+# OpenNI
+################################################################################
+
+#OPEN_NI_ROOT
+FIND_PACKAGE(OpenNI REQUIRED)
+
+################################################################################
 # OpenCV
 ################################################################################
 
@@ -42,8 +51,6 @@ FIND_PACKAGE(OpenCV REQUIRED)
 
 # Add our find script.
 #LIBUSB_1_ROOT
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
-
 FIND_PACKAGE(libusb-1.0 REQUIRED)
 
 ################################################################################
@@ -91,5 +98,5 @@ ADD_EXECUTABLE(${KINJO_TARGET_NAME}
 	${KINJO_CPP_FILES_ALL})
 
 TARGET_COMPILE_OPTIONS(${KINJO_TARGET_NAME} ${COMPILE_OPTIONS})
-TARGET_INCLUDE_DIRECTORIES(${KINJO_TARGET_NAME} PUBLIC ${KINJO_INCLUDE_DIR} PUBLIC "external/" PUBLIC ${OpenCV_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(${KINJO_TARGET_NAME} PUBLIC ${LIBKINDRV_TARGET_NAME} PUBLIC ${OpenCV_LIBS})
+TARGET_INCLUDE_DIRECTORIES(${KINJO_TARGET_NAME} PUBLIC ${KINJO_INCLUDE_DIR} PUBLIC "external/" PUBLIC ${OpenCV_INCLUDE_DIR} PUBLIC ${OpenNI_INCLUDE_DIR})
+TARGET_LINK_LIBRARIES(${KINJO_TARGET_NAME} PUBLIC ${LIBKINDRV_TARGET_NAME} PUBLIC ${OpenCV_LIBS} PUBLIC ${OpenNI_LIBRARY})

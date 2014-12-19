@@ -48,7 +48,7 @@ namespace kinjo
                 std::size_t const uiCalibrationRotationCount) const;
 
             /**
-            * \return Estimates the rigid body trsansformation from the given point correspondences.
+            * \return Estimates the rigid body transformation from the given point correspondences.
             **/
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);

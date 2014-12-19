@@ -9,6 +9,8 @@ namespace kinjo
         /**
         * \return The position of the calibration object in the image.
         **/
-        cv::Vec3f getCalibrationObjectVisionPosition(cv::Mat matRgb);
+		cv::Vec3f getCalibrationObjectVisionPosition(
+			cv::Mat const & matRgb,
+			cv::Mat const & matDepth);
     }
 }
