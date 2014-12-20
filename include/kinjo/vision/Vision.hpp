@@ -7,14 +7,33 @@ namespace kinjo {
 
         class Vision
         {
-
-        public:
+		public:
+			/**
+			 * Updates the images.
+			 **/
+			virtual void updateImages(bool bRequireUpdates) = 0;
             /**
-             * \return the depth values normalized to centimetres.
+             * \return The depth image in millimeters.
              */
-            virtual cv::Mat getDepth() = 0;
-            virtual cv::Mat getRgb() = 0;
+			virtual cv::Mat const & getDepth() = 0;
+			/**
+			* \return The color image.
+			*/
+			virtual cv::Mat const & getRgb() = 0;
 
+			/**
+			 * \return The 3d position in the vision.
+			 **/
+			virtual cv::Vec3f getPositionFromImagePointPx(
+				cv::Point const & v2iPointPx) = 0;
+
+			/**
+			 * Estimates the vision position from the 8 surrounding pixels and the given pixel only incorporating valid values.
+			 *
+			 * \return The 3d position in the vision.
+			 **/
+			cv::Vec3f estimatePositionFromImagePointPx(
+				cv::Point const & v2iPointPx);
         };
 
     }

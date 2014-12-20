@@ -14,42 +14,50 @@ namespace kinjo
         **/
         class Calibrator
         {
+		public:
             /**
-            * Constructor.
-            **/
+             * Constructor.
+             **/
             Calibrator(
                 arm::Arm * const pArm, 
                 vision::Vision * const pVision);
 
 			/**
-			* Copy-assignment.
-			**/
+			 * Copy-assignment.
+			 **/
 			Calibrator & operator=(
 				Calibrator const & calibrator) = delete;
 
+			/**
+			 * \return If there is a valid transformation available.
+			 **/
+			bool getIsValidTransformationAvailable() const;
+
             /**
-            * \return The current rigid body transformation betwween vision and arm.
-            **/
+             * \return The current rigid body transformation betwween vision and arm.
+             **/
 			cv::Matx44f getRigidBodyTransformation() const;
 
             /**
-            * Calibrates the vision and the arm.
-            * The calibration object has to be grabbed before!
-            **/
+             * Calibrates the vision and the arm.
+             * The calibration object has to be grabbed before!
+             **/
             void calibrate(
                 std::size_t const uiCalibrationPointCount, 
-				std::size_t const uiCalibrationRotationCount);
+				std::size_t const uiCalibrationRotationCount,
+				std::size_t const uiRecognitionAttemptCount);
 
         private:
             /**
-            * \return The averaged position of the calibration object in the vision over multiple frames.
-            **/
+             * \return The averaged position of the calibration object in the vision over multiple frames.
+             **/
             cv::Vec3f getAveragedCalibrationObjectVisionPosition(
-                std::size_t const uiCalibrationRotationCount) const;
+				std::size_t const uiCalibrationRotationCount,
+				std::size_t const uiRecognitionAttemptCount) const;
 
             /**
-            * \return Estimates the rigid body transformation from the given point correspondences.
-            **/
+             * \return Estimates the rigid body transformation from the given point correspondences.
+             **/
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 

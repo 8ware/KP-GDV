@@ -2,6 +2,8 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <utility>	// std::pair
+
 namespace kinjo
 {
     namespace recognition
@@ -9,8 +11,7 @@ namespace kinjo
         /**
         * \return The position of the calibration object in the image.
         **/
-		cv::Vec3f getCalibrationObjectVisionPosition(
-			cv::Mat const & matRgb,
-			cv::Mat const & matDepth);
+		std::pair<cv::Vec2f, float> getCalibrationObjectVisionPositionPx(
+			cv::Mat const & matRgb);
     }
 }

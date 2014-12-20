@@ -2,7 +2,7 @@
 #include <kinjo/vision/OpenNiVision.hpp>
 
 #include <iostream>
-
+#include <cstdint>		// std::uint16_t
 
 namespace kinjo {
     namespace vision {
@@ -28,42 +28,50 @@ namespace kinjo {
 			depthGenerator.GetAlternativeViewPointCap().SetViewPoint(rgbGenerator);
 		}
 
-
-		cv::Mat OpenNiVision::getDepth()
+		void OpenNiVision::updateImages(bool bRequireUpdates)
 		{
-			status = context.WaitOneUpdateAll(depthGenerator);
-			checkStatus("Updating depth data");
+			// Update the internal generator buffers if there is new data.
+			if(bRequireUpdates)
+			{
+				status = context.WaitAndUpdateAll();
+			}
+			else
+			{
+				status = context.WaitNoneUpdateAll();
+			}
+			checkStatus("Updating data");
 
+			// Update the depth data.
 			const XnDepthPixel* depthPixels = depthGenerator.GetDepthMap();
-			cv::Mat d(depthImageSize, CV_16UC1, (void*) depthPixels);
+			matDepth = cv::Mat(depthImageSize, CV_16UC1, const_cast<void*>(reinterpret_cast<void const *>(depthPixels)));
 
-			cv::Mat depth;
-			d.copyTo(depth);
-
-			// TODO maybe use float-matrix since mm resolution is desirable
-//			depth /= 10; // mm -> cm
-
-			d.release();
-
-			return depth;
-		}
-
-		cv::Mat OpenNiVision::getRgb()
-		{
-			status = context.WaitOneUpdateAll(rgbGenerator);
-			checkStatus("Updating RGB data");
-
+			// Update the color data.
 			const XnRGB24Pixel* rgbPixels = rgbGenerator.GetRGB24ImageMap();
-			cv::Mat bgr(rgbImageSize, CV_8UC3, (void*) rgbPixels);
-
-			cv::Mat rgb;
-			cvtColor(bgr, rgb, CV_RGB2BGR);
-
-			bgr.release();
-
-			return rgb;
+			cv::Mat bgr(rgbImageSize, CV_8UC3, const_cast<void*>(reinterpret_cast<void const *>(rgbPixels)));
+			cv::cvtColor(bgr, matRgb, CV_RGB2BGR);
 		}
 
+		cv::Mat const & OpenNiVision::getDepth()
+		{
+			return matDepth;
+		}
+
+		cv::Mat const & OpenNiVision::getRgb()
+		{
+			return matRgb;
+		}
+
+		cv::Vec3f OpenNiVision::getPositionFromImagePointPx(
+			cv::Point const & v2iPointPx)
+		{
+			// Look up the depth at this position.
+			std::uint16_t const fDepth(getDepth().at<std::uint16_t>(v2iPointPx.x, v2iPointPx.y));
+			// FIXME: How to get the real x,y coordinates in vision?.
+			return cv::Vec3f(
+				static_cast<float>(v2iPointPx.x),
+				static_cast<float>(v2iPointPx.y),
+				static_cast<float>(fDepth)/10.0f);
+		}
 
 		void OpenNiVision::checkStatus(std::string action) const
 		{

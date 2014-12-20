@@ -9,8 +9,8 @@ namespace kinjo
     namespace calibration
     {
         /**
-        *
-        **/
+         *
+         **/
         Calibrator::Calibrator(
             arm::Arm * const pArm, 
             vision::Vision * const pVision) :
@@ -18,13 +18,21 @@ namespace kinjo
             m_bCalibrationAvailable(false),
             m_pArm(pArm),
             m_pVision(pVision)
-        {}
+		{
+		}
+		/**
+		 *
+		 **/
+		bool Calibrator::getIsValidTransformationAvailable() const
+		{
+			return m_bCalibrationAvailable;
+		}
         /**
-        *
-        **/
+         *
+         **/
 		cv::Matx44f Calibrator::getRigidBodyTransformation() const
         {
-            if(m_bCalibrationAvailable)
+			if(getIsValidTransformationAvailable())
             {
                 return m_matCurrentRigidBodyTransformation;
             }
@@ -34,11 +42,12 @@ namespace kinjo
             }
         }
         /**
-        *
-        **/
+         *
+         **/
         void Calibrator::calibrate(
 			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount)
+			std::size_t const uiCalibrationRotationCount,
+			std::size_t const uiRecognitionAttemptCount)
         {
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> m_vCorrespondences;
 			m_vCorrespondences.reserve(uiCalibrationPointCount);
@@ -47,8 +56,12 @@ namespace kinjo
 			for(std::size_t i(0); i<uiCalibrationPointCount; ++i)
             {
                 m_pArm->moveTo(getRandomArmPosition());
-                // Get the final position the arm haltet at and store it.
-				m_vCorrespondences.push_back(std::make_pair(m_pArm->getPosition(), getAveragedCalibrationObjectVisionPosition(uiCalibrationRotationCount)));
+                // Get the final position the arm haltet at and store it with the estimated calibration object position.
+				m_vCorrespondences.push_back(std::make_pair(
+					m_pArm->getPosition(), 
+					getAveragedCalibrationObjectVisionPosition(
+						uiCalibrationRotationCount,
+						uiRecognitionAttemptCount)));
             }
 
             // Estimate the rigid body transformation.
@@ -56,12 +69,14 @@ namespace kinjo
             m_bCalibrationAvailable = true;
         }
         /**
-        *
-        **/
+         *
+         **/
         cv::Vec3f Calibrator::getAveragedCalibrationObjectVisionPosition(
-			std::size_t const uiCalibrationRotationCount) const
+			std::size_t const uiCalibrationRotationCount,
+			std::size_t const uiRecognitionAttemptCount) const
         {
-            cv::Vec3f v3fVisionPosition;
+            cv::Vec3f v3fVisionPosition(0.0f, 0.0f, 0.0f);
+			std::size_t uiValidPositions(0);
 
             // Multiple hand rotations at same position to prevent occultation.
 			for(std::size_t j(0); j<uiCalibrationRotationCount; ++j)
@@ -70,18 +85,37 @@ namespace kinjo
 				cv::Vec3f const v3fArmRotation(getRandomArmRotation());
                 m_pArm->rotateTo(v3fArmRotation);
 
-                // Get current calibration object vision position.
-				v3fVisionPosition += recognition::getCalibrationObjectVisionPosition(m_pVision->getRgb(), m_pVision->getDepth());
+				// Multiple recognition attempts at the same position/rotation.
+				for(std::size_t uiTry(0); uiTry<uiRecognitionAttemptCount; ++uiTry)
+				{
+					// We need new images.
+					m_pVision->updateImages(true);
+					// Get current calibration object vision position.
+					std::pair<cv::Vec2f, float> const calib(
+						recognition::getCalibrationObjectVisionPositionPx(
+							m_pVision->getRgb()));
+
+					// If this is a valid point.
+					if(calib.second != 0.0f)
+					{
+						// Accumulate the positions for averaging.
+						v3fVisionPosition += m_pVision->estimatePositionFromImagePointPx(
+							cv::Point(
+								static_cast<int>(calib.first[0u]),
+								static_cast<int>(calib.first[1u])));
+						++uiValidPositions;
+					}
+				}
             }
 			// Average the positions.
-			v3fVisionPosition *= (1.0 / static_cast<float>(uiCalibrationRotationCount));
+			v3fVisionPosition *= (1.0 / static_cast<float>(uiValidPositions));
 
             return v3fVisionPosition;
         }
         /**
-        * Implements "Least-Squares Rigid Motion Using SVD"
-		* See: http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
-        **/
+         * Implements "Least-Squares Rigid Motion Using SVD"
+		 * See: http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+         **/
 		cv::Matx44f Calibrator::estimateRigidBodyTransformation(
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
         {
@@ -94,21 +128,21 @@ namespace kinjo
 			// Compute centers.
 			cv::Vec3f v3CenterLeft;
 			cv::Vec3f v3CenterRight;
-			typedef std::vector<std::pair<cv::Vec3f, cv::Vec3f>>::const_iterator TIterator;
-			TIterator const itCorrEnd(vv2v3fCorrespondences.end());
-			for(TIterator itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
+			for(auto && corr : vv2v3fCorrespondences)
 			{
-				v3CenterLeft += itCorr->first;
-				v3CenterRight += itCorr->second;
+				v3CenterLeft += corr.first;
+				v3CenterRight += corr.second;
 			}
 			v3CenterLeft *= (1.0 / static_cast<float>(vv2v3fCorrespondences.size()));
 			v3CenterRight *= (1.0 / static_cast<float>(vv2v3fCorrespondences.size()));
 
 			// Create a vector with the centered correspondences.
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> vv2v3fCenteredCorrespondences;
-			for(TIterator itCorr(vv2v3fCorrespondences.begin()); itCorr != itCorrEnd; ++itCorr)
+			for(auto && corr : vv2v3fCorrespondences)
 			{
-				vv2v3fCenteredCorrespondences.push_back(std::make_pair(itCorr->first-v3CenterLeft, itCorr->second-v3CenterRight));
+				vv2v3fCenteredCorrespondences.push_back(std::make_pair(
+					corr.first-v3CenterLeft,
+					corr.second-v3CenterRight));
 			}
 
 			// Fill the covariance matrix.
@@ -117,10 +151,9 @@ namespace kinjo
 			{
 				for(std::size_t j(0); j<3; ++j)
 				{
-					TIterator const itCentCorrEnd(vv2v3fCenteredCorrespondences.end());
-					for(TIterator itCorr(vv2v3fCenteredCorrespondences.begin()); itCorr != itCentCorrEnd; ++itCorr)
+					for(auto && corr : vv2v3fCenteredCorrespondences)
 					{
-						H(i, j) += (*itCorr).second(i) * (*itCorr).first(j);
+						H(i, j) += corr.second(i) * corr.first(j);
 					}
 				}
 			}
@@ -148,8 +181,8 @@ namespace kinjo
 				0.0f, 0.0f, 0.0f, 1.0f};
         }
         /**
-        *
-        **/
+         *
+         **/
         cv::Vec3f Calibrator::getRandomArmPosition() const
         {
             // TODO: Implement better algorithm!
@@ -160,8 +193,8 @@ namespace kinjo
 				static_cast<float>(rng.uniform(0.2, 0.7)));
         }
         /**
-        *
-        **/
+         *
+         **/
         cv::Vec3f Calibrator::getRandomArmRotation() const
         {
             // TODO: Implement!

@@ -21,17 +21,44 @@ namespace kinjo {
 			OpenNiVision();
 
 			/**
+			 * Updates the images.
+			 * 
+			 * \param bRequireUpdates	
+			 *		If the thread should wait for new data from all inputs.
+			 *		If this is false, the images are only updated if there is already new data.
+			 **/
+			virtual void updateImages(bool bRequireUpdates) override;
+
+			/**
 			 * \return the depth values normalized to centimeters.
 			 */
-			virtual cv::Mat getDepth();
+			virtual cv::Mat const & getDepth() override;
 			/**
 			 * \return the RGB image already translated to OpenCV's internal
 			 * BGR representation.
 			 */
-			// TODO maybe rename to getBgr?
-			virtual cv::Mat getRgb();
+			virtual cv::Mat const & getRgb() override;
+
+			/**
+			 * \return The 3d position in the vision.
+			 **/
+			virtual cv::Vec3f getPositionFromImagePointPx(
+				cv::Point const & v2iPointPx) override;
 
 		private:
+			/**
+			 * Helper function to check the OpenNI status.
+			 * \param action a message describing the action during which the
+			 * error occurred
+			 */
+			void checkStatus(std::string action) const;
+			/**
+			 * Helper function to get the generator's output image size.
+			 * \param generator the generator which produces image maps
+			 * \return the (OpenCV) size of the generated image.
+			 */
+			cv::Size getImageSize(xn::MapGenerator& generator) const;
+
 			/**
 			 * The status which is set by OpenNI.
 			 */
@@ -58,17 +85,13 @@ namespace kinjo {
 			cv::Size rgbImageSize;
 
 			/**
-			 * Helper function to check the OpenNI status.
-			 * \param action a message describing the action during which the
-			 * error occurred
+			 * The RGB image.
 			 */
-			void checkStatus(std::string action) const;
+			cv::Mat matRgb;
 			/**
-			 * Helper function to get the generator's output image size.
-			 * \param generator the generator which produces image maps
-			 * \return the (OpenCV) size of the generated image.
+			 * The depth image.
 			 */
-			cv::Size getImageSize(xn::MapGenerator& generator) const;
+			cv::Mat matDepth;
         };
 
     }

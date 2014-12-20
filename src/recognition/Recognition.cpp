@@ -22,10 +22,11 @@ namespace kinjo
 		* Step 4: Blur for better circle detection.
 		* Step 5: Circle detection via Hough transform.
 		* Step 6: Look up the circles vision position.
+		* 
+		* \return	The position of the calibration object in pixels and the circle radius.
         **/
-		cv::Vec3f getCalibrationObjectVisionPosition(
-			cv::Mat const & matRgb, 
-			cv::Mat const & matDepth)
+		std::pair<cv::Vec2f, float> getCalibrationObjectVisionPositionPx(
+			cv::Mat const & matRgb)
 		{
 			static int iMorphSizeDilatePx(5);
 			static int iMorphSizeErodePx(10);
@@ -97,7 +98,6 @@ namespace kinjo
 #endif
 
 			// 3: Morphological operations to enhance the mask.
-			// CV_SHAPE_RECT is faster but a circle could lead to beter results.
 			// TODO: Set morph size adaptively depending on image size.
 
 			// Dilation
@@ -181,19 +181,12 @@ namespace kinjo
 			{
 				// 6: Just take the first circle because they are sorted by confidence.
 				cv::Vec3f const v3fCircle(vv3fCircles[0u]);
-				// Get its center and radius.
-				cv::Point const v2iCenter(cvRound(v3fCircle[0u]), cvRound(v3fCircle[1u]));
-				//int const iRadius(cvRound(v3fCircle[2]));
 
-				// Look up th depth at this position.
-				std::uint16_t const fDepth(matDepth.at<std::uint16_t>(v2iCenter.y, v2iCenter.x));
-				// FIXME: How to get the real x,y coordinates in vision?.
-				// FIXME: How to scale z?
-				return cv::Vec3f(v3fCircle[0u], v3fCircle[1u], static_cast<float>(fDepth)/10.0f);
+				return std::make_pair(cv::Vec2f(v3fCircle[0u], v3fCircle[1u]), v3fCircle[2]);
 			}
 			else
 			{
-				return cv::Vec3f(0.0f, 0.0f, 0.0f);
+				return std::make_pair(cv::Vec2f(0.0f, 0.0f), 0.0f);
 			}
         }
     }
