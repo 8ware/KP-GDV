@@ -153,7 +153,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			posZ = (int)initial[2];
 		}
 
-		int const slider_max(50);
+		int const slider_max(500);
 		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max);
 		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max);
 		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max);

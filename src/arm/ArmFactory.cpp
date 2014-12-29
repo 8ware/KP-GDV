@@ -19,10 +19,11 @@ namespace kinjo {
 				std::cerr << e.what() << std::endl;
 			}
 
-			// TODO: find out, if the Product contains an actual arm.
+			if (Product->initialized)
+				return Product;
 			// if not go on, if it does use that arm
-			//if (Product == nullptr) std::cout << "Trying next arm." << std::endl;
 
+			//add more Arms here
 			return Product;
 		} //getInstance
 	}//namespace arm

@@ -28,11 +28,11 @@ namespace kinjo {
 
         void JacoArm::moveTo(cv::Vec3f vector)
         {
-			// TODO: Test
+			//works with milimeter, accuracy is bad though
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
-			position.position[0] = vector[0]/100;
-			position.position[1] = vector[1]/100;
-			position.position[2] = vector[2]/100;
+			position.position[0] = vector[0]/1000;
+			position.position[1] = vector[1]/1000;
+			position.position[2] = vector[2]/1000;
 			TheJacoArm->start_api_ctrl();
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
@@ -55,9 +55,9 @@ namespace kinjo {
         {
             // TODO: Test
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
-			position.position[0] += vector[0] / 100;
-			position.position[1] += vector[1] / 100;
-			position.position[2] += vector[2] / 100;
+			position.position[0] += vector[0] / 1000;
+			position.position[1] += vector[1] / 1000;
+			position.position[2] += vector[2] / 1000;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
         }
@@ -73,10 +73,10 @@ namespace kinjo {
         cv::Vec3f JacoArm::getPosition() const
         {
             cv::Vec3f position;
-            // *100 makes it Centimeter
-            position[0] = TheJacoArm->get_cart_pos().position[0]*100;
-            position[1] = TheJacoArm->get_cart_pos().position[1]*100;
-            position[2] = TheJacoArm->get_cart_pos().position[2]*100;
+            // *1000 makes it Milimeter
+            position[0] = TheJacoArm->get_cart_pos().position[0]*1000;
+            position[1] = TheJacoArm->get_cart_pos().position[1]*1000;
+            position[2] = TheJacoArm->get_cart_pos().position[2]*1000;
             return position;
         }
 
