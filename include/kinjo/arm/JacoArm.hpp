@@ -61,6 +61,12 @@ namespace kinjo {
             **/
             bool isArmMoving() const;
 
+			/**
+			* Helper to get a bool if 2 float values are the same
+			* \return True if both values are the same
+			**/
+			bool DiffIsZero(float X, float Y) const;
+
         private:
             std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
         };//class

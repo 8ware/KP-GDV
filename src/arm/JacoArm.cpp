@@ -114,22 +114,21 @@ namespace kinjo {
 			KinDrv::jaco_position_t position1 = TheJacoArm->get_ang_pos();
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             KinDrv::jaco_position_t position2 = TheJacoArm->get_ang_pos();
-            //usualy the arm returns exact the same coordinates if it did not move
-            //however we are dealing with floats here, better turn them to integer
-            /////Position
-            int X_diff = static_cast<int> ((position1.position[0] * 1000) - (position2.position[0] * 1000));
-            int Y_diff = static_cast<int> ((position1.position[1] * 1000) - (position2.position[1] * 1000));
-            int Z_diff = static_cast<int> ((position1.position[2] * 1000) - (position2.position[2] * 1000));
-            if(X_diff != 0 || Y_diff != 0 || Z_diff != 0)
-                return true;
-            /////Rotation
-            X_diff = static_cast<int> ((position1.rotation[0] * 1000) - (position2.rotation[0] * 1000));
-            Y_diff = static_cast<int> ((position1.rotation[1] * 1000) - (position2.rotation[1] * 1000));
-            Z_diff = static_cast<int> ((position1.rotation[2] * 1000) - (position2.rotation[2] * 1000));
-            if(X_diff != 0 || Y_diff != 0 || Z_diff != 0)
-                return true;
-            return false;
+			//Position
+			if (!DiffIsZero(position1.position[0], position2.position[0]) ||
+				!DiffIsZero(position1.position[1], position2.position[1]) ||
+				!DiffIsZero(position1.position[2], position2.position[2]) ||
+			//Rotation
+				!DiffIsZero(position1.rotation[0], position2.rotation[0]) ||
+				!DiffIsZero(position1.rotation[1], position2.rotation[1]) ||
+				!DiffIsZero(position1.rotation[2], position2.rotation[2]))
+				return true;
+			return false;
         }
+
+		bool JacoArm::DiffIsZero(float X, float Y) const{
+			return (static_cast<int> (X * 1000) == static_cast<int>(Y * 1000));
+		}
     
     }
 }
