@@ -17,14 +17,20 @@ namespace kinjo
 			{
 				for(int x(-1); x<2; ++x)
 				{
-					cv::Vec3f const p(getPositionFromImagePointPx(
-						cv::Vec2i(v2iPointPx.x + x, v2iPointPx.y + y)));
+					cv::Point const v2iOffsetPointPx(v2iPointPx.x + x, v2iPointPx.y + y);
 
-					// If the position is valid, add it up
-					if(p[2u] > 0.0f)
+					// The point has to be within the image.
+					if(v2iOffsetPointPx.x>=0 && v2iOffsetPointPx.x<getDepth().cols
+						&& v2iOffsetPointPx.y>=0 && v2iOffsetPointPx.y<getDepth().rows)
 					{
-						v3fVisionPosition += p;
-						++uiValidPositions;
+						cv::Vec3f const p(getPositionFromImagePointPx(v2iOffsetPointPx));
+
+						// If the position is valid, add it up
+						if(p[2u] > 0.0f)
+						{
+							v3fVisionPosition += p;
+							++uiValidPositions;
+						}
 					}
 				}
 			}

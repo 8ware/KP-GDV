@@ -65,7 +65,7 @@ namespace kinjo {
 			cv::Point const & v2iPointPx)
 		{
 			// Look up the depth at this position.
-			std::uint16_t const fDepth(getDepth().at<std::uint16_t>(v2iPointPx.x, v2iPointPx.y));
+			std::uint16_t const fDepth(getDepth().at<std::uint16_t>(v2iPointPx.y, v2iPointPx.x));
 			// FIXME: How to get the real x,y coordinates in vision?.
 			return cv::Vec3f(
 				static_cast<float>(v2iPointPx.x),

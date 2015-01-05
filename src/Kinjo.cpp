@@ -48,6 +48,10 @@ void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
 	}
 }
 
+/**
+* Renders a double circle.
+* This is used to indicate the mouse click position.
+**/
 void renderDoubleCircle(cv::Mat& image, cv::Point const & point, cv::Scalar const & color)
 {
 	cv::circle(image, point, 3, color);
