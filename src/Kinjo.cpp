@@ -48,7 +48,7 @@ void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
 	}
 }
 
-void displayCoordinates(cv::Mat& image, cv::Point const & point, cv::Scalar const & color)
+void renderDoubleCircle(cv::Mat& image, cv::Point const & point, cv::Scalar const & color)
 {
 	cv::circle(image, point, 3, color);
 	cv::circle(image, point, 7, color);
@@ -243,8 +243,8 @@ int main(int /*argc*/, char* /*argv*/[]){
 			if(0 <= point.x && point.x < matDepth.cols
 				&& 0 <= point.y && point.y < matDepth.rows)
 			{
-				displayCoordinates(matDepth, point, depthColor);
-				displayCoordinates(matRgb, point, rgbColor);
+				renderDoubleCircle(matDepth, point, depthColor);
+				renderDoubleCircle(matRgb, point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
 					vision->estimatePositionFromImagePointPx(point));
