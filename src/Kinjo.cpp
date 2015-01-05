@@ -1,3 +1,11 @@
+/**
+ * This code has been developed during the WS 14/15 KP-CGV at the TU-Dresden
+ **/
+
+// Under windows, opencv includes <windows.h> which defines min and max as macros.
+// To enable their usage as functions we have to prevent this.
+#define NOMINMAX
+
 #include <kinjo/arm/ArmFactory.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/Calibration.hpp>
@@ -7,6 +15,8 @@
 
 #include <iostream>
 #include <cmath>		// std::modf
+#include <limits>		// std::numeric_limits
+#include <cstdint>		// std::uint16_t
 
 static std::string const g_sWindowTitleDepth("Vision (Depth)");
 static std::string const g_sWindowTitleColor("Vision (RGB)");
@@ -14,7 +24,7 @@ static std::string const g_sWindowTitleArm("Arm");
 static const int g_iRefreshIntervallMs(100);
 
 #define KINJO_ARM_DEBUG
-//#define KINJO_NO_ARM
+#define KINJO_NO_ARM
 
 #ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
@@ -98,7 +108,7 @@ void displayPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const &
 	std::stringstream stream;
 	stream << "[" << v3fVisionPosition[0u] << ", " << v3fVisionPosition[1u] << ", " << v3fVisionPosition[2u] << "] cm";
 	cv::Point const shifted = point + cv::Point(15, -5);
-	cv::putText(image, stream.str(), shifted, cv::FONT_HERSHEY_SIMPLEX, 0.3, color);
+	cv::putText(image, stream.str(), shifted, cv::FONT_HERSHEY_SIMPLEX, 0.3, color, 1, CV_AA);
 }
 
 /**
@@ -267,8 +277,10 @@ int main(int /*argc*/, char* /*argv*/[]){
 					displayPosition(matRgb, point, rgbColor, v3fVisionPosition);
 				}
 			}
-			// Scale the depth image by 10 to make it more visible.
-			cv::imshow(g_sWindowTitleDepth, matDepth * 10);
+			// Scale the depth image to use the whole 16-bit and make it more visible.
+			float fKinectMaxDepthMm(5000.0f);
+			float fImageValueScale(std::numeric_limits<std::uint16_t>::max()/fKinectMaxDepthMm);
+			cv::imshow(g_sWindowTitleDepth, matDepth * fImageValueScale);
 			cv::imshow(g_sWindowTitleColor, matRgb);
 
 			// Get currently pressed keys and wait to restrict the framerate.
