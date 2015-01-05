@@ -65,13 +65,13 @@ void renderTextCenter(
 	int iThickness)
 {
 	int const fontFace(
-		cv::FONT_HERSHEY_SCRIPT_SIMPLEX);
+		cv::FONT_HERSHEY_SIMPLEX);
 
 	int iBaseline(0);
 	cv::Size textSize(
 		cv::getTextSize(
 			sText,
-			cv::FONT_HERSHEY_SIMPLEX,
+			fontFace,
 			fFontScale, iThickness,
 			&iBaseline));
 	iBaseline += iThickness;
@@ -170,7 +170,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			if(applicationState == ApplicationState::Uncalibrated)
 			{
 				// Render the text centered.
-				renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 2.0, 3);
+				renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
 
 				// Start calibration after pressing c.
 				if(key == 'c')
