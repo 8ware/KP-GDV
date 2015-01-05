@@ -19,11 +19,13 @@ namespace kinjo {
 				std::cerr << e.what() << std::endl;
 			}
 
-			if (Product->initialized)
-				return Product;
-			// if not go on, if it does use that arm
+			// Add search for more Arms here if the Jaco arm is not found!
 
-			//add more Arms here
+			if(!Product)
+			{
+				throw std::runtime_error("No arm found!");
+			}
+
 			return Product;
 		} //getInstance
 	}//namespace arm

@@ -46,9 +46,6 @@ namespace kinjo {
             virtual void openFingers() = 0;
             virtual void closeFingers() = 0;
 
-		public:
-			bool initialized = false;
-
         };
     
     }

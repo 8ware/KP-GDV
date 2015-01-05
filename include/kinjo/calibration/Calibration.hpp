@@ -5,6 +5,9 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <thread>
+#include <atomic>
+
 namespace kinjo
 {
     namespace calibration
@@ -41,13 +44,24 @@ namespace kinjo
             /**
              * Calibrates the vision and the arm.
              * The calibration object has to be grabbed before!
+			 * This function returns immediately and performs the calibration asynchronously.
+			 * The calibration has finished when getIsValidTransformationAvailable returns true.
              **/
-            void calibrate(
+            void calibrateAsync(
                 std::size_t const uiCalibrationPointCount, 
 				std::size_t const uiCalibrationRotationCount,
 				std::size_t const uiRecognitionAttemptCount);
 
-        private:
+		private:
+
+			/**
+			* Calibrates the vision and the arm.
+			**/
+			void calibrationThreadMain(
+				std::size_t const uiCalibrationPointCount,
+				std::size_t const uiCalibrationRotationCount,
+				std::size_t const uiRecognitionAttemptCount);
+
             /**
              * \return The averaged position of the calibration object in the vision over multiple frames.
              **/
@@ -64,9 +78,12 @@ namespace kinjo
             cv::Vec3f getRandomArmPosition() const;
             cv::Vec3f getRandomArmRotation() const;
 
-			cv::Matx44f m_matCurrentRigidBodyTransformation;
+		private:
+			std::thread m_Thread;
 
-            bool m_bCalibrationAvailable;
+			std::atomic<cv::Matx44f> m_matCurrentRigidBodyTransformation;
+
+            std::atomic<bool> m_bCalibrationAvailable;
 
 			arm::Arm * const m_pArm;
             vision::Vision * const m_pVision;

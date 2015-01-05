@@ -5,7 +5,7 @@
 #include <libkindrv/kindrv.h>   // KinDrv::JacoArm
 
 #include <thread>
-#include <iostream>					// std::cout
+#include <iostream>
 
 namespace kinjo {
 	namespace arm {
@@ -14,16 +14,8 @@ namespace kinjo {
 
         JacoArm::JacoArm()
         {
-			try {
-				TheJacoArm = std::make_shared<KinDrv::JacoArm>();
-				std::cout << "JacoArm found, using Jaco Arm." << std::endl;
-				initialized = true;
-			}
-			catch (KinDrv::KinDrvException e)
-			{
-				std::cout << "No Jaco Arm found." << std::endl;
-				initialized = false;
-			}
+			TheJacoArm = std::make_shared<KinDrv::JacoArm>();
+			std::cout << "JacoArm found, using Jaco Arm." << std::endl;
         }
 
         void JacoArm::moveTo(cv::Vec3f vector)

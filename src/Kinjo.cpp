@@ -14,13 +14,11 @@ static std::string const g_sWindowTitleArm("Arm");
 static const int g_iRefreshIntervallMs(100);
 
 #define KINJO_ARM_DEBUG
+//#define KINJO_NO_ARM
 
+#ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
 void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
-	if (!Arm->initialized) {
-		std::cerr << "Arm not Connected!\n";
-		return;
-	}
 
 	std::printf("moving to %i,%i,%i ...\n", x, y, z);
 
@@ -34,6 +32,7 @@ void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
 	std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
 		actual[0], actual[1], actual[2]);
 }
+#endif
 #endif
 
 void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
@@ -118,15 +117,19 @@ int main(int /*argc*/, char* /*argv*/[]){
 	{
 		ApplicationState applicationState(ApplicationState::Uncalibrated);
 
+#ifndef KINJO_NO_ARM
 		// Initialize the arm.
 		std::shared_ptr<kinjo::arm::Arm> arm(kinjo::arm::ArmFactory::getInstance());
+#endif
 		// Create the vision.
 		std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
+
+#ifndef KINJO_NO_ARM
 		// Create the calibrator.
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator(std::make_shared<kinjo::calibration::Calibrator>(
 			arm.get(),
 			vision.get()));
-
+#endif
 
 		// Initialize the main windows.
 		cv::Point point(-1, -1);
@@ -141,6 +144,8 @@ int main(int /*argc*/, char* /*argv*/[]){
 		int key = -1;
 		cv::Mat matDepth, matRgb;
 
+
+#ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
 		// Create the arm movement window.
 		int posX = 0;
@@ -149,18 +154,16 @@ int main(int /*argc*/, char* /*argv*/[]){
 		cv::namedWindow(g_sWindowTitleArm, cv::WINDOW_AUTOSIZE);
 
 		// Get the current arm position.
-		if(arm->initialized)
-		{
-			cv::Vec3f initial = arm->getPosition();
-			posX = (int)initial[0];
-			posY = (int)initial[1];
-			posZ = (int)initial[2];
-		}
+		cv::Vec3f initial = arm->getPosition();
+		posX = (int)initial[0];
+		posY = (int)initial[1];
+		posZ = (int)initial[2];
 
 		int const slider_max(500);
 		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max);
 		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max);
 		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max);
+#endif
 #endif
 
 		do
@@ -171,6 +174,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			vision->getRgb().copyTo(matRgb);
 
 
+#ifndef KINJO_NO_ARM
 			if(applicationState == ApplicationState::Uncalibrated)
 			{
 				// Render the text centered.
@@ -184,17 +188,21 @@ int main(int /*argc*/, char* /*argv*/[]){
 					std::size_t const uiCalibrationPointCount(5);
 					std::size_t const uiCalibrationRotationCount(10);
 					std::size_t const uiRecognitionAttemptCount(5);
-					// TODO: This should be asynchronous!
-					/*calibrator->calibrate(
+
+					// Start the calibration thread.
+					calibrator->calibrateAsync(
 						uiCalibrationPointCount,
 						uiCalibrationRotationCount,
-						uiRecognitionAttemptCount);*/
+						uiRecognitionAttemptCount);
 				}
 			}
 
 
 			else if(applicationState == ApplicationState::Calibration)
 			{
+				// Render the text centered.
+				renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
+
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
 				std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
 					kinjo::recognition::getCalibrationObjectVisionPositionPx(matRgb));
@@ -241,6 +249,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 			{
 				jacoMove(arm.get(), posX, posY, posZ);
 			}
+#endif
 #endif
 
 			// Show depth, color and selected point.

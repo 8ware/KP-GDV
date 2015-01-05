@@ -40,11 +40,27 @@ namespace kinjo
             {
                 throw std::logic_error("getRigidBodyTransformation() is not allowed to be called before calibrate()!");
             }
-        }
+		}
+		/**
+		*
+		**/
+		void Calibrator::calibrateAsync(
+			std::size_t const uiCalibrationPointCount,
+			std::size_t const uiCalibrationRotationCount,
+			std::size_t const uiRecognitionAttemptCount)
+		{
+			m_Thread = std::thread(
+				&Calibrator::calibrationThreadMain,
+				this, 
+				uiCalibrationPointCount,
+				uiCalibrationRotationCount,
+				uiRecognitionAttemptCount);
+			m_Thread.detach();
+		}
         /**
          *
          **/
-        void Calibrator::calibrate(
+        void Calibrator::calibrationThreadMain(
 			std::size_t const uiCalibrationPointCount,
 			std::size_t const uiCalibrationRotationCount,
 			std::size_t const uiRecognitionAttemptCount)
@@ -189,7 +205,7 @@ namespace kinjo
 			cv::RNG rng;
 			return cv::Vec3f(
 				static_cast<float>(rng.uniform(0.2, 0.7)),
-				static_cast<float>(rng.uniform(0.2, 0.7)),
+				static_cast<float>(rng.uniform(-0.2, -0.7)),
 				static_cast<float>(rng.uniform(0.2, 0.7)));
         }
         /**
