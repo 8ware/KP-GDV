@@ -35,7 +35,9 @@ namespace kinjo
 				}
 			}
 
-			return (v3fVisionPosition / static_cast<float>(uiValidPositions));
+			return (uiValidPositions==0) 
+				? cv::Vec3f(static_cast<float>(v2iPointPx.x), static_cast<float>(v2iPointPx.y), 0.0f)
+				: (v3fVisionPosition / static_cast<float>(uiValidPositions));
 		}
 	}
 }

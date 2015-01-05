@@ -200,7 +200,7 @@ int main(int /*argc*/, char* /*argv*/[]){
 					kinjo::recognition::getCalibrationObjectVisionPositionPx(matRgb));
 
 				// If recognition was successfull.
-				if(calibrationObjectPositionPx.second != 0.0f)
+				if(calibrationObjectPositionPx.second > 0.0f)
 				{
 					cv::Point const v2iCenter(
 						cvRound(calibrationObjectPositionPx.first[0]),

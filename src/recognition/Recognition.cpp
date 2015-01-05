@@ -28,17 +28,17 @@ namespace kinjo
 		std::pair<cv::Vec2f, float> getCalibrationObjectVisionPositionPx(
 			cv::Mat const & matRgb)
 		{
-			static int iMorphSizeDilatePx(5);
-			static int iMorphSizeErodePx(10);
-			static int iGaussianBlurFilterWidthHalf(10);
+			static int iMorphSizeDilatePx(4);
+			static int iMorphSizeErodePx(8);
+			static int iGaussianBlurFilterWidthHalf(8);
 			static int iInvRatioAccuSize(2);
 			static int iMinCircleDistImageHeightPercent(50);
 			static int iCannyEdgeThreshold(100);
-			static int iHoughAccuThreshold(40);
-			static int iMinCircleRadiusImageHeightPercent(4);
+			static int iHoughAccuThreshold(15);
+			static int iMinCircleRadiusImageHeightPercent(1);
 			static int iMaxCircleRadiusImageHeightPercent(25);
 			static int iMinHuePercent(11);
-			static int iMaxHuePercent(14);
+			static int iMaxHuePercent(15);
 			static int iMinSatPercent(30);
 			static int iMinValPercent(40);
 
@@ -162,11 +162,8 @@ namespace kinjo
 #ifdef KINJO_RECOGNITION_DEBUG
 			cv::Mat matRgbCopy(matRgb.rows, matRgb.cols, CV_8UC3);
 			matRgb.copyTo(matRgbCopy);
-			typedef std::vector<cv::Vec3f>::const_iterator TIterator;
-			TIterator const itCirclesEnd(vv3fCircles.end());
-			for(TIterator itCircles(vv3fCircles.begin()); itCircles != itCirclesEnd; ++itCircles)
+			for(auto && v3fCircle : vv3fCircles)
 			{
-				cv::Vec3f const & v3fCircle(*itCircles);
 				cv::Point const v2iCenter(cvRound(v3fCircle[0]), cvRound(v3fCircle[1]));
 				int const iRadius(cvRound(v3fCircle[2]));
 				// Draw the center point.

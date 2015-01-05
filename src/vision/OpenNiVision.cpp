@@ -65,12 +65,14 @@ namespace kinjo {
 			cv::Point const & v2iPointPx)
 		{
 			// Look up the depth at this position.
-			std::uint16_t const fDepth(getDepth().at<std::uint16_t>(v2iPointPx.y, v2iPointPx.x));
+			std::uint16_t const uiDepth(getDepth().at<std::uint16_t>(v2iPointPx.y, v2iPointPx.x));
 			// FIXME: How to get the real x,y coordinates in vision?.
 			return cv::Vec3f(
 				static_cast<float>(v2iPointPx.x),
 				static_cast<float>(v2iPointPx.y),
-				static_cast<float>(fDepth)/10.0f);
+				(uiDepth==0) 
+					? 0.0f 
+					: (static_cast<float>(uiDepth)/10.0f));
 		}
 
 		void OpenNiVision::checkStatus(std::string action) const
