@@ -39,8 +39,8 @@ namespace kinjo {
             void rotateBy(cv::Vec3f vector) override;
 
             /**
-             * \return the absolute position in centimetres.
-             */
+            * \return the absolute position in centimetres.
+            */
             cv::Vec3f getPosition() const override;
             /**
             * \return the absolute rotation in degree

@@ -1,6 +1,6 @@
 /**
- * This code has been developed during the WS 14/15 KP-CGV at the TU-Dresden
- **/
+* This code has been developed during the WS 14/15 KP-CGV at the TU-Dresden
+**/
 
 // Under windows, opencv includes <windows.h> which defines min and max as macros.
 // To enable their usage as functions we have to prevent this.
@@ -13,7 +13,7 @@
 
 #include <opencv2/highgui/highgui.hpp>
 
-#include <iostream>
+#include <iostream>		// std::cout
 #include <cmath>		// std::modf
 #include <limits>		// std::numeric_limits
 #include <cstdint>		// std::uint16_t
@@ -24,10 +24,13 @@ static std::string const g_sWindowTitleArm("Arm");
 static const int g_iRefreshIntervallMs(100);
 
 #define KINJO_ARM_DEBUG
-#define KINJO_NO_ARM
+//#define KINJO_NO_ARM
 
 #ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
+/**
+* Moves the arm to the desired position.
+**/
 void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
 
 	std::printf("moving to %i,%i,%i ...\n", x, y, z);
@@ -45,6 +48,9 @@ void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
 #endif
 #endif
 
+/**
+* The mouse position change callback.
+**/
 void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
 {
 	cv::Point* point = static_cast<cv::Point*>(param);
@@ -101,9 +107,9 @@ void renderTextCenter(
 }
 
 /**
- * Render the given 3d-vector at the given point.
- **/
-void displayPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, cv::Vec3f const & v3fVisionPosition)
+* Render the given 3d-vector at the given point.
+**/
+void renderPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, cv::Vec3f const & v3fVisionPosition)
 {
 	std::stringstream stream;
 	stream << "[" << v3fVisionPosition[0u] << ", " << v3fVisionPosition[1u] << ", " << v3fVisionPosition[2u] << "] cm";
@@ -112,8 +118,8 @@ void displayPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const &
 }
 
 /**
- * The application states.
- **/
+* The application states.
+**/
 enum class ApplicationState
 {
 	Uncalibrated,
@@ -121,8 +127,11 @@ enum class ApplicationState
 	Calibrated,
 };
 
-int main(int /*argc*/, char* /*argv*/[]){
-
+/**
+* The application entry point.
+**/
+int main(int /*argc*/, char* /*argv*/[])
+{
 	try
 	{
 		ApplicationState applicationState(ApplicationState::Uncalibrated);
@@ -234,8 +243,8 @@ int main(int /*argc*/, char* /*argv*/[]){
 						vision->estimatePositionFromImagePointPx(v2iCenter));
 
 					// Display its coordinates.
-					displayPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
-					displayPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
+					renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
+					renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
 				}
 
 				// If the calibration is finished.
@@ -273,8 +282,8 @@ int main(int /*argc*/, char* /*argv*/[]){
 					vision->estimatePositionFromImagePointPx(point));
 				if(v3fVisionPosition[2u] > 0)
 				{
-					displayPosition(matDepth, point, depthColor, v3fVisionPosition);
-					displayPosition(matRgb, point, rgbColor, v3fVisionPosition);
+					renderPosition(matDepth, point, depthColor, v3fVisionPosition);
+					renderPosition(matRgb, point, rgbColor, v3fVisionPosition);
 				}
 			}
 			// Scale the depth image to use the whole 16-bit and make it more visible.
