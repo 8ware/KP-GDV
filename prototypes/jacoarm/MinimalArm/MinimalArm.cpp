@@ -5,6 +5,7 @@
 #include "libkindrv/kindrv.h" // KinDrv::JacoArm
 #include <thread>
 
+void testImprecisions(KinDrv::JacoArm* arm);
 
 KinDrv::jaco_position_t ArmMoveTo(KinDrv::JacoArm* arm, float Position[3], float Rotation[3], float Finger[3]){
 	KinDrv::jaco_position_t Pos1 = arm->get_cart_pos();
@@ -101,12 +102,6 @@ KinDrv::jaco_position_t ArmMoveTo(KinDrv::JacoArm* arm, float Position[3]){
 }
 
 
-void Moveandprint(KinDrv::JacoArm* arm,float m_x, float m_y, float m_z){
-	float p[3] = {m_x,m_y,m_z};
-	KinDrv::jaco_position_t nachher = ArmMoveTo(arm, p);
-	printf("nachher: x:%f y:%f z:%f \nSoll: x:%f y:%f z:%f", nachher.position[0], nachher.position[1], nachher.position[2],m_x,m_y,m_z );
-}
-
 int main(int argc, char* argv[])
 {
 	KinDrv::init_usb();
@@ -128,15 +123,8 @@ int main(int argc, char* argv[])
 	printf("rotation: %f, %f, %f \n", Pos1.rotation[0], Pos1.rotation[1], Pos1.rotation[2]);
 	printf("Finger:   %f, %f, %f \n", Pos1.finger_position[0], Pos1.finger_position[1], Pos1.finger_position[2]);
 
-	//Test
-	float delta = 0.15f;//meter!
-	for (int i = 1; i < 3; i++){
-		KinDrv::jaco_position_t p = arm->get_cart_pos();
-		p.position[0] += delta * ((i % 2) ? 1 : -1);
-		Moveandprint(arm, p.position[0], p.position[1], p.position[2]);
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	}
-
+	testImprecisions(arm);
+	
 	std::cin.ignore();
 	/*float Position[3] = { 0, -0.50, 0.50 };
 	float Rotation[3] = { 3, 0, -3 };
@@ -152,4 +140,77 @@ int main(int argc, char* argv[])
 	*/
 	std::cin.ignore(); 
 	return 0;
+}
+
+
+
+void Moveandprint(KinDrv::JacoArm* arm, float m_x, float m_y, float m_z){
+	float p[3] = { m_x, m_y, m_z };
+	KinDrv::jaco_position_t nachher = ArmMoveTo(arm, p);
+	printf("nachher: x:%f y:%f z:%f \nSoll: x:%f y:%f z:%f", nachher.position[0], nachher.position[1], nachher.position[2], m_x, m_y, m_z);
+}
+
+void getDiff(KinDrv::jaco_position_t ref, KinDrv::jaco_position_t actual, float(&result)[3]){
+	for (int i = 0; i < 3; i++){
+		result[i] = abs(ref.position[i] - actual.position[i]);
+	}
+}
+
+void testImprecisions(KinDrv::JacoArm* arm){
+	//Test: Abweichungen in jede Achsenrichtung (hin und zur¸ck)
+	float diffs[3][2][3];//[Achse][Hin/R¸ck][x,y,z]
+	float delta = 0.15f;//meter!
+
+	printf("Achsen-Abweichungen: ");
+	for (int achse = 0; achse < 3; achse++){
+		//hin
+		KinDrv::jaco_position_t p = arm->get_cart_pos();
+		p.position[achse] += delta;
+		Moveandprint(arm, p.position[0], p.position[1], p.position[2]);
+		getDiff(p, arm->get_cart_pos(), diffs[achse][0]);
+		printf("hin Abweichung: x=> %f, y=> %f, z=> %f", achse, diffs[achse][0], diffs[achse][1], diffs[achse][2]);
+		//und zur¸ck
+		p = arm->get_cart_pos();
+		p.position[achse] -= delta;
+		Moveandprint(arm, p.position[0], p.position[1], p.position[2]);
+		getDiff(p, arm->get_cart_pos(), diffs[achse][1]);
+		printf("zur¸ck Abweichung: x=> %f, y=> %f, z=> %f", achse, diffs[achse][0], diffs[achse][1], diffs[achse][2]);
+	}
+	float median[3] = { 0, 0, 0 };
+	int total = 6;
+	for (int achse = 0; achse < 3; achse++){
+		for (int hz = 0; hz < 2; hz++){
+			for (int i = 0; i < 3; i++){
+				median[i] += diffs[achse][hz][i];
+			}
+		}
+	}
+	for (int i = 0; i < 3; i++){
+		median[i] /= total;
+	}
+
+	printf("Mittlere Abweichung bei Achsen-Test:  x=> %f, y=> %f, z=> %f", median[0], median[1], median[2]);
+
+	//Nun Figur abfahren und Gesamt-abweichung bestimmen
+	const int pointCount = 4;
+
+	//Muss evtl noch angepasst werden, da ich die Range des Arms nicht genau weiﬂ
+	float figur[pointCount][3] = {
+		0.0f,0.3f,0.3f, // startpunkt
+		0.2f, 0.4f, 0.4f,
+		-0.2f, 0.5f, 0.5f,
+		0.3f, 0.3f, 0.3f // endpunkt = startpunkt
+	};
+
+	float diffTotal[3] = { 0, 0, 0 };
+	for (int i = 0; i < pointCount; i++){
+		KinDrv::jaco_position_t p = arm->get_cart_pos();
+		Moveandprint(arm, figur[i][0], figur[i][1], figur[i][2]);
+		float diff[3];
+		getDiff(p, arm->get_cart_pos(), diff);
+		for (int k = 0; k < 3; k++) { diffTotal[k] += diff[k] / pointCount; }//gleich mittelwert bilden
+		printf("Abweichung:  x=> %f, y=> %f, z=> %f",diff[0],diff[1],diff[2]);
+	}
+
+	printf("Mittlere Abweichung bei Figur: x=> %f, y=> %f, z=> %f", diffTotal[0], diffTotal[1], diffTotal[2]);
 }
