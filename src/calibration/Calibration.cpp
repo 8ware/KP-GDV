@@ -16,7 +16,7 @@ namespace kinjo
             arm::Arm * const pArm, 
             vision::Vision * const pVision) :
 			m_fPi(std::atan2(0, -1)),
-            m_matCurrentRigidBodyTransformation(),
+            m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
             m_bCalibrationAvailable(false),
             m_pArm(pArm),
             m_pVision(pVision)

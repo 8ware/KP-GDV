@@ -83,7 +83,7 @@ namespace kinjo
 
 			std::thread m_Thread;
 
-			std::atomic<cv::Matx44f> m_matCurrentRigidBodyTransformation;
+			cv::Matx44f m_matCurrentRigidBodyTransformation;
 
             std::atomic<bool> m_bCalibrationAvailable;
 
