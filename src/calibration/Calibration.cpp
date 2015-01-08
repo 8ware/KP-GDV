@@ -121,7 +121,8 @@ namespace kinjo
             {
                 // Rotate the arm around the point.
 				auto const fRotationAngle(((2.0*m_fPi)/static_cast<float>(uiCalibrationRotationCount))*static_cast<float>(uiCalibrationRotation));
-				m_pArm->rotateTo(cv::Vec3f(0.0f, 0.0f, fRotationAngle));
+				auto const v3fRotation(m_pArm->getRotation());
+				m_pArm->rotateTo(cv::Vec3f(v3fRotation[0], v3fRotation[1], fRotationAngle));
 
 				// Multiple recognition attempts at the same position/rotation.
 				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttemptCount; ++uiRecognitionAttempt)

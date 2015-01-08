@@ -208,8 +208,8 @@ int main(int /*argc*/, char* /*argv*/[])
 						vision->estimatePositionFromImagePointPx(v2iCenter));
 
 					// Display its coordinates.
-					renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
-					renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
+					kinjo::renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
+					kinjo::renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
 				}
 
 				// If the calibration is finished.
