@@ -32,7 +32,7 @@ namespace kinjo {
 			waitArmFinishMovement();
 			TheJacoArm->stop_api_ctrl();
 
-			cv::Vec3f actual = Arm->getPosition();
+			cv::Vec3f actual = getPosition();
 			std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
 				actual[0], actual[1], actual[2]);
 
