@@ -80,7 +80,7 @@ namespace kinjo
 				cv::Vec3f v3fAveragedPosition(0.0f, 0.0f, 0.0f);
 				do
 				{
-					auto const v3fArmDesiredPosition(getArmCalibrationPosition(uiCalibrationPointCount));
+					auto const v3fArmDesiredPosition(getNextArmCalibrationPosition());
 					m_pArm->moveTo(v3fArmDesiredPosition);
 					std::cout << "v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
 					// Get the final position the arm haltet at and store it with the estimated calibration object position.
@@ -120,7 +120,7 @@ namespace kinjo
 			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount; ++uiCalibrationRotation)
             {
                 // Rotate the arm around the point.
-				auto const fRotationAngle(((2.0*m_fPi)/static_cast<float>(uiCalibrationRotationCount))*static_cast<float>(uiCalibrationRotation));
+				auto const fRotationAngle((static_cast<float>(2.0*m_fPi)/static_cast<float>(uiCalibrationRotationCount))*static_cast<float>(uiCalibrationRotation));
 				auto const v3fRotation(m_pArm->getRotation());
 				m_pArm->rotateTo(cv::Vec3f(v3fRotation[0], v3fRotation[1], fRotationAngle));
 
@@ -245,16 +245,16 @@ namespace kinjo
         /**
          *
          **/
-        cv::Vec3f Calibrator::getArmCalibrationPosition(std::size_t const i) const
+        cv::Vec3f Calibrator::getNextArmCalibrationPosition() const
 		{
-			std::cout << "[+] getArmCalibrationPosition" << std::endl;
+			std::cout << "[+] getNextArmCalibrationPosition" << std::endl;
 
 			// Clock-wise rotation angle when looking from the top. 
 			auto const fTheta(m_Rng.uniform(0.0, 2.0*m_fPi));
 			// Because we can not come too close to the arm base we have to keep a minimum distance.
 			auto const fDist(m_Rng.uniform(300.0, 450.0));
 
-			std::cout << "[-] getArmCalibrationPosition" << std::endl;
+			std::cout << "[-] getNextArmCalibrationPosition" << std::endl;
 
 			return cv::Vec3f(
 				static_cast<float>(fDist * std::cos(fTheta)),

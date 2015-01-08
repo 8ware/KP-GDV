@@ -27,54 +27,24 @@ static const int g_iRefreshIntervallMs(100);
 #define KINJO_ARM_DEBUG
 //#define KINJO_NO_ARM
 
-#ifndef KINJO_NO_ARM
-#ifdef KINJO_ARM_DEBUG
-/**
-* Moves the arm to the desired position.
-**/
-void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
-
-	std::printf("moving to %i,%i,%i ...\n", x, y, z);
-
-	float fx = static_cast<float>(x);
-	float fy = static_cast<float>(y);
-	float fz = static_cast<float>(z);
-	cv::Vec3f position = cv::Vec3f(fx, fy, fz);
-
-	Arm->moveTo(position);
-	cv::Vec3f actual = Arm->getPosition();
-	std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
-		actual[0], actual[1], actual[2]);
-}
-
-void jacoRotateBy(kinjo::arm::Arm* Arm, int x, int y, int z){
-
-	std::printf("moving to %i,%i,%i ...\n", x, y, z);
-
-	float fx = static_cast<float>(x);
-	float fy = static_cast<float>(y);
-	float fz = static_cast<float>(z);
-	cv::Vec3f rotation = cv::Vec3f(fx, fy, fz);
-	Arm->rotateBy(rotation);
-	cv::Vec3f actual = Arm->getRotation();
-	std::printf("moving done. New \"exact\" Rotation: %.4f,%.4f,%.4f\n",
-		actual[0], actual[1], actual[2]);
-}
-
-#endif
-#endif
+struct MouseCallback
+{
+	cv::Point point;
+	bool pointChanged;
+};
 
 /**
 * The mouse position change callback.
 **/
 void mouseCallback(int event, int x, int y, int /*flags*/, void *param)
 {
-	cv::Point* point = static_cast<cv::Point*>(param);
+	MouseCallback* mouseState = static_cast<MouseCallback*>(param);
 
 	switch(event)
 	{
 	case CV_EVENT_LBUTTONUP:
-		*point = cv::Point(x, y);
+		mouseState->point = cv::Point(x, y);
+		mouseState->pointChanged = true;
 		break;
 	}
 }
@@ -113,11 +83,13 @@ int main(int /*argc*/, char* /*argv*/[])
 #endif
 
 		// Initialize the main windows.
-		cv::Point point(-1, -1);
+		MouseCallback mouseState;
+		mouseState.point = cv::Point(-1, -1);
+		mouseState.pointChanged = false;
 		cv::namedWindow(g_sWindowTitleDepth);
 		cv::namedWindow(g_sWindowTitleColor);
-		cv::setMouseCallback(g_sWindowTitleDepth, mouseCallback, &point);
-		cv::setMouseCallback(g_sWindowTitleColor, mouseCallback, &point);
+		cv::setMouseCallback(g_sWindowTitleDepth, mouseCallback, &mouseState);
+		cv::setMouseCallback(g_sWindowTitleColor, mouseCallback, &mouseState);
 
 		cv::Scalar const depthColor(cv::Scalar(255 << 8));
 		cv::Scalar const rgbColor(cv::Scalar(0, 255, 0));
@@ -169,9 +141,9 @@ int main(int /*argc*/, char* /*argv*/[])
 				{
 					applicationState = ApplicationState::Calibration;
 
-					std::size_t const uiCalibrationPointCount(5);
-					std::size_t const uiCalibrationRotationCount(5);
-					std::size_t const uiRecognitionAttemptCount(5);
+					std::size_t const uiCalibrationPointCount(6);
+					std::size_t const uiCalibrationRotationCount(3);
+					std::size_t const uiRecognitionAttemptCount(4);
 
 					// Start the calibration thread.
 					calibrator->calibrateAsync(
@@ -216,40 +188,62 @@ int main(int /*argc*/, char* /*argv*/[])
 				if(calibrator->getIsValidTransformationAvailable())
 				{
 					applicationState = ApplicationState::Calibrated;
+
+					std::cout << "rigidBodyTransformation: " << calibrator->getRigidBodyTransformation() << std::endl;
 				}
 			}
 
 
 			else if(applicationState == ApplicationState::Calibrated)
 			{
-				cv::Matx44f rigidBodyTransformation(calibrator->getRigidBodyTransformation());
+				if(mouseState.pointChanged)
+				{
+					mouseState.pointChanged = false;
 
-				// TODO: Implement object catching.
+					cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
+
+					cv::Vec3f const v3fVisionPosition(
+						vision->estimatePositionFromImagePointPx(mouseState.point));
+
+					//arm->openFingers();
+
+					cv::Vec4f const v4fhomogenousVisionPosition(v3fVisionPosition[0], v3fVisionPosition[1], v3fVisionPosition[2], 1.0f);
+
+					cv::Vec4f const v4fArmPosition(mat44fRigidBodyTransformation * v4fhomogenousVisionPosition);
+
+					cv::Vec3f const v3fArmPosition(v4fArmPosition[0], v4fArmPosition[1], v4fArmPosition[2]);
+
+					arm->moveTo(v3fArmPosition);
+
+					//arm->closeFingers();
+				}
 			}
 
 #ifdef KINJO_ARM_DEBUG
 			// Move the arm when pressing space.
 			if(key == 32)
 			{
-				jacoMove(arm.get(), posX, posY, posZ);
-				jacoRotateBy(arm.get(), 0, 0, rotZ);
+				cv::Vec3f target;
+				target[0] = posX; target[1] = posY; target[2] = posZ;
+				arm->moveTo(target);
+				arm->rotateHandBy(rotZ);
 			}
 #endif
 #endif
 
 			// Show depth, color and selected point.
-			if(0 <= point.x && point.x < matDepth.cols
-				&& 0 <= point.y && point.y < matDepth.rows)
+			if(0 <= mouseState.point.x && mouseState.point.x < matDepth.cols
+				&& 0 <= mouseState.point.y && mouseState.point.y < matDepth.rows)
 			{
-				kinjo::renderDoubleCircle(matDepth, point, depthColor);
-				kinjo::renderDoubleCircle(matRgb, point, rgbColor);
+				kinjo::renderDoubleCircle(matDepth, mouseState.point, depthColor);
+				kinjo::renderDoubleCircle(matRgb, mouseState.point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
-					vision->estimatePositionFromImagePointPx(point));
+					vision->estimatePositionFromImagePointPx(mouseState.point));
 				if(v3fVisionPosition[2u] > 0)
 				{
-					kinjo::renderPosition(matDepth, point, depthColor, v3fVisionPosition);
-					kinjo::renderPosition(matRgb, point, rgbColor, v3fVisionPosition);
+					kinjo::renderPosition(matDepth, mouseState.point, depthColor, v3fVisionPosition);
+					kinjo::renderPosition(matRgb, mouseState.point, rgbColor, v3fVisionPosition);
 				}
 			}
 			// Scale the depth image to use the whole 16-bit and make it more visible.

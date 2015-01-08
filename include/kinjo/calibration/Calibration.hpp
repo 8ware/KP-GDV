@@ -76,7 +76,7 @@ namespace kinjo
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 
-			cv::Vec3f getArmCalibrationPosition(std::size_t const i) const;
+			cv::Vec3f getNextArmCalibrationPosition() const;
 
 		private:
 			double const m_fPi;
