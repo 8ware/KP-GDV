@@ -20,6 +20,8 @@ namespace kinjo {
 
         void JacoArm::moveTo(cv::Vec3f vector)
         {
+
+			std::printf("moving to %i,%i,%i ...\n", vector[0], vector[1],vector[2]);
 			//works with milimeter, accuracy is bad though
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			position.position[0] = vector[0]/1000;
@@ -29,6 +31,11 @@ namespace kinjo {
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
 			TheJacoArm->stop_api_ctrl();
+
+			cv::Vec3f actual = Arm->getPosition();
+			std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
+				actual[0], actual[1], actual[2]);
+
         }
         void JacoArm::rotateTo(cv::Vec3f vector)
         {
@@ -55,12 +62,59 @@ namespace kinjo {
         }
         void JacoArm::rotateBy(cv::Vec3f vector)
         {
-            // TODO: implement!
+			/*
+			// vector 0-360 0-360 0-360
+			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
+			//TODO: calculate Degree vector to euler
+			position.rotation[0] += vector[0];
+			position.rotation[1] += vector[1];
+			position.rotation[2] += vector[2];
+			TheJacoArm->set_target_cart(
+				position.position[0], position.position[1], position.position[2],
+				position.rotation[0], position.rotation[1], position.rotation[2],
+				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
+			waitArmFinishMovement();
+			*/
+		
         }
+
+
+		void JacoArm::rotateHandBy(float MultiplesOfPI)
+		{
+			KinDrv::jaco_joystick_axis_t axes = { 0 };
+			
+			float waittime;
+			//decide which way to turn
+			
+			if (MultiplesOfPI < 0) {
+				axes.wrist_rot = -2.5f;
+				waittime = (MultiplesOfPI / pi) * -1;
+			} else {
+				axes.wrist_rot = 2.5f;
+				waittime = (MultiplesOfPI / pi);
+			}
+
+			TheJacoArm->start_api_ctrl();
+			//wait 50ms to make sure wrist rot is set correctly
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			TheJacoArm->move_joystick_axis(axes);
+			//rotating the arm for 8 happens to be 'exactly' 180 degrees or 360, depends on mode arm is in
+			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(waittime * 8000)));
+			TheJacoArm->release_joystick();
+			TheJacoArm->stop_api_ctrl();
+			axes.wrist_rot = 0.f;
+			waitArmFinishMovement();
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		}
 
         cv::Vec3f JacoArm::getRotation() const
         {
-            return cv::Vec3f();
+			cv::Vec3f rotation;
+			rotation[0] = TheJacoArm->get_cart_pos().rotation[0];
+			rotation[1] = TheJacoArm->get_cart_pos().rotation[1];
+			rotation[2] = TheJacoArm->get_cart_pos().rotation[2];
+            return rotation;
         }
         cv::Vec3f JacoArm::getPosition() const
         {

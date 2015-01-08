@@ -38,6 +38,8 @@ namespace kinjo {
             */
             void rotateBy(cv::Vec3f vector) override;
 
+			void rotateHandBy(float MultiplesOfPI) override;
+
             /**
             * \return the absolute position in centimetres.
             */
