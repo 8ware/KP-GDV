@@ -10,6 +10,7 @@
 #include <kinjo/arm/ArmFactory.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/Calibration.hpp>
+#include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 #include <kinjo/recognition/Recognition.hpp>
 
 #include <opencv2/highgui/highgui.hpp>
@@ -76,10 +77,14 @@ int main(int /*argc*/, char* /*argv*/[])
 		std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
 
 #ifndef KINJO_NO_ARM
+		// Create the calibration point generator.
+		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator(std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>());
+
 		// Create the calibrator.
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator(std::make_shared<kinjo::calibration::Calibrator>(
 			arm.get(),
-			vision.get()));
+			vision.get(),
+			calibrationPointGenerator.get()));
 #endif
 
 		// Initialize the main windows.
@@ -224,9 +229,9 @@ int main(int /*argc*/, char* /*argv*/[])
 			if(key == 32)
 			{
 				cv::Vec3f target;
-				target[0] = posX; target[1] = posY; target[2] = posZ;
+				target[0] = static_cast<float>(posX); target[1] = static_cast<float>(posY); target[2] = static_cast<float>(posZ);
 				arm->moveTo(target);
-				arm->rotateHandBy(rotZ);
+				arm->rotateHandBy(static_cast<float>(rotZ));
 			}
 #endif
 #endif

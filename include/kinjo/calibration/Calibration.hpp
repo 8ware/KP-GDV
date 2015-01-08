@@ -2,11 +2,11 @@
 
 #include <kinjo/arm/Arm.hpp>
 #include <kinjo/vision/Vision.hpp>
+#include <kinjo/calibration/CalibrationPointGenerator.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <thread>
-#include <atomic>
 
 namespace kinjo
 {
@@ -23,13 +23,13 @@ namespace kinjo
              **/
             Calibrator(
                 arm::Arm * const pArm, 
-                vision::Vision * const pVision);
+                vision::Vision * const pVision,
+				CalibrationPointGenerator * const pCalibrationPointGenerator);
 
 			/**
-			 * Copy-assignment.
+			 * Copy assignment operator.
 			 **/
-			Calibrator & operator=(
-				Calibrator const & calibrator) = delete;
+			Calibrator & operator=(Calibrator const &) = delete;
 
 			/**
 			 * \return If there is a valid transformation available.
@@ -76,21 +76,16 @@ namespace kinjo
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 
-			cv::Vec3f getNextArmCalibrationPosition() const;
-
 		private:
-			double const m_fPi;
-
 			std::thread m_Thread;
 
 			cv::Matx44f m_matCurrentRigidBodyTransformation;
 
-            std::atomic<bool> m_bCalibrationAvailable;
+            bool m_bCalibrationAvailable;
 
 			arm::Arm * const m_pArm;
             vision::Vision * const m_pVision;
-
-			mutable cv::RNG m_Rng;
+			CalibrationPointGenerator * const m_pCalibrationPointGenerator;
         };
     
     }
