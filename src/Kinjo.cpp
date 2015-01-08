@@ -6,6 +6,7 @@
 // To enable their usage as functions we have to prevent this.
 #define NOMINMAX
 
+#include <kinjo/RenderHelper.hpp>
 #include <kinjo/arm/ArmFactory.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/Calibration.hpp>
@@ -45,6 +46,21 @@ void jacoMove(kinjo::arm::Arm* Arm, int x, int y, int z){
 	std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
 		actual[0], actual[1], actual[2]);
 }
+
+void jacoRotateBy(kinjo::arm::Arm* Arm, int x, int y, int z){
+
+	std::printf("moving to %i,%i,%i ...\n", x, y, z);
+
+	float fx = static_cast<float>(x);
+	float fy = static_cast<float>(y);
+	float fz = static_cast<float>(z);
+	cv::Vec3f rotation = cv::Vec3f(fx, fy, fz);
+	Arm->rotateBy(rotation);
+	cv::Vec3f actual = Arm->getRotation();
+	std::printf("moving done. New \"exact\" Rotation: %.4f,%.4f,%.4f\n",
+		actual[0], actual[1], actual[2]);
+}
+
 #endif
 #endif
 
@@ -61,60 +77,6 @@ void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
 		*point = cv::Point(x, y);
 		break;
 	}
-}
-
-/**
-* Renders a double circle.
-* This is used to indicate the mouse click position.
-**/
-void renderDoubleCircle(cv::Mat& image, cv::Point const & point, cv::Scalar const & color)
-{
-	cv::circle(image, point, 3, color);
-	cv::circle(image, point, 7, color);
-}
-
-/**
-* Render the text at the center.
-**/
-void renderTextCenter(
-	cv::Mat & image, 
-	cv::Scalar const & color, 
-	std::string const & sText, 
-	double fFontScale,
-	int iThickness)
-{
-	int const fontFace(
-		cv::FONT_HERSHEY_SIMPLEX);
-
-	int iBaseline(0);
-	cv::Size textSize(
-		cv::getTextSize(
-			sText,
-			fontFace,
-			fFontScale, iThickness,
-			&iBaseline));
-	iBaseline += iThickness;
-
-	cv::Point const textOrg(
-		(image.cols - textSize.width)/2,
-		(image.rows + textSize.height)/2);
-
-	cv::putText(
-		image,
-		sText, textOrg,
-		fontFace, fFontScale,
-		color, iThickness);
-}
-
-/**
-* Render the given 3d-vector at the given point.
-**/
-void renderPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, cv::Vec3f const & v3fVisionPosition)
-{
-	std::stringstream stream;
-	stream << "[" << v3fVisionPosition[0u] << ", " << v3fVisionPosition[1u] << ", " << v3fVisionPosition[2u] << "] cm";
-	cv::Point const shifted = point + cv::Point(15, -5);
-	cv::putText(image, stream.str(), shifted, cv::FONT_HERSHEY_SIMPLEX, 0.3, color, 1, CV_AA);
 }
 
 /**
@@ -170,6 +132,7 @@ int main(int /*argc*/, char* /*argv*/[])
 		int posX = 0;
 		int posY = 0;
 		int posZ = 0;
+		int rotZ = 0;
 		cv::namedWindow(g_sWindowTitleArm, cv::WINDOW_AUTOSIZE);
 
 		// Get the current arm position.
@@ -182,6 +145,8 @@ int main(int /*argc*/, char* /*argv*/[])
 		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max);
 		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max);
 		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max);
+
+		cv::createTrackbar("Rotate", g_sWindowTitleArm, &rotZ, 360);
 #endif
 #endif
 
@@ -197,7 +162,7 @@ int main(int /*argc*/, char* /*argv*/[])
 			if(applicationState == ApplicationState::Uncalibrated)
 			{
 				// Render the text centered.
-				renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
+				kinjo::renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
 
 				// Start calibration after pressing c.
 				if(key == 'c')
@@ -220,7 +185,7 @@ int main(int /*argc*/, char* /*argv*/[])
 			else if(applicationState == ApplicationState::Calibration)
 			{
 				// Render the text centered.
-				renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
+				kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
 
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
 				/*std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
@@ -267,6 +232,7 @@ int main(int /*argc*/, char* /*argv*/[])
 			if(key == 32)
 			{
 				jacoMove(arm.get(), posX, posY, posZ);
+				jacoRotateBy(arm.get(), 0, 0, rotZ);
 			}
 #endif
 #endif
@@ -275,15 +241,15 @@ int main(int /*argc*/, char* /*argv*/[])
 			if(0 <= point.x && point.x < matDepth.cols
 				&& 0 <= point.y && point.y < matDepth.rows)
 			{
-				renderDoubleCircle(matDepth, point, depthColor);
-				renderDoubleCircle(matRgb, point, rgbColor);
+				kinjo::renderDoubleCircle(matDepth, point, depthColor);
+				kinjo::renderDoubleCircle(matRgb, point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
 					vision->estimatePositionFromImagePointPx(point));
 				if(v3fVisionPosition[2u] > 0)
 				{
-					renderPosition(matDepth, point, depthColor, v3fVisionPosition);
-					renderPosition(matRgb, point, rgbColor, v3fVisionPosition);
+					kinjo::renderPosition(matDepth, point, depthColor, v3fVisionPosition);
+					kinjo::renderPosition(matRgb, point, rgbColor, v3fVisionPosition);
 				}
 			}
 			// Scale the depth image to use the whole 16-bit and make it more visible.
