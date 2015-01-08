@@ -188,7 +188,7 @@ int main(int /*argc*/, char* /*argv*/[])
 				kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
 
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
-				/*std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
+				std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
 					kinjo::recognition::getCalibrationObjectVisionPositionPx(matRgb));
 
 				// If recognition was successfull.
@@ -210,7 +210,7 @@ int main(int /*argc*/, char* /*argv*/[])
 					// Display its coordinates.
 					renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
 					renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
-				}*/
+				}
 
 				// If the calibration is finished.
 				if(calibrator->getIsValidTransformationAvailable())

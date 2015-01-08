@@ -15,6 +15,7 @@ namespace kinjo
         Calibrator::Calibrator(
             arm::Arm * const pArm, 
             vision::Vision * const pVision) :
+			m_fPi(std::atan2(0, -1)),
             m_matCurrentRigidBodyTransformation(),
             m_bCalibrationAvailable(false),
             m_pArm(pArm),
@@ -115,13 +116,12 @@ namespace kinjo
 			cv::Vec3f v3fSummedVisionPosition(0.0f, 0.0f, 0.0f);
 			std::size_t uiValidPositions(0);
 
-			// TODO: Implement rotation!
-            /*// Multiple hand rotations at same position to prevent occultation.
-			//for(std::size_t j(0); j<uiCalibrationRotationCount; ++j)
+            // Multiple hand rotations at same position to prevent occultation.
+			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount; ++uiCalibrationRotation)
             {
                 // Rotate the arm around the point.
-				cv::Vec3f const v3fArmRotation(getRandomArmRotation());
-                m_pArm->rotateTo(v3fArmRotation);*/
+				auto const fRotationAngle(((2.0*m_fPi)/static_cast<float>(uiCalibrationRotationCount))*static_cast<float>(uiCalibrationRotation));
+				m_pArm->rotateTo(cv::Vec3f(0.0f, 0.0f, fRotationAngle));
 
 				// Multiple recognition attempts at the same position/rotation.
 				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttemptCount; ++uiRecognitionAttempt)
@@ -148,7 +148,7 @@ namespace kinjo
 						std::cout << "v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
 					}
 				}
-            //}
+            }
 
 			cv::Vec3f v3fAveragedVisionPosition(v3fSummedVisionPosition);
 
@@ -190,10 +190,8 @@ namespace kinjo
 				v3CenterLeft += corr.first;
 				v3CenterRight += corr.second;
 			}
-			v3CenterLeft *= (1.0 / static_cast<float>(uiCorrespondenceCount));
-			v3CenterRight *= (1.0 / static_cast<float>(uiCorrespondenceCount));
-
-			std::cout << "1" << std::endl;
+			v3CenterLeft *= (1.0f / static_cast<float>(uiCorrespondenceCount));
+			v3CenterRight *= (1.0f / static_cast<float>(uiCorrespondenceCount));
 
 			// Create a vector with the centered correspondences.
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> vv2v3fCenteredCorrespondences;
@@ -203,8 +201,6 @@ namespace kinjo
 					corr.first-v3CenterLeft,
 					corr.second-v3CenterRight));
 			}
-
-			std::cout << "2" << std::endl;
 
 			// Fill the covariance matrix.
 			cv::Matx33f H(cv::Matx33f::zeros());
@@ -219,15 +215,11 @@ namespace kinjo
 				}
 			}
 
-			std::cout << "3" << std::endl;
-
 			// Compute the SVD.
 			cv::SVD svd(H, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
 			cv::Matx33f U(reinterpret_cast<float*>(svd.u.data));
 			cv::Matx33f S(reinterpret_cast<float*>(svd.w.data));
 			cv::Matx33f V(reinterpret_cast<float*>(svd.vt.data));
-
-			std::cout << "4" << std::endl;
 
 			// Transpose U.
 			cv::Matx33f const Ut(U.t());
@@ -235,8 +227,6 @@ namespace kinjo
 			// Correct it so that it is a rotation.
 			cv::Matx33f DCorrect(cv::Matx33f::eye());
 			DCorrect(2, 2) = static_cast<float>(cv::determinant(V*Ut));
-
-			std::cout << "5" << std::endl;
 
 			// Compute the roation matrix.
 			cv::Matx33f const R(V * DCorrect * Ut);
@@ -258,11 +248,10 @@ namespace kinjo
 		{
 			std::cout << "[+] getArmCalibrationPosition" << std::endl;
 
-			auto const fPi(std::atan2(0, -1));
 			// Clock-wise rotation angle when looking from the top. 
-			auto const fTheta(m_Rng.uniform(0.0, 2.0*fPi));
+			auto const fTheta(m_Rng.uniform(0.0, 2.0*m_fPi));
 			// Because we can not come too close to the arm base we have to keep a minimum distance.
-			auto const fDist(m_Rng.uniform(100.0, 300.0));
+			auto const fDist(m_Rng.uniform(300.0, 450.0));
 
 			std::cout << "[-] getArmCalibrationPosition" << std::endl;
 
@@ -270,14 +259,6 @@ namespace kinjo
 				static_cast<float>(fDist * std::cos(fTheta)),
 				static_cast<float>(fDist * std::sin(fTheta)),
 				static_cast<float>(m_Rng.uniform(50.0, 300.0)));
-        }
-        /**
-         *
-         **/
-        cv::Vec3f Calibrator::getRandomArmRotation() const
-        {
-            // TODO: Implement!
-            return cv::Vec3f(0.5, 0.5, 0.5);
         }
     }
 }
