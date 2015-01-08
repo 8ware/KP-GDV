@@ -51,18 +51,14 @@ namespace kinjo {
 			 * \param action a message describing the action during which the
 			 * error occurred
 			 */
-			void checkStatus(std::string action) const;
+			static void checkStatus(XnStatus const & status, std::string const & action);
 			/**
 			 * Helper function to get the generator's output image size.
 			 * \param generator the generator which produces image maps
 			 * \return the (OpenCV) size of the generated image.
 			 */
-			cv::Size getImageSize(xn::MapGenerator& generator) const;
+			cv::Size getImageSize(xn::MapGenerator const & generator) const;
 
-			/**
-			 * The status which is set by OpenNI.
-			 */
-			XnStatus status;
 			/**
 			 * The context which keeps the depth- and RGB-production nodes.
 			 */

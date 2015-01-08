@@ -9,17 +9,13 @@ namespace kinjo {
 
 		OpenNiVision::OpenNiVision()
 		{
-			status = context.Init();
-			checkStatus("Initializing context");
+			checkStatus(context.Init(), "Initializing context");
 
-			status = depthGenerator.Create(context);
-			checkStatus("Creating depth generator");
+			checkStatus(depthGenerator.Create(context), "Creating depth generator");
 
-			status = rgbGenerator.Create(context);
-			checkStatus("Creating RGB generator");
+			checkStatus(rgbGenerator.Create(context), "Creating RGB generator");
 
-			status = context.StartGeneratingAll();
-			checkStatus("Starting generation");
+			checkStatus(context.StartGeneratingAll(), "Starting generation");
 
 			depthImageSize = getImageSize(depthGenerator);
 			rgbImageSize = getImageSize(rgbGenerator);
@@ -33,13 +29,12 @@ namespace kinjo {
 			// Update the internal generator buffers if there is new data.
 			if(bRequireUpdates)
 			{
-				status = context.WaitAndUpdateAll();
+				checkStatus(context.WaitAndUpdateAll(), "WaitAndUpdateAll");
 			}
 			else
 			{
-				status = context.WaitNoneUpdateAll();
+				checkStatus(context.WaitNoneUpdateAll(), "WaitNoneUpdateAll");
 			}
-			checkStatus("Updating data");
 
 			// Update the depth data.
 			const XnDepthPixel* depthPixels = depthGenerator.GetDepthMap();
@@ -75,7 +70,7 @@ namespace kinjo {
 					: (static_cast<float>(uiDepth)/10.0f));
 		}
 
-		void OpenNiVision::checkStatus(std::string action) const
+		void OpenNiVision::checkStatus(XnStatus const & status, std::string const & action)
 		{
 			if (status != XN_STATUS_OK) {
 				std::string cause = xnGetStatusString(status);
@@ -85,7 +80,7 @@ namespace kinjo {
 			}
 		}
 
-		cv::Size OpenNiVision::getImageSize(xn::MapGenerator& generator) const
+		cv::Size OpenNiVision::getImageSize(xn::MapGenerator const & generator) const
 		{
 			XnMapOutputMode output;
 			generator.GetMapOutputMode(output);
