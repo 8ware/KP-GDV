@@ -67,7 +67,7 @@ void jacoRotateBy(kinjo::arm::Arm* Arm, int x, int y, int z){
 /**
 * The mouse position change callback.
 **/
-void updateCoordinates(int event, int x, int y, int /*flags*/, void *param)
+void mouseCallback(int event, int x, int y, int /*flags*/, void *param)
 {
 	cv::Point* point = static_cast<cv::Point*>(param);
 
@@ -116,8 +116,8 @@ int main(int /*argc*/, char* /*argv*/[])
 		cv::Point point(-1, -1);
 		cv::namedWindow(g_sWindowTitleDepth);
 		cv::namedWindow(g_sWindowTitleColor);
-		cv::setMouseCallback(g_sWindowTitleDepth, updateCoordinates, &point);
-		cv::setMouseCallback(g_sWindowTitleColor, updateCoordinates, &point);
+		cv::setMouseCallback(g_sWindowTitleDepth, mouseCallback, &point);
+		cv::setMouseCallback(g_sWindowTitleColor, mouseCallback, &point);
 
 		cv::Scalar const depthColor(cv::Scalar(255 << 8));
 		cv::Scalar const rgbColor(cv::Scalar(0, 255, 0));
@@ -170,7 +170,7 @@ int main(int /*argc*/, char* /*argv*/[])
 					applicationState = ApplicationState::Calibration;
 
 					std::size_t const uiCalibrationPointCount(5);
-					std::size_t const uiCalibrationRotationCount(10);
+					std::size_t const uiCalibrationRotationCount(5);
 					std::size_t const uiRecognitionAttemptCount(5);
 
 					// Start the calibration thread.
