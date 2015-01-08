@@ -63,7 +63,8 @@ namespace kinjo
 				std::size_t const uiRecognitionAttemptCount);
 
             /**
-             * \return The averaged position of the calibration object in the vision over multiple frames.
+             * \return The averaged position of the calibration object in the vision over multiple frames/rotations.
+			 *		   The vector is zero if it was not recognized.
              **/
             cv::Vec3f getAveragedCalibrationObjectVisionPosition(
 				std::size_t const uiCalibrationRotationCount,
@@ -75,7 +76,7 @@ namespace kinjo
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 
-            cv::Vec3f getRandomArmPosition() const;
+			cv::Vec3f getArmCalibrationPosition(std::size_t const i) const;
             cv::Vec3f getRandomArmRotation() const;
 
 		private:
@@ -87,6 +88,8 @@ namespace kinjo
 
 			arm::Arm * const m_pArm;
             vision::Vision * const m_pVision;
+
+			mutable cv::RNG m_Rng;
         };
     
     }

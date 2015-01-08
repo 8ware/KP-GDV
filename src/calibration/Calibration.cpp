@@ -3,6 +3,7 @@
 #include <kinjo/recognition/Recognition.hpp>
 
 #include <vector>
+#include <iostream>
 
 namespace kinjo
 {
@@ -64,25 +65,43 @@ namespace kinjo
 			std::size_t const uiCalibrationPointCount,
 			std::size_t const uiCalibrationRotationCount,
 			std::size_t const uiRecognitionAttemptCount)
-        {
+		{
+			std::cout << "Begin calibration..." << std::endl;
+
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> m_vCorrespondences;
 			m_vCorrespondences.reserve(uiCalibrationPointCount);
 
             // Get the point correspondences.
-			for(std::size_t i(0); i<uiCalibrationPointCount; ++i)
-            {
-                m_pArm->moveTo(getRandomArmPosition());
-                // Get the final position the arm haltet at and store it with the estimated calibration object position.
-				m_vCorrespondences.push_back(std::make_pair(
-					m_pArm->getPosition(), 
-					getAveragedCalibrationObjectVisionPosition(
+			for(std::size_t uiCalibrationPoint(0); uiCalibrationPoint<uiCalibrationPointCount; ++uiCalibrationPoint)
+			{
+				std::cout << "uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
+
+				cv::Vec3f v3fAveragedPosition(0.0f, 0.0f, 0.0f);
+				do
+				{
+					auto const v3fArmDesiredPosition(getArmCalibrationPosition(uiCalibrationPointCount));
+					m_pArm->moveTo(v3fArmDesiredPosition);
+					std::cout << "v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
+					// Get the final position the arm haltet at and store it with the estimated calibration object position.
+
+					v3fAveragedPosition = getAveragedCalibrationObjectVisionPosition(
 						uiCalibrationRotationCount,
-						uiRecognitionAttemptCount)));
+						uiRecognitionAttemptCount);
+					std::cout << "v3fAveragedPosition: " << v3fAveragedPosition << std::endl;
+				}
+				// If the object was not recognized, retry.
+				while(v3fAveragedPosition == cv::Vec3f(0.0f, 0.0f, 0.0f));
+                
+				m_vCorrespondences.push_back(std::make_pair(
+					m_pArm->getPosition(),
+					v3fAveragedPosition));
             }
 
             // Estimate the rigid body transformation.
 			m_matCurrentRigidBodyTransformation = estimateRigidBodyTransformation(m_vCorrespondences);
-            m_bCalibrationAvailable = true;
+			m_bCalibrationAvailable = true;
+
+			std::cout << "Finished calibration..." << std::endl;
         }
         /**
          *
@@ -90,20 +109,24 @@ namespace kinjo
         cv::Vec3f Calibrator::getAveragedCalibrationObjectVisionPosition(
 			std::size_t const uiCalibrationRotationCount,
 			std::size_t const uiRecognitionAttemptCount) const
-        {
-            cv::Vec3f v3fVisionPosition(0.0f, 0.0f, 0.0f);
+		{
+			std::cout << "[+] getAveragedCalibrationObjectVisionPosition" << std::endl;
+
+			cv::Vec3f v3fSummedVisionPosition(0.0f, 0.0f, 0.0f);
 			std::size_t uiValidPositions(0);
 
-            // Multiple hand rotations at same position to prevent occultation.
-			for(std::size_t j(0); j<uiCalibrationRotationCount; ++j)
+			// TODO: Implement rotation!
+            /*// Multiple hand rotations at same position to prevent occultation.
+			//for(std::size_t j(0); j<uiCalibrationRotationCount; ++j)
             {
                 // Rotate the arm around the point.
 				cv::Vec3f const v3fArmRotation(getRandomArmRotation());
-                m_pArm->rotateTo(v3fArmRotation);
+                m_pArm->rotateTo(v3fArmRotation);*/
 
 				// Multiple recognition attempts at the same position/rotation.
-				for(std::size_t uiTry(0); uiTry<uiRecognitionAttemptCount; ++uiTry)
+				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttemptCount; ++uiRecognitionAttempt)
 				{
+					std::cout << "uiRecognitionAttempt: " << uiRecognitionAttempt << std::endl;
 					// We need new images.
 					m_pVision->updateImages(true);
 					// Get current calibration object vision position.
@@ -114,19 +137,35 @@ namespace kinjo
 					// If this is a valid point.
 					if(calib.second != 0.0f)
 					{
+						std::cout << "Found at: (" << calib.first[0u] << "," << calib.first[1u] << ")" << std::endl;
 						// Accumulate the positions for averaging.
-						v3fVisionPosition += m_pVision->estimatePositionFromImagePointPx(
+						cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimatePositionFromImagePointPx(
 							cv::Point(
 								static_cast<int>(calib.first[0u]),
-								static_cast<int>(calib.first[1u])));
+								static_cast<int>(calib.first[1u]))));
+						v3fSummedVisionPosition += v3fEstimatedVisionPosition;
 						++uiValidPositions;
+						std::cout << "v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
 					}
 				}
-            }
-			// Average the positions.
-			v3fVisionPosition *= (1.0 / static_cast<float>(uiValidPositions));
+            //}
 
-            return v3fVisionPosition;
+			cv::Vec3f v3fAveragedVisionPosition(v3fSummedVisionPosition);
+
+			if(uiValidPositions>0)
+			{
+				// Average the positions.
+				v3fAveragedVisionPosition *= (1.0f / static_cast<float>(uiValidPositions));
+			}
+			else
+			{
+				// If the object could not be recognized (maybe too far away or out of image, return a zero vector)
+				std::cout << "No calibration object found..." << std::endl;
+			}
+
+			std::cout << "[-] getAveragedCalibrationObjectVisionPosition" << std::endl;
+
+			return v3fAveragedVisionPosition;
         }
         /**
          * Implements "Least-Squares Rigid Motion Using SVD"
@@ -134,7 +173,9 @@ namespace kinjo
          **/
 		cv::Matx44f Calibrator::estimateRigidBodyTransformation(
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
-        {
+		{
+			std::cout << "[+] estimateRigidBodyTransformation" << std::endl;
+
 			std::size_t const uiCorrespondenceCount(vv2v3fCorrespondences.size());
 			if(uiCorrespondenceCount < 3)
 			{
@@ -149,8 +190,10 @@ namespace kinjo
 				v3CenterLeft += corr.first;
 				v3CenterRight += corr.second;
 			}
-			v3CenterLeft *= (1.0 / static_cast<float>(vv2v3fCorrespondences.size()));
-			v3CenterRight *= (1.0 / static_cast<float>(vv2v3fCorrespondences.size()));
+			v3CenterLeft *= (1.0 / static_cast<float>(uiCorrespondenceCount));
+			v3CenterRight *= (1.0 / static_cast<float>(uiCorrespondenceCount));
+
+			std::cout << "1" << std::endl;
 
 			// Create a vector with the centered correspondences.
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> vv2v3fCenteredCorrespondences;
@@ -160,6 +203,8 @@ namespace kinjo
 					corr.first-v3CenterLeft,
 					corr.second-v3CenterRight));
 			}
+
+			std::cout << "2" << std::endl;
 
 			// Fill the covariance matrix.
 			cv::Matx33f H(cv::Matx33f::zeros());
@@ -174,9 +219,15 @@ namespace kinjo
 				}
 			}
 
+			std::cout << "3" << std::endl;
+
 			// Compute the SVD.
-			cv::Matx33f U, S, V;
-			cv::SVD::compute(H, U, S, V);
+			cv::SVD svd(H, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
+			cv::Matx33f U(reinterpret_cast<float*>(svd.u.data));
+			cv::Matx33f S(reinterpret_cast<float*>(svd.w.data));
+			cv::Matx33f V(reinterpret_cast<float*>(svd.vt.data));
+
+			std::cout << "4" << std::endl;
 
 			// Transpose U.
 			cv::Matx33f const Ut(U.t());
@@ -185,10 +236,14 @@ namespace kinjo
 			cv::Matx33f DCorrect(cv::Matx33f::eye());
 			DCorrect(2, 2) = static_cast<float>(cv::determinant(V*Ut));
 
+			std::cout << "5" << std::endl;
+
 			// Compute the roation matrix.
 			cv::Matx33f const R(V * DCorrect * Ut);
 			// Compute the translation vector.
 			cv::Vec3f const t(v3CenterLeft - R * v3CenterRight);
+
+			std::cout << "[-] estimateRigidBodyTransformation" << std::endl;
 
 			return cv::Matx44f{
 				R(0, 0), R(0, 1), R(0, 2), t(0),
@@ -199,14 +254,22 @@ namespace kinjo
         /**
          *
          **/
-        cv::Vec3f Calibrator::getRandomArmPosition() const
-        {
-            // TODO: Implement better algorithm!
-			cv::RNG rng;
+        cv::Vec3f Calibrator::getArmCalibrationPosition(std::size_t const i) const
+		{
+			std::cout << "[+] getArmCalibrationPosition" << std::endl;
+
+			auto const fPi(std::atan2(0, -1));
+			// Clock-wise rotation angle when looking from the top. 
+			auto const fTheta(m_Rng.uniform(0.0, 2.0*fPi));
+			// Because we can not come too close to the arm base we have to keep a minimum distance.
+			auto const fDist(m_Rng.uniform(100.0, 300.0));
+
+			std::cout << "[-] getArmCalibrationPosition" << std::endl;
+
 			return cv::Vec3f(
-				static_cast<float>(rng.uniform(0.2, 0.7)),
-				static_cast<float>(rng.uniform(-0.2, -0.7)),
-				static_cast<float>(rng.uniform(0.2, 0.7)));
+				static_cast<float>(fDist * std::cos(fTheta)),
+				static_cast<float>(fDist * std::sin(fTheta)),
+				static_cast<float>(m_Rng.uniform(50.0, 300.0)));
         }
         /**
          *
