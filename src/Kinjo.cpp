@@ -51,8 +51,8 @@ void mouseCallback(int event, int x, int y, int /*flags*/, void *param)
 }
 
 /**
-* The application states.
-**/
+ * The application states.
+ **/
 enum class ApplicationState
 {
 	Uncalibrated,
@@ -61,8 +61,8 @@ enum class ApplicationState
 };
 
 /**
-* The application entry point.
-**/
+ * The application entry point.
+ **/
 int main(int /*argc*/, char* /*argv*/[])
 {
 	try
@@ -210,17 +210,23 @@ int main(int /*argc*/, char* /*argv*/[])
 					cv::Vec3f const v3fVisionPosition(
 						vision->estimatePositionFromImagePointPx(mouseState.point));
 
-					//arm->openFingers();
+					if(v3fVisionPosition[2]>0.0f)
+					{
+						//arm->openFingers();
 
-					cv::Vec4f const v4fhomogenousVisionPosition(v3fVisionPosition[0], v3fVisionPosition[1], v3fVisionPosition[2], 1.0f);
+						// vision position -> homogenous vision position.
+						cv::Vec4f const v4fHomogenousVisionPosition(v3fVisionPosition[0], v3fVisionPosition[1], v3fVisionPosition[2], 1.0f);
 
-					cv::Vec4f const v4fArmPosition(mat44fRigidBodyTransformation * v4fhomogenousVisionPosition);
+						// homogenous vision position -> homogenous arm position.
+						cv::Vec4f const v4fArmPosition(mat44fRigidBodyTransformation * v4fHomogenousVisionPosition);
 
-					cv::Vec3f const v3fArmPosition(v4fArmPosition[0], v4fArmPosition[1], v4fArmPosition[2]);
+						// homogenous arm position -> arm position.
+						cv::Vec3f const v3fArmPosition(v4fArmPosition[0], v4fArmPosition[1], v4fArmPosition[2]);
 
-					arm->moveTo(v3fArmPosition);
+						arm->moveTo(v3fArmPosition);
 
-					//arm->closeFingers();
+						//arm->closeFingers();
+					}
 				}
 			}
 

@@ -13,8 +13,8 @@ namespace kinjo
     namespace calibration
     {
         /**
-        * Allows calibration of arm to vision.
-        **/
+         * Allows calibration of arm to vision.
+         **/
         class Calibrator
         {
 		public:
@@ -52,11 +52,17 @@ namespace kinjo
 				std::size_t const uiCalibrationRotationCount,
 				std::size_t const uiRecognitionAttemptCount);
 
+			/**
+			 * \return Estimates the rigid body transformation from the given point correspondences.
+			 **/
+			static cv::Matx44f estimateRigidBodyTransformation(
+				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
+
 		private:
 
 			/**
-			* Calibrates the vision and the arm.
-			**/
+			 * Calibrates the vision and the arm.
+			 **/
 			void calibrationThreadMain(
 				std::size_t const uiCalibrationPointCount,
 				std::size_t const uiCalibrationRotationCount,
@@ -69,12 +75,6 @@ namespace kinjo
             cv::Vec3f getAveragedCalibrationObjectVisionPosition(
 				std::size_t const uiCalibrationRotationCount,
 				std::size_t const uiRecognitionAttemptCount) const;
-
-            /**
-             * \return Estimates the rigid body transformation from the given point correspondences.
-             **/
-			static cv::Matx44f estimateRigidBodyTransformation(
-				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 
 		private:
 			std::thread m_Thread;

@@ -77,25 +77,27 @@ namespace kinjo
 			{
 				std::cout << "uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
 
-				cv::Vec3f v3fAveragedPosition(0.0f, 0.0f, 0.0f);
+				cv::Vec3f v3fAveragedVisionPosition(0.0f, 0.0f, 0.0f);
 				do
 				{
 					auto const v3fArmDesiredPosition(m_pCalibrationPointGenerator->getNextCalibrationPoint());
-					m_pArm->moveTo(v3fArmDesiredPosition);
 					std::cout << "v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
-					// Get the final position the arm haltet at and store it with the estimated calibration object position.
+					m_pArm->moveTo(v3fArmDesiredPosition);
+					std::cout << "reached psotition: " << m_pArm->getPosition() << std::endl;
+					// \TODO: Maybe we should check if the position was approximately reached and retry else.
 
-					v3fAveragedPosition = getAveragedCalibrationObjectVisionPosition(
+					v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition(
 						uiCalibrationRotationCount,
 						uiRecognitionAttemptCount);
-					std::cout << "v3fAveragedPosition: " << v3fAveragedPosition << std::endl;
+					std::cout << "v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
 				}
 				// If the object was not recognized, retry.
-				while(v3fAveragedPosition == cv::Vec3f(0.0f, 0.0f, 0.0f));
-                
+				while(v3fAveragedVisionPosition == cv::Vec3f(0.0f, 0.0f, 0.0f));
+
+				// Get the final position the arm haltet at and store it with the estimated calibration object vision position.
 				m_vCorrespondences.push_back(std::make_pair(
 					m_pArm->getPosition(),
-					v3fAveragedPosition));
+					v3fAveragedVisionPosition));
             }
 
             // Estimate the rigid body transformation.
@@ -119,11 +121,10 @@ namespace kinjo
             // Multiple hand rotations at same position to prevent occultation.
 			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount; ++uiCalibrationRotation)
             {
-                // Rotate the arm around the point.
+                // Rotate the hand.
 				auto const fPi(std::atan2(0, -1));
-				auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(uiCalibrationRotationCount))*static_cast<float>(uiCalibrationRotation));
-				auto const v3fRotation(m_pArm->getRotation());
-				m_pArm->rotateTo(cv::Vec3f(v3fRotation[0], v3fRotation[1], fRotationAngle));
+				auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(uiCalibrationRotationCount)));
+				m_pArm->rotateHandBy(fRotationAngle);
 
 				// Multiple recognition attempts at the same position/rotation.
 				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttemptCount; ++uiRecognitionAttempt)
@@ -221,8 +222,10 @@ namespace kinjo
 			cv::SVD svd(H, cv::SVD::MODIFY_A | cv::SVD::FULL_UV);
 			cv::Matx33f U(reinterpret_cast<float*>(svd.u.data));
 			cv::Matx33f S(reinterpret_cast<float*>(svd.w.data));
-			cv::Matx33f V(reinterpret_cast<float*>(svd.vt.data));
-
+			cv::Matx33f Vt(reinterpret_cast<float*>(svd.vt.data));
+			
+			// Transpose Vt.
+			cv::Matx33f V(Vt.t());
 			// Transpose U.
 			cv::Matx33f const Ut(U.t());
 
