@@ -21,7 +21,7 @@ namespace kinjo {
         void JacoArm::moveTo(cv::Vec3f vector)
         {
 
-			std::printf("moving to %i,%i,%i ...\n", vector[0], vector[1],vector[2]);
+			std::printf("moving to %f,%f,%f ...\n", vector[0], vector[1],vector[2]);
 			//works with milimeter, accuracy is bad though
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			position.position[0] = vector[0]/1000;
@@ -49,6 +49,8 @@ namespace kinjo {
 				position.rotation[0], position.rotation[1], position.rotation[2],
 				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
 			waitArmFinishMovement();
+
+
         }
         void JacoArm::moveBy(cv::Vec3f vector)
         {
@@ -62,7 +64,7 @@ namespace kinjo {
         }
         void JacoArm::rotateBy(cv::Vec3f vector)
         {
-			/*
+			std::printf("rotating to %f,%f,%f ...\n", vector[0], vector[1], vector[2]);
 			// vector 0-360 0-360 0-360
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: calculate Degree vector to euler
@@ -74,7 +76,10 @@ namespace kinjo {
 				position.rotation[0], position.rotation[1], position.rotation[2],
 				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
 			waitArmFinishMovement();
-			*/
+
+			cv::Vec3f actual = getRotation();
+			std::printf("moving done. New \"exact\" Rotation: %.4f,%.4f,%.4f\n",
+				actual[0], actual[1], actual[2]);
 		
         }
 
@@ -98,14 +103,13 @@ namespace kinjo {
 			//wait 50ms to make sure wrist rot is set correctly
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			TheJacoArm->move_joystick_axis(axes);
-			//rotating the arm for 8 happens to be 'exactly' 180 degrees or 360, depends on mode arm is in
+			//TODO rotating the arm for 8 happens to be 'exactly' 180 degrees or 360, depends on... find out!
+			
 			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(waittime * 8000)));
 			TheJacoArm->release_joystick();
 			TheJacoArm->stop_api_ctrl();
 			axes.wrist_rot = 0.f;
 			waitArmFinishMovement();
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		}
 
         cv::Vec3f JacoArm::getRotation() const
