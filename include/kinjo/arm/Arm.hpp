@@ -18,6 +18,11 @@ namespace kinjo {
             */
             virtual void moveTo(cv::Vec3f vector) = 0;
 
+			/**
+			* \param hasFingersClosed true-> fingers are closed, false -> fingers are opened
+			**/
+			virtual void moveToStartPosition(bool hasFingersClosed) = 0;
+
             /**
             * \param vector the absolute grab rotation in Degree
             */

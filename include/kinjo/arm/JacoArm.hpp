@@ -17,11 +17,16 @@ namespace kinjo {
 
         public:
             JacoArm();
-
+			~JacoArm();
             /**
             * \param vector the absolute position in centimetres.
             */
             void moveTo(cv::Vec3f vector) override;
+
+			/**
+			* \param hasFingersClosed true-> fingers are closed, false -> fingers are opened
+			**/
+			void moveToStartPosition(bool hasFingersClosed) override;
 
             /**
             * \param vector the absolute grab rotation in Degree
@@ -68,6 +73,15 @@ namespace kinjo {
 			* \return True if both values are the same
 			**/
 			bool DiffIsZero(float X, float Y) const;
+
+			/**
+			* Helper to find out if a line between 2 Points intersects with a Circle at 0,0,0
+			* \param startPos
+			* \param endPos
+			* \param CircleRadius
+			* \return true if intersection, false if no intersection
+			**/
+			bool LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos, float CircleRadius);
 
         private:
             std::shared_ptr<KinDrv::JacoArm> TheJacoArm;

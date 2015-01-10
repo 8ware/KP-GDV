@@ -105,6 +105,9 @@ int main(int /*argc*/, char* /*argv*/[])
 
 #ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
+		//Arm move to your start position
+		arm->moveToStartPosition(true);
+
 		// Create the arm movement window.
 		int posX = 0;
 		int posY = 0;
@@ -272,6 +275,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
 		return 0;
 	}
+	
 	catch (std::exception const & e)
 	{
 		std::cerr << e.what() << std::endl;
