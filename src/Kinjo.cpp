@@ -150,6 +150,9 @@ int main(int /*argc*/, char* /*argv*/[])
 					std::size_t const uiCalibrationRotationCount(3);
 					std::size_t const uiRecognitionAttemptCount(4);
 
+					// Move arm to its start position.
+					arm->moveToStartPosition(true);
+
 					// Start the calibration thread.
 					calibrator->calibrateAsync(
 						uiCalibrationPointCount,
@@ -163,9 +166,6 @@ int main(int /*argc*/, char* /*argv*/[])
 			{
 				// Render the text centered.
 				kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
-
-				// Move arm to its start position.
-				arm->moveToStartPosition(true);
 
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
 				std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
