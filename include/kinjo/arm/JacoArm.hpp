@@ -17,7 +17,8 @@ namespace kinjo {
 
         public:
             JacoArm();
-			~JacoArm();
+			virtual ~JacoArm() = default;
+
             /**
             * \param vector the absolute position in centimetres.
             */

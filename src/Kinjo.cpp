@@ -105,9 +105,6 @@ int main(int /*argc*/, char* /*argv*/[])
 
 #ifndef KINJO_NO_ARM
 #ifdef KINJO_ARM_DEBUG
-		//Arm move to your start position
-		arm->moveToStartPosition(true);
-
 		// Create the arm movement window.
 		int posX = 0;
 		int posY = 0;
@@ -167,6 +164,9 @@ int main(int /*argc*/, char* /*argv*/[])
 				// Render the text centered.
 				kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
 
+				// Move arm to its start position.
+				arm->moveToStartPosition(true);
+
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
 				std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
 					kinjo::recognition::getCalibrationObjectVisionPositionPx(matRgb));
@@ -197,13 +197,14 @@ int main(int /*argc*/, char* /*argv*/[])
 				{
 					applicationState = ApplicationState::Calibrated;
 
-					std::cout << "rigidBodyTransformation: " << calibrator->getRigidBodyTransformation() << std::endl;
+					std::cout << "rigidBodyTransformation: " << std::endl << calibrator->getRigidBodyTransformation() << std::endl;
 				}
 			}
 
 
 			else if(applicationState == ApplicationState::Calibrated)
 			{
+				// \TODO: This movement should be asynchronous to show the movement immediately.
 				if(mouseState.pointChanged)
 				{
 					mouseState.pointChanged = false;
@@ -260,6 +261,12 @@ int main(int /*argc*/, char* /*argv*/[])
 					kinjo::renderPosition(matRgb, mouseState.point, rgbColor, v3fVisionPosition);
 				}
 			}
+
+			// Render current arm position(in arm coordinate system).
+			cv::Vec3f const v3fArmPosition(
+				arm->getPosition());
+			kinjo::renderPosition(matRgb, cv::Point(0, 30), rgbColor, v3fArmPosition);
+
 			// Scale the depth image to use the whole 16-bit and make it more visible.
 			float fKinectMaxDepthMm(5000.0f);
 			float fImageValueScale(std::numeric_limits<std::uint16_t>::max()/fKinectMaxDepthMm);

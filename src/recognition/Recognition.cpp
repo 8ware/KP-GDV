@@ -34,7 +34,7 @@ namespace kinjo
 			static int iInvRatioAccuSize(2);
 			static int iMinCircleDistImageHeightPercent(50);
 			static int iCannyEdgeThreshold(100);
-			static int iHoughAccuThreshold(15);
+			static int iHoughAccuThreshold(25);
 			static int iMinCircleRadiusImageHeightPercent(1);
 			static int iMaxCircleRadiusImageHeightPercent(25);
 			static int iMinHuePercent(11);

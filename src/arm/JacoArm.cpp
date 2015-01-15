@@ -29,7 +29,7 @@ namespace kinjo {
 			Position_end[0] = vector[0] / 1000;
 			Position_end[1] = vector[1] / 1000;
 			Position_end[2] = vector[2] / 1000;
-			if (LineCircleIntersection(Position_start, Position_end, 0.2f)){
+			/*if (LineCircleIntersection(Position_start, Position_end, 0.2f)){
 				//If a Intersection took Place, we dont Move!
 				//LineCircleIntersection Calls moveTo for a better way around the dead zone or
 				//doesn't in case endpoint is inside Deadzone
@@ -37,7 +37,7 @@ namespace kinjo {
 				std::printf("Taking a detour or don't move because target coordinates are too close");
 #endif
 			}
-			else{
+			else*/{
 #ifdef _DEBUG
 				std::printf("moving to %f,%f,%f ...\n", vector[0], vector[1], vector[2]);
 #endif
@@ -65,7 +65,7 @@ namespace kinjo {
 			//next step, move arm and rotate it to the starting position we want.
 			TheJacoArm->start_api_ctrl();
 			//TODO: TEST if this is right: Fingers
-			if (hasFingersClosed) {
+			if (!hasFingersClosed) {
 				TheJacoArm->set_target_cart(0.0f, 0.5f, 0.5f, pi, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 			}
 			else {
