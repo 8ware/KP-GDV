@@ -17,3 +17,6 @@ TestdataGenerator:
 		$(SRC)/arm/ArmFactory.cpp $(SRC)/arm/JacoArm.cpp \
 		$(EXT)/libkindrv/exception.cpp $(EXT)/libkindrv/kindrv.cpp
 
+DepthImageTest:
+	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o DepthImageTest DepthImageTest.cpp
+
