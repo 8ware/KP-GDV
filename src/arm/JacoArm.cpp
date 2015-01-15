@@ -63,14 +63,14 @@ namespace kinjo {
 			//move arm and rotate it to the starting position we want.
 			TheJacoArm->start_api_ctrl();
 			if (!hasFingersClosed) {
-				moveTo({ 0.0f, -500.0f, 500.0f });
+				moveTo({ 0.0f, -500.0f, 400.0f });
 				waitArmFinishMovement();
-				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.5f, pi, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.4f, pi, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 			}
 			else {
-				moveTo({ 0.0f, -500.0f, 500.0f });
+				moveTo({ 0.0f, -500.0f, 400.0f });
 				waitArmFinishMovement();
-				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.5f, pi, 0.0f, 0.0f, 55.0f, 55.0f, 55.0f);
+				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.4f, pi, 0.0f, 0.0f, 40.0f, 40.0f, 40.0f);
 			}
 			waitArmFinishMovement();
 			TheJacoArm->stop_api_ctrl();
@@ -275,7 +275,7 @@ namespace kinjo {
 
 				P = P / sqrt(P.dot(P));
 				printf("Calculating Detour\n");
-				moveTo(P * CircleRadius * 2.0f * 1000);
+				moveTo(P * CircleRadius * 2.3f * 1000);
 				moveTo(endPos*1000);
 				return true;
 			}
