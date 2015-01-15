@@ -34,7 +34,7 @@ namespace kinjo {
 				//LineCircleIntersection Calls moveTo for a better way around the dead zone or
 				//doesn't in case endpoint is inside Deadzone
 #ifdef _DEBUG
-				std::printf("Arm took detour");
+				std::printf("Arm took detour\n");
 #endif
 			}
 			else{
@@ -223,10 +223,15 @@ namespace kinjo {
 
 		bool JacoArm::LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos, float CircleRadius){
 			//check if start or endpoint are inside the circle
-			if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < CircleRadius)
+			if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < CircleRadius) {
+				printf("StartPos inside Deadzone!\n");
 				return true;
-			if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < CircleRadius)
+			}
+			if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < CircleRadius){
+				printf("EndPos inside Deadzone! \n");
 				return true;
+			}
+					
 
 			//now that we know both points are outside the circle, lets begin
 			//g: x-> = S + Lambda * (E - S) = S + Lambda * B
@@ -264,10 +269,10 @@ namespace kinjo {
 					//in this case P is exactly on 0,0,0, so we need a Plan B
 					//very unlikely but possible...
 					//we rotate direction Vector B 90 degree
-					
+					P[0] = B[1];
+					P[1] = B[0];
 				}
-				P[0] = B[1];
-				P[1] = B[0];
+
 				P = P / sqrt(P.dot(P));
 				printf("Calculating Detour\n");
 				moveTo(P * CircleRadius * 2.0f * 1000);
