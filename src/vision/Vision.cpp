@@ -7,8 +7,8 @@ namespace kinjo
 		/**
 		 * 
 		 **/
-		cv::Vec3f Vision::estimatePositionFromImagePointPx(
-			cv::Point const & v2iPointPx)
+		cv::Vec3f Vision::estimateVisionPositionFromImagePointPx(
+			cv::Point const & v2iPointPx) const
 		{
 			cv::Vec3f v3fVisionPosition(0.0f, 0.0f, 0.0f);
 			std::size_t uiValidPositions(0);

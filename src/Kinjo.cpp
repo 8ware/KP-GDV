@@ -14,6 +14,7 @@
 #include <kinjo/recognition/Recognition.hpp>
 
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 #include <iostream>		// std::cout
 #include <cmath>		// std::modf
@@ -122,7 +123,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
 					std::size_t const uiCalibrationPointCount(6);
 					std::size_t const uiCalibrationRotationCount(3);
-					std::size_t const uiRecognitionAttemptCount(4);
+					std::size_t const uiRecognitionAttemptCount(5);
 
 					// Move arm to its start position.
 					arm->moveToStartPosition(true);
@@ -143,7 +144,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
 				// NOTE: Searching for the calibration object and rendering it influences the speed negatively!
 				std::pair<cv::Vec2f, float> const calibrationObjectPositionPx(
-					kinjo::recognition::getCalibrationObjectVisionPositionPx(matRgb));
+					kinjo::recognition::estimateCalibrationObjectImagePointPx(matRgb));
 
 				// If recognition was successfull.
 				if(calibrationObjectPositionPx.second > 0.0f)
@@ -159,7 +160,7 @@ int main(int /*argc*/, char* /*argv*/[])
 
 					// Get the 3d position from the 2d point.
 					cv::Vec3f const v3fVisionPosition(
-						vision->estimatePositionFromImagePointPx(v2iCenter));
+						vision->estimateVisionPositionFromImagePointPx(v2iCenter));
 
 					// Display its coordinates.
 					kinjo::renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
@@ -186,20 +187,13 @@ int main(int /*argc*/, char* /*argv*/[])
 					cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
 
 					cv::Vec3f const v3fVisionPosition(
-						vision->estimatePositionFromImagePointPx(mouseState.point));
+						vision->estimateVisionPositionFromImagePointPx(mouseState.point));
 
 					if(v3fVisionPosition[2]>0.0f)
 					{
 						//arm->openFingers();
 
-						// vision position -> homogenous vision position.
-						cv::Vec4f const v4fHomogenousVisionPosition(v3fVisionPosition[0], v3fVisionPosition[1], v3fVisionPosition[2], 1.0f);
-
-						// homogenous vision position -> homogenous arm position.
-						cv::Vec4f const v4fArmPosition(mat44fRigidBodyTransformation * v4fHomogenousVisionPosition);
-
-						// homogenous arm position -> arm position.
-						cv::Vec3f const v3fArmPosition(v4fArmPosition[0], v4fArmPosition[1], v4fArmPosition[2]);
+						cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
 
 						arm->moveTo(v3fArmPosition);
 
@@ -217,7 +211,7 @@ int main(int /*argc*/, char* /*argv*/[])
 				kinjo::renderDoubleCircle(matRgb, mouseState.point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
-					vision->estimatePositionFromImagePointPx(mouseState.point));
+					vision->estimateVisionPositionFromImagePointPx(mouseState.point));
 				if(v3fVisionPosition[2u] > 0)
 				{
 					kinjo::renderPosition(matDepth, mouseState.point, depthColor, v3fVisionPosition);
@@ -225,14 +219,16 @@ int main(int /*argc*/, char* /*argv*/[])
 				}
 			}
 
+#ifndef KINJO_NO_ARM
 			// Render current arm position(in arm coordinate system).
 			cv::Vec3f const v3fArmPosition(
 				arm->getPosition());
 			kinjo::renderPosition(matRgb, cv::Point(0, 30), rgbColor, v3fArmPosition);
+#endif
 
 			// Scale the depth image to use the whole 16-bit and make it more visible.
-			float fKinectMaxDepthMm(5000.0f);
-			float fImageValueScale(std::numeric_limits<std::uint16_t>::max()/fKinectMaxDepthMm);
+			float const fImageValueScale(
+				static_cast<float>(std::numeric_limits<std::uint16_t>::max())/static_cast<float>(vision->getMaxDepthValue()));
 			cv::imshow(g_sWindowTitleDepth, matDepth * fImageValueScale);
 			cv::imshow(g_sWindowTitleColor, matRgb);
 

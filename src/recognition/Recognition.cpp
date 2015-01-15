@@ -25,7 +25,7 @@ namespace kinjo
 		* 
 		* \return	The position of the calibration object in pixels and the circle radius.
         **/
-		std::pair<cv::Vec2f, float> getCalibrationObjectVisionPositionPx(
+		std::pair<cv::Vec2f, float> estimateCalibrationObjectImagePointPx(
 			cv::Mat const & matRgb)
 		{
 			static int iMorphSizeDilatePx(4);

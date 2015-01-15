@@ -11,7 +11,7 @@ namespace kinjo
         /**
         * \return The position of the calibration object in the image.
         **/
-		std::pair<cv::Vec2f, float> getCalibrationObjectVisionPositionPx(
+		std::pair<cv::Vec2f, float> estimateCalibrationObjectImagePointPx(
 			cv::Mat const & matRgb);
     }
 }

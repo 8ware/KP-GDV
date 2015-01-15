@@ -21,7 +21,7 @@ namespace kinjo {
 			rgbImageSize = getImageSize(rgbGenerator);
 
 			// Align the depth image center to the color image center.
-			depthGenerator.GetAlternativeViewPointCap().SetViewPoint(rgbGenerator);
+			checkStatus(depthGenerator.GetAlternativeViewPointCap().SetViewPoint(rgbGenerator), "GetAlternativeViewPointCap().SetViewPoint");
 		}
 
 		void OpenNiVision::updateImages(bool bRequireUpdates)
@@ -46,31 +46,41 @@ namespace kinjo {
 			cv::cvtColor(bgr, matRgb, CV_RGB2BGR);
 		}
 
-		cv::Mat const & OpenNiVision::getDepth()
+		cv::Mat const & OpenNiVision::getDepth() const
 		{
 			return matDepth;
 		}
 
-		cv::Mat const & OpenNiVision::getRgb()
+		cv::Mat const & OpenNiVision::getRgb() const
 		{
 			return matRgb;
 		}
 
+		std::uint16_t OpenNiVision::getMaxDepthValue() const
+		{
+			return depthGenerator.GetDeviceMaxDepth();
+		}
+
 		cv::Vec3f OpenNiVision::getPositionFromImagePointPx(
-			cv::Point const & v2iPointPx)
+			cv::Point const & v2iPointPx) const
 		{
 			// Look up the depth at this position.
 			std::uint16_t const uiDepth(getDepth().at<std::uint16_t>(v2iPointPx.y, v2iPointPx.x));
-			// FIXME: How to get the real x,y coordinates in vision?.
+			XnPoint3D const v3fProjectivePoint {v2iPointPx.x, v2iPointPx.y, uiDepth};
+			XnPoint3D v3fRealPoint;
+			depthGenerator.ConvertProjectiveToRealWorld(1, &v3fProjectivePoint, &v3fRealPoint);
+
 			return cv::Vec3f(
-				static_cast<float>(v2iPointPx.x),
-				static_cast<float>(v2iPointPx.y),
-				(uiDepth==0) 
+				static_cast<float>(v3fRealPoint.X),
+				static_cast<float>(v3fRealPoint.Y),
+				(v3fRealPoint.Z==0)
 					? 0.0f 
-					: (static_cast<float>(uiDepth)/10.0f));
+					: (static_cast<float>(v3fRealPoint.Z)/10.0f));
 		}
 
-		void OpenNiVision::checkStatus(XnStatus const & status, std::string const & action)
+		void OpenNiVision::checkStatus(
+			XnStatus const & status, 
+			std::string const & action)
 		{
 			if (status != XN_STATUS_OK) {
 				std::string cause = xnGetStatusString(status);
@@ -80,7 +90,8 @@ namespace kinjo {
 			}
 		}
 
-		cv::Size OpenNiVision::getImageSize(xn::MapGenerator const & generator) const
+		cv::Size OpenNiVision::getImageSize(
+			xn::MapGenerator const & generator) const
 		{
 			XnMapOutputMode output;
 			generator.GetMapOutputMode(output);

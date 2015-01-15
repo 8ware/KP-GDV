@@ -32,18 +32,23 @@ namespace kinjo {
 			/**
 			 * \return the depth values normalized to centimeters.
 			 */
-			virtual cv::Mat const & getDepth() override;
+			virtual cv::Mat const & getDepth() const override;
 			/**
 			 * \return the RGB image already translated to OpenCV's internal
 			 * BGR representation.
 			 */
-			virtual cv::Mat const & getRgb() override;
+			virtual cv::Mat const & getRgb() const override;
+
+			/**
+			 * \return The maximum depth value.
+			 */
+			virtual std::uint16_t getMaxDepthValue() const const override;
 
 			/**
 			 * \return The 3d position in the vision.
 			 **/
 			virtual cv::Vec3f getPositionFromImagePointPx(
-				cv::Point const & v2iPointPx) override;
+				cv::Point const & v2iPointPx) const override;
 
 		private:
 			/**

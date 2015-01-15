@@ -53,6 +53,19 @@ namespace kinjo
 				std::size_t const uiRecognitionAttemptCount);
 
 			/**
+			 * Filters a point list for outliers.
+			 **/
+			static std::vector<cv::Vec3f> filterPointList(
+				std::vector<cv::Vec3f> vv3fVisionPositions,
+				float fInlierDistanceMm);
+
+			/**
+			 * \return The average point.
+			 **/
+			static cv::Vec3f average(
+				std::vector<cv::Vec3f> const & vv3fVisionPositions);
+
+			/**
 			 * \return Estimates the rigid body transformation from the given point correspondences.
 			 **/
 			static cv::Matx44f estimateRigidBodyTransformation(
