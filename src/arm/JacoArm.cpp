@@ -26,18 +26,18 @@ namespace kinjo {
 			Position_start[1] = position_now.position[1];
 			Position_start[2] = position_now.position[2];
 			cv::Vec3f Position_end;
-			Position_end[0] = vector[0] / 1000;
-			Position_end[1] = vector[1] / 1000;
-			Position_end[2] = vector[2] / 1000;
-			/*if (LineCircleIntersection(Position_start, Position_end, 0.2f)){
+			Position_end[0] = vector[0]/1000;
+			Position_end[1] = vector[1]/1000;
+			Position_end[2] = vector[2]/1000;
+			if (LineCircleIntersection(Position_start, Position_end, 0.2f)){
 				//If a Intersection took Place, we dont Move!
 				//LineCircleIntersection Calls moveTo for a better way around the dead zone or
 				//doesn't in case endpoint is inside Deadzone
 #ifdef _DEBUG
-				std::printf("Taking a detour or don't move because target coordinates are too close");
+				std::printf("Arm took detour");
 #endif
 			}
-			else*/{
+			else{
 #ifdef _DEBUG
 				std::printf("moving to %f,%f,%f ...\n", vector[0], vector[1], vector[2]);
 #endif
@@ -60,16 +60,17 @@ namespace kinjo {
 		} //moveto
 
 		void JacoArm::moveToStartPosition(bool hasFingersClosed){
-			//TODO: check Arm state and press the joystick button until the arm is at its starting own point
-
-			//next step, move arm and rotate it to the starting position we want.
+			//move arm and rotate it to the starting position we want.
 			TheJacoArm->start_api_ctrl();
-			//TODO: TEST if this is right: Fingers
 			if (!hasFingersClosed) {
-				TheJacoArm->set_target_cart(0.0f, 0.5f, 0.5f, pi, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+				moveTo({ 0.0f, -500.0f, 500.0f });
+				waitArmFinishMovement();
+				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.5f, pi, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 			}
 			else {
-				TheJacoArm->set_target_cart(0.0f, 0.5f, 0.5f, pi, 0.0f, 0.0f, 55.0f, 55.0f, 55.0f);
+				moveTo({ 0.0f, -500.0f, 500.0f });
+				waitArmFinishMovement();
+				TheJacoArm->set_target_cart(0.0f, -0.5f, 0.5f, pi, 0.0f, 0.0f, 55.0f, 55.0f, 55.0f);
 			}
 			waitArmFinishMovement();
 			TheJacoArm->stop_api_ctrl();
@@ -143,7 +144,7 @@ namespace kinjo {
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			TheJacoArm->move_joystick_axis(axes);
 			//TODO rotating the arm for 8 happens to be 'exactly' 180 degrees or 360, depends on... find out!
-			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(waittime * 8000)));
+			std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(waittime * 4000)));
 			TheJacoArm->release_joystick();
 			TheJacoArm->stop_api_ctrl();
 			axes.wrist_rot = 0.f;
@@ -174,9 +175,9 @@ namespace kinjo {
 		{
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: test if the numbers are right
-			position.finger_position[0] = 55;
-			position.finger_position[1] = 55;
-			position.finger_position[2] = 55;
+			position.finger_position[0] = 0;
+			position.finger_position[1] = 0;
+			position.finger_position[2] = 0;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
 		}
@@ -184,9 +185,9 @@ namespace kinjo {
 		{
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: test if the numbers are right
-			position.finger_position[0] = 0;
-			position.finger_position[1] = 0;
-			position.finger_position[2] = 0;
+			position.finger_position[0] = 55;
+			position.finger_position[1] = 55;
+			position.finger_position[2] = 55;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
 		}
@@ -249,7 +250,7 @@ namespace kinjo {
 			float distance = sqrt(P.dot(P)); //Distance between 0 0 0 and the closest point
 			//if thats lesser than the Radius AND between Startpoint and Enpoint, we have an intersection
 			if (distance < CircleRadius && Lambda>0.0f && Lambda < 1.0f){
-
+				
 				//now we know we intersect the deadzone
 				//So we tell the system to move to another position first
 
@@ -263,14 +264,14 @@ namespace kinjo {
 					//in this case P is exactly on 0,0,0, so we need a Plan B
 					//very unlikely but possible...
 					//we rotate direction Vector B 90 degree
-					P[0] = B[1];
-					P[1] = B[0];
+					
 				}
-
+				P[0] = B[1];
+				P[1] = B[0];
 				P = P / sqrt(P.dot(P));
-				moveTo(P * CircleRadius * 1.2);
-				moveTo(endPos);
-
+				printf("Calculating Detour\n");
+				moveTo(P * CircleRadius * 2.0f * 1000);
+				moveTo(endPos*1000);
 				return true;
 			}
 			return false;

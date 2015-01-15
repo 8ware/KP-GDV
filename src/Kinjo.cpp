@@ -25,7 +25,6 @@ static std::string const g_sWindowTitleColor("Vision (RGB)");
 static std::string const g_sWindowTitleArm("Arm");
 static const int g_iRefreshIntervallMs(100);
 
-#define KINJO_ARM_DEBUG
 //#define KINJO_NO_ARM
 
 struct MouseCallback
@@ -101,31 +100,6 @@ int main(int /*argc*/, char* /*argv*/[])
 
 		int key = -1;
 		cv::Mat matDepth, matRgb;
-
-
-#ifndef KINJO_NO_ARM
-#ifdef KINJO_ARM_DEBUG
-		// Create the arm movement window.
-		int posX = 0;
-		int posY = 0;
-		int posZ = 0;
-		int rotZ = 0;
-		cv::namedWindow(g_sWindowTitleArm, cv::WINDOW_AUTOSIZE);
-
-		// Get the current arm position.
-		cv::Vec3f initial = arm->getPosition();
-		posX = (int)initial[0];
-		posY = (int)initial[1];
-		posZ = (int)initial[2];
-
-		int const slider_max(500);
-		cv::createTrackbar("X", g_sWindowTitleArm, &posX, slider_max);
-		cv::createTrackbar("Y", g_sWindowTitleArm, &posY, slider_max);
-		cv::createTrackbar("Z", g_sWindowTitleArm, &posZ, slider_max);
-
-		cv::createTrackbar("Rotate", g_sWindowTitleArm, &rotZ, 360);
-#endif
-#endif
 
 		do
 		{
@@ -233,17 +207,6 @@ int main(int /*argc*/, char* /*argv*/[])
 					}
 				}
 			}
-
-#ifdef KINJO_ARM_DEBUG
-			// Move the arm when pressing space.
-			if(key == 32)
-			{
-				cv::Vec3f target;
-				target[0] = static_cast<float>(posX); target[1] = static_cast<float>(posY); target[2] = static_cast<float>(posZ);
-				arm->moveTo(target);
-				arm->rotateHandBy(static_cast<float>(rotZ));
-			}
-#endif
 #endif
 
 			// Show depth, color and selected point.
