@@ -20,3 +20,7 @@ TestdataGenerator:
 DepthImageTest:
 	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o DepthImageTest DepthImageTest.cpp
 
+DirectoryBasedDataProviderTest:
+	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o DirectoryBasedDataProviderTest \
+		DirectoryBasedDataProviderTest.cpp $(SRC)/mock/DirectoryBasedDataProvider.cpp
+

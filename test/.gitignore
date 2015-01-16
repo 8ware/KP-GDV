@@ -1,3 +1,4 @@
 OpenNiVisionTest
 TestdataGenerator
 DepthImageTest
+DirectoryBasedDataProviderTest
