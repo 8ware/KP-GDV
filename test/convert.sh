@@ -3,7 +3,6 @@
 source=${1:?Source directory must be given!}
 target=${2:?Target directory must be given!}
 
-
 for dir in "$source"/*; do
 	angle=$(grep -oP 'data_A\K\d+' <<< "$dir")
 	distance=$(grep -oP 'data_A\d+-D\K\d+' <<< "$dir")
@@ -19,9 +18,17 @@ for dir in "$source"/*; do
 	z_=$(cut -d , -f 3 <<< "${xyz_// }")
 
 	new="${x},${y},${z}_${x_},${y_},${z_}"
-	echo "$(basename "$dir") -> $new (A=$angle, D=$distance)"
+	echo "Converting $(basename "$dir") to $new (A=$angle, D=$distance)"
 
-	mkdir "$target/$new"
-	cp "$dir/"*.png "$target/$new"
+	mkdir -p "$target/$new"
+	mv "$dir/"*.png "$target/$new"
+
+	rm -v "$dir/INFO"
+	rmdir -v "$dir"
 done
+
+echo "angle: ${angle}°" >> "$target/setup"
+echo "distance: ${distance}cm" >> "$target/setup"
+
+rmdir -v "$source"
 
