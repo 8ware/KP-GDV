@@ -1,3 +1,4 @@
+#pragma once
 
 #include <kinjo/mock/DataProvider.hpp>
 
