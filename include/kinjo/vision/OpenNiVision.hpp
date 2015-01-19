@@ -42,7 +42,7 @@ namespace kinjo {
 			/**
 			 * \return The maximum depth value.
 			 */
-			virtual std::uint16_t getMaxDepthValue() const const override;
+			virtual std::uint16_t getMaxDepthValue() const override;
 
 			/**
 			 * \return The 3d position in the vision.
