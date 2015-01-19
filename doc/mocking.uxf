@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>230</x>
+      <y>750</y>
+      <w>380</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+DataProvider
+--
+// getNextCalibrationPoint, moveTo (validation)
++getPositions() : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
++getDepthImages( position : Vec3f ) : vector&lt;Mat&gt;
++getRgbImages( position : Vec3f ) : vector&lt;Mat&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>360</x>
+      <y>130</y>
+      <w>390</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Vision
+--
++updateImages( force : bool ) : void
++getDepth() : Mat
++getRgb() : Mat
++getMaxDepthValue() : uint16_t
++getPositionFromImagePointPx( point : Point ) : Vec3f</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>770</x>
+      <y>130</y>
+      <w>400</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Arm
+--
++moveTo( vector : Vec3f ) : void
++rotateTo( vector : Vec3f ) : void
++moveBy( vector : Vec3f ) : void
++rotateBy( vector : Vec3f ) : void
++rotateHandBy( MultiplesOfPi : float ) : void
++getPosition() : Vec3f
++getRotation() : Vec3f
++openFingers() : void
++closeFingers() : void
++moveToStartPosition( hasFingersClosed : bool ) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>770</x>
+      <y>750</y>
+      <w>510</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>DirectoryBasedDataProvider
+--
+-directory : string
+-positions : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
+--
++DirectoryBasedDataProvider( directory : string )
+-loadPositions()
+-loadImages( type : string, position : Vec3f, flags : int ) : vector&lt;Mat&gt;
+-checkPosition( position : Vec3f ) : Vec3f</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>550</x>
+      <y>470</y>
+      <w>320</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>TestdataMock
+--
+-positions : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
+-availPosCount : int
+-posIndex : index
+-currPosition : pair&lt;Vec3f, Vec3f&gt;
+-imgIndex : int
+-currDepthImages : vector&lt;Mat&gt;
+-currRgbImages : vector&lt;Mat&gt;
+--
++TestdataMock( provider : DataProvider )
+-checkInitialized() : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>550</x>
+      <y>330</y>
+      <w>180</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;160.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>700</x>
+      <y>330</y>
+      <w>180</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>160.0;10.0;10.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>750</y>
+      <w>190</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;170.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>360</x>
+      <y>270</y>
+      <w>260</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+CalibrationPointGenerator
+--
++getNextCalibrationPoint() : Vec3f</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>700</x>
+      <y>250</y>
+      <w>30</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;220.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>410</x>
+      <y>480</y>
+      <w>160</w>
+      <h>290</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+r2=provider
+m2=1</panel_attributes>
+    <additional_attributes>140.0;20.0;10.0;20.0;10.0;270.0</additional_attributes>
+  </element>
+</diagram>

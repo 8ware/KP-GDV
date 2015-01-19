@@ -45,18 +45,23 @@ int main(void) {
 	Vision* vision;
 	vision = new OpenNiVision();
 
-	Point point;
+	Point point(-1, -1);
 	namedWindow(TITLE_DEPTH);
 	namedWindow(TITLE_RGB);
 	setMouseCallback(TITLE_DEPTH, updateCoordinates, &point);
 	setMouseCallback(TITLE_RGB, updateCoordinates, &point);
 
-	Scalar depthColor = Scalar(255 << 8);
-	Scalar rgbColor = Scalar(0, 255, 0);
+	uint16_t maxDepth = vision->getMaxDepthValue();
+	uint16_t maxValue = numeric_limits<uint16_t>::max();
+	float scaleFactor = maxValue / maxDepth;
+
+	Scalar depthColor(maxValue);
+	Scalar rgbColor(0, 255, 0);
 
 	Mat depth, rgb;
 	do {
-		depth = vision->getDepth();
+		vision->updateImages(true);
+		vision->getDepth().copyTo(depth);
 		rgb = vision->getRgb();
 
 		if (0 <= point.x && point.x < depth.cols
@@ -72,7 +77,7 @@ int main(void) {
 
 		}
 
-		imshow(TITLE_DEPTH, depth * 10);
+		imshow(TITLE_DEPTH, depth * scaleFactor);
 		imshow(TITLE_RGB, rgb);
 	} while (waitKey(REFRESH_INTERVAL) != 27);
 
