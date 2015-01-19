@@ -73,7 +73,7 @@ cv::Vec3f TestdataMock::getNextCalibrationPoint() const {
 
 void TestdataMock::checkInitialized() const {
 	if (posIndex == -1)
-		throw std::runtime_error("Method moveTo() has to be called first!");
+		throw std::logic_error("Method moveTo() has to be called first!");
 }
 
 
