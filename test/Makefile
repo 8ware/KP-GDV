@@ -24,3 +24,8 @@ DirectoryBasedDataProviderTest:
 	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o DirectoryBasedDataProviderTest \
 		DirectoryBasedDataProviderTest.cpp $(SRC)/mock/DirectoryBasedDataProvider.cpp
 
+TestdataMockTest:
+	@$(GCC) -std=c++11 $(FLAGS) $(LIBS) -o TestdataMockTest \
+		TestdataMockTest.cpp $(SRC)/mock/TestdataMock.cpp \
+		$(SRC)/mock/DirectoryBasedDataProvider.cpp
+
