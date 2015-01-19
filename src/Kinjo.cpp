@@ -13,6 +13,9 @@
 #include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 #include <kinjo/recognition/Recognition.hpp>
 
+#include <kinjo/mock/DirectoryBasedDataProvider.hpp>
+#include <kinjo/mock/TestdataMock.hpp>
+
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
@@ -60,32 +63,12 @@ enum class ApplicationState
 	Calibrated,
 };
 
-/**
- * The application entry point.
- **/
-int main(int /*argc*/, char* /*argv*/[])
+int run(kinjo::arm::Arm* arm, kinjo::vision::Vision* vision,
+		kinjo::calibration::Calibrator* calibrator)
 {
 	try
 	{
 		ApplicationState applicationState(ApplicationState::Uncalibrated);
-
-#ifndef KINJO_NO_ARM
-		// Initialize the arm.
-		std::shared_ptr<kinjo::arm::Arm> arm(kinjo::arm::ArmFactory::getInstance());
-#endif
-		// Create the vision.
-		std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
-
-#ifndef KINJO_NO_ARM
-		// Create the calibration point generator.
-		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator(std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>());
-
-		// Create the calibrator.
-		std::shared_ptr<kinjo::calibration::Calibrator> calibrator(std::make_shared<kinjo::calibration::Calibrator>(
-			arm.get(),
-			vision.get(),
-			calibrationPointGenerator.get()));
-#endif
 
 		// Initialize the main windows.
 		MouseCallback mouseState;
@@ -193,9 +176,9 @@ int main(int /*argc*/, char* /*argv*/[])
 					{
 						//arm->openFingers();
 
-						cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
+//						cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
 
-						arm->moveTo(v3fArmPosition);
+//						arm->moveTo(v3fArmPosition);
 
 						//arm->closeFingers();
 					}
@@ -253,3 +236,49 @@ int main(int /*argc*/, char* /*argv*/[])
 		return 1;
 	}
 }
+
+/**
+ * The application entry point.
+ **/
+int main(int argc, char* argv[])
+{
+	if (argc < 2) {
+#ifndef KINJO_NO_ARM
+		// Initialize the arm.
+		std::shared_ptr<kinjo::arm::Arm> arm(kinjo::arm::ArmFactory::getInstance());
+#endif
+		// Create the vision.
+		std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
+
+#ifndef KINJO_NO_ARM
+		// Create the calibration point generator.
+		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator(std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>());
+
+		// Create the calibrator.
+		std::shared_ptr<kinjo::calibration::Calibrator> calibrator(std::make_shared<kinjo::calibration::Calibrator>(
+			arm.get(),
+			vision.get(),
+			calibrationPointGenerator.get()));
+#endif
+
+		return run(arm.get(), vision.get(), calibrator.get());
+	} else {
+		std::string directory = argv[1];
+		kinjo::mock::DirectoryBasedDataProvider provider(directory);
+
+		kinjo::mock::TestdataMock mock(&provider);
+
+		kinjo::arm::Arm *arm = &mock;
+		kinjo::vision::Vision *vision = &mock;
+		kinjo::calibration::CalibrationPointGenerator *generator = &mock;
+
+		cv::Vec3f position = generator->getNextCalibrationPoint();
+		arm->moveTo(position);
+
+		std::shared_ptr<kinjo::calibration::Calibrator> calibrator
+			= std::make_shared<kinjo::calibration::Calibrator>(arm, vision, generator);
+
+		return run(arm, vision, calibrator.get());
+	}
+}
+
