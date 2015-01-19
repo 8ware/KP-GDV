@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 	shared_ptr<DataProvider> provider
 		= make_shared<DirectoryBasedDataProvider>(directory);
 
-	TestdataMock mock(provider);
+	TestdataMock mock(provider.get());
 	Arm *arm = &mock;
 	Vision *vision = &mock;
 	CalibrationPointGenerator *generator = &mock;

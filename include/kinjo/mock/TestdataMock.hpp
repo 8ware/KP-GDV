@@ -5,8 +5,6 @@
 #include <kinjo/calibration/CalibrationPointGenerator.hpp>
 #include <kinjo/mock/DataProvider.hpp>
 
-#include <memory>
-
 
 namespace kinjo {
 namespace mock {
@@ -32,7 +30,7 @@ public:
 	 * \param provider an implementation of a data provider which delivers the
 	 *        sample data
 	 */
-	TestdataMock(std::shared_ptr<DataProvider> provider);
+	TestdataMock(DataProvider* provider);
 
 	virtual void moveTo(cv::Vec3f vector);
 	virtual cv::Vec3f getPosition() const;
@@ -61,7 +59,7 @@ private:
 	/**
 	 * The data provider used to deliver sample data.
 	 */
-	std::shared_ptr<DataProvider> provider;
+	DataProvider *provider;
 
 	/**
 	 * The list of available positions.

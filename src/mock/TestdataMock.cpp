@@ -7,7 +7,7 @@
 namespace kinjo {
 namespace mock {
 	
-TestdataMock::TestdataMock(std::shared_ptr<DataProvider> provider) {
+TestdataMock::TestdataMock(DataProvider* provider) {
 	this->provider = provider;
 
 	this->positions = provider->getPositions();
