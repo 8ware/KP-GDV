@@ -4,42 +4,45 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>140</x>
-      <y>590</y>
+      <x>230</x>
+      <y>750</y>
       <w>380</w>
-      <h>110</h>
+      <h>100</h>
     </coordinates>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
 DataProvider
 --
 // getNextCalibrationPoint, moveTo (validation)
 +getPositions() : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
-+getDepthFiles( position : Vec3f ) : vector&lt;Mat&gt;
-+getImageFiles( position : Vec3f ) : vector&lt;Mat&gt;</panel_attributes>
++getDepthImages( position : Vec3f ) : vector&lt;Mat&gt;
++getRgbImages( position : Vec3f ) : vector&lt;Mat&gt;</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>470</x>
-      <y>150</y>
-      <w>140</w>
-      <h>80</h>
+      <x>360</x>
+      <y>130</y>
+      <w>390</w>
+      <h>130</h>
     </coordinates>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
 Vision
 --
++updateImages( force : bool ) : void
 +getDepth() : Mat
-+getRgb() : Mat</panel_attributes>
++getRgb() : Mat
++getMaxDepthValue() : uint16_t
++getPositionFromImagePointPx( point : Point ) : Vec3f</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>700</x>
-      <y>140</y>
-      <w>250</w>
-      <h>180</h>
+      <x>770</x>
+      <y>130</y>
+      <w>400</w>
+      <h>210</h>
     </coordinates>
     <panel_attributes>&lt;&lt;interface&gt;&gt;
 Arm
@@ -48,89 +51,82 @@ Arm
 +rotateTo( vector : Vec3f ) : void
 +moveBy( vector : Vec3f ) : void
 +rotateBy( vector : Vec3f ) : void
++rotateHandBy( MultiplesOfPi : float ) : void
 +getPosition() : Vec3f
 +getRotation() : Vec3f
 +openFingers() : void
-+closeFingers() : void</panel_attributes>
++closeFingers() : void
++moveToStartPosition( hasFingersClosed : bool ) : void</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>680</x>
-      <y>590</y>
-      <w>430</w>
-      <h>110</h>
+      <x>770</x>
+      <y>750</y>
+      <w>510</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>DirectoryBasedDataProvider
 --
+-directory : string
+-positions : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
 --
 +DirectoryBasedDataProvider( directory : string )
-#loadImages()</panel_attributes>
+-loadPositions()
+-loadImages( type : string, position : Vec3f, flags : int ) : vector&lt;Mat&gt;
+-checkPosition( position : Vec3f ) : Vec3f</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>580</x>
-      <y>370</y>
-      <w>280</w>
-      <h>100</h>
+      <x>550</x>
+      <y>470</y>
+      <w>320</w>
+      <h>180</h>
     </coordinates>
-    <panel_attributes>MockVisionArm
+    <panel_attributes>TestdataMock
 --
--position : Vec3f
---</panel_attributes>
+-positions : vector&lt; pair&lt;Vec3f, Vec3f&gt; &gt;
+-availPosCount : int
+-posIndex : index
+-currPosition : pair&lt;Vec3f, Vec3f&gt;
+-imgIndex : int
+-currDepthImages : vector&lt;Mat&gt;
+-currRgbImages : vector&lt;Mat&gt;
+--
++TestdataMock( provider : DataProvider )
+-checkInitialized() : void</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>490</x>
-      <y>290</y>
-      <w>260</w>
-      <h>100</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>10.0;10.0;240.0;80.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>720</x>
-      <y>310</y>
-      <w>90</w>
-      <h>80</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>70.0;10.0;10.0;60.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLNote</id>
-    <coordinates>
-      <x>950</x>
-      <y>390</y>
-      <w>330</w>
+      <x>550</x>
+      <y>330</y>
+      <w>180</w>
       <h>160</h>
     </coordinates>
-    <panel_attributes>* Throw exceptions when using any method
-except for moveTo and getPosition
-
-* when moveTo is called check for existence
-of the given point and set it as current
-position
-
-* when getPosition is called return according
-"actual" point
-
-bg=orange</panel_attributes>
-    <additional_attributes/>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;160.0;140.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>510</x>
-      <y>590</y>
+      <x>700</x>
+      <y>330</y>
+      <w>180</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>160.0;10.0;10.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>750</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -140,8 +136,8 @@ bg=orange</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>240</x>
-      <y>280</y>
+      <x>360</x>
+      <y>270</y>
       <w>260</w>
       <h>70</h>
     </coordinates>
@@ -154,55 +150,25 @@ CalibrationPointGenerator
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>560</x>
-      <y>220</y>
-      <w>190</w>
-      <h>170</h>
+      <x>700</x>
+      <y>250</y>
+      <w>30</w>
+      <h>240</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;.</panel_attributes>
-    <additional_attributes>10.0;10.0;170.0;150.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;220.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>320</x>
-      <y>390</y>
-      <w>280</w>
-      <h>220</h>
+      <x>410</x>
+      <y>480</y>
+      <w>160</w>
+      <h>290</h>
     </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>260.0;10.0;10.0;10.0;10.0;200.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>680</x>
-      <y>730</y>
-      <w>430</w>
-      <h>130</h>
-    </coordinates>
-    <panel_attributes>MemorySavingDirectoryBasedDataProvider
---
---
-
-{innerclass
-ImageVectorProxy
---
--filenames : vector&lt;string&gt;
---
-+operator[]() : Mat
-innerclass}</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>890</x>
-      <y>690</y>
-      <w>30</w>
-      <h>60</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+r2=provider
+m2=1</panel_attributes>
+    <additional_attributes>140.0;20.0;10.0;20.0;10.0;270.0</additional_attributes>
   </element>
 </diagram>
