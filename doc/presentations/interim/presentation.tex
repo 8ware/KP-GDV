@@ -1,0 +1,79 @@
+\documentclass[
+	ddcfooter,
+	german,
+%	nototalpages,
+%	handout
+]{tudbeamer}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage[babel, german=guillemets]{csquotes}
+\usepackage{xspace}
+
+\usepackage{listings}
+
+\usepackage[style=numeric-verb, backend=bibtex]{biblatex}
+\DeclareFieldFormat{urldate}{\space\tiny[#1]}
+\addbibresource{../../references}
+
+\setbeamerfont{caption}{size=\tiny}
+
+\graphicspath{ {./graphics/} }
+
+\einrichtung{Fakultät Informatik}
+\institut{Institut für Software- und Multimediatechnik}
+\professur{Computergraphik und Visualisierung}
+
+\title{Zwischenpräsentation}
+\subtitle{KP Graphische Datenverarbeitung WS 14/15}
+\author{Felix Mai}
+\date{26. Januar 2015}
+
+\newcommand{\blankline}{\newline\space\newline}
+\newcommand{\arrow}{\ensuremath{\rightarrow}~}
+\newcommand{\thus}{\item[\arrow]}
+\newcommand{\zb}{z.\,B.\xspace}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}[t]
+	\frametitle*{Gliederung}
+	\tableofcontents
+\end{frame}
+
+
+\input{content/introduction}
+\input{content/arm}
+\input{content/vision}
+\input{content/tests}
+\input{content/outlook}
+
+\begin{frame}[t]
+	\vspace*{2.5cm}
+	\centerline{\huge{Demonstration des}}
+	\centerline{\huge{aktuellen Standes}}
+\end{frame}
+
+
+\begin{frame}[t]
+	\vspace*{2.5cm}
+	\centerline{\huge{Fragen oder Anmerkungen?}}
+\end{frame}
+
+
+\section*{References}
+
+\begin{frame}[t]
+	\frametitle*{References}
+	\renewcommand*{\bibfont}{\tiny}
+	\nocite{*}
+	\printbibliography[title=References]
+\end{frame}
+
+\end{document}
+

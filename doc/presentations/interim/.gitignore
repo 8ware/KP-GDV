@@ -1,0 +1,35 @@
+# LaTeX
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*-blx.bib
+*.nav
+*.snm
+*.aux
+*.log
+*.toc
+*.out
+*.ist
+*.idx
+*.ind
+*.ilg
+*.dvi
+*.ps
+*.synctex.gz
+*.acn
+*.acr
+*.alg
+*.glg
+*.*-glg
+*.glo
+*.*-glo
+*.gls
+*.*-gls
+* slg
+* syi
+*.syg
+*.lof
+*.lot
+*.lol
+presentation.pdf
