@@ -58,7 +58,7 @@ namespace kinjo
 			 * Filters a point list for outliers.
 			 **/
 			static std::vector<cv::Vec3f> filterPointList(
-				std::vector<cv::Vec3f> vv3fVisionPositions,
+				std::vector<cv::Vec3f> & vv3fVisionPositions,
 				float fInlierDistanceMm);
 
 			/**

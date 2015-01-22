@@ -174,7 +174,7 @@ namespace kinjo
 		 * Filter by iteratively removing the point that is outside the limit and is farthest away.
 		 **/
 		std::vector<cv::Vec3f> Calibrator::filterPointList(
-			std::vector<cv::Vec3f> vv3fVisionPositions,
+			std::vector<cv::Vec3f> & vv3fVisionPositions,
 			float fInlierDistanceMm)
 		{
 			std::cout << "Calib:: #points before filtering: " << vv3fVisionPositions.size() << std::endl;
