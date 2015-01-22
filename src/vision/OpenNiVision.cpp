@@ -78,7 +78,7 @@ namespace kinjo {
 				static_cast<float>(v3fRealPoint.Y),
 				(v3fRealPoint.Z==0.0f)
 					? 0.0f 
-					: (static_cast<float>(v3fRealPoint.Z)/10.0f));
+					: static_cast<float>(v3fRealPoint.Z));
 		}
 
 		void OpenNiVision::checkStatus(
