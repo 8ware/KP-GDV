@@ -1,0 +1,60 @@
+[
+    {
+        "title": "other",
+        "properties": {
+            "pi": "3.14159265358979323846f"
+        }
+    },
+
+    {
+        "title": "JacoArm",
+        "properties": {
+            "fingers closed X": 0,
+            "fingers closed Y": 0,
+            "fingers closed Z": 0,
+
+            "fingers open X": 55,
+            "fingers open Y": 55,
+            "fingers open Z": 55
+        }
+    },
+
+    {
+        "title": "MockArm",
+        "properties": {
+            "offset position": 0.1,
+            "offset rotation": 0.2,
+            "offset fingers": 10,
+            "initial position X": 0.050,
+            "initial position Y": 0.050,
+            "initial position Z": 0.050,
+            "initial rotation X": 1,
+            "initial rotation Y": 1,
+            "initial rotation Z": 1,
+            "initial fingerpos X": 0,
+            "initial fingerpos Y": 0,
+            "initial fingerpos Z": 0
+        }
+    },
+
+    {
+        "title": "calibration",
+        "properties": {
+
+        }
+    },
+
+    {
+        "title": "recognition",
+        "properties": {
+
+        }
+    },
+
+    {
+        "title": "vision",
+        "properties": {
+
+        }
+    }
+]
