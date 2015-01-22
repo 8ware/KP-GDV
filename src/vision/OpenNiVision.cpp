@@ -66,7 +66,10 @@ namespace kinjo {
 		{
 			// Look up the depth at this position.
 			std::uint16_t const uiDepth(getDepth().at<std::uint16_t>(v2iPointPx.y, v2iPointPx.x));
-			XnPoint3D const v3fProjectivePoint {v2iPointPx.x, v2iPointPx.y, uiDepth};
+			XnPoint3D const v3fProjectivePoint{
+				static_cast<XnFloat>(v2iPointPx.x), 
+				static_cast<XnFloat>(v2iPointPx.y), 
+				static_cast<XnFloat>(uiDepth)};
 			XnPoint3D v3fRealPoint;
 			depthGenerator.ConvertProjectiveToRealWorld(1, &v3fProjectivePoint, &v3fRealPoint);
 

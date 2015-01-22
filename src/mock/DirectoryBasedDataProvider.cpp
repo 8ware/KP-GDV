@@ -1,4 +1,4 @@
-
+#ifndef _MSC_VER
 #include <kinjo/mock/DirectoryBasedDataProvider.hpp>
 
 #include <iostream>
@@ -126,4 +126,4 @@ cv::Vec3f DirectoryBasedDataProvider::checkPosition(cv::Vec3f expected) const {
 
 } // end namespace mock
 } // end namespace kinjo
-
+#endif

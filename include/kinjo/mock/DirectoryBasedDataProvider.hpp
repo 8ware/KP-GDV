@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef _MSC_VER
 #include <kinjo/mock/DataProvider.hpp>
 
 
@@ -80,4 +80,4 @@ private:
 
 } // end namespace mock
 } // end namespace kinjo
-
+#endif
