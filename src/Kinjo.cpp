@@ -208,8 +208,11 @@ int run(kinjo::arm::Arm* arm, kinjo::vision::Vision* vision,
 #endif
 
 		// Scale the depth image to use the whole 16-bit and make it more visible.
+		// This value seems not to be correct...
+		//float const fMaxVisionDepthValue(static_cast<float>(vision->getMaxDepthValue()));
+		float const fMaxVisionDepthValue(4000.0f);
 		float const fImageValueScale(
-			static_cast<float>(std::numeric_limits<std::uint16_t>::max())/static_cast<float>(vision->getMaxDepthValue()));
+			static_cast<float>(std::numeric_limits<std::uint16_t>::max())/fMaxVisionDepthValue);
 		cv::imshow(g_sWindowTitleDepth, matDepth * fImageValueScale);
 		cv::imshow(g_sWindowTitleColor, matRgb);
 
@@ -234,6 +237,8 @@ int main(int argc, char* argv[])
 #ifndef KINJO_NO_ARM
 			// Initialize the arm.
 			std::shared_ptr<kinjo::arm::Arm> arm(kinjo::arm::ArmFactory::getInstance());
+#else
+			std::shared_ptr<kinjo::arm::Arm> arm(nullptr);
 #endif
 			// Create the vision.
 			std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
@@ -247,6 +252,8 @@ int main(int argc, char* argv[])
 				arm.get(),
 				vision.get(),
 				calibrationPointGenerator.get()));
+#else
+			std::shared_ptr<kinjo::calibration::Calibrator> calibrator(nullptr);
 #endif
 
 			return run(arm.get(), vision.get(), calibrator.get());
