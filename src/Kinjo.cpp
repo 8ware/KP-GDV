@@ -112,9 +112,8 @@ namespace kinjo
 				{
 					applicationState = ApplicationState::Calibration;
 
-					std::size_t const uiCalibrationPointCount(6);
+					std::size_t const uiCalibrationPointCount(8);
 					std::size_t const uiCalibrationRotationCount(3);
-					std::size_t const uiRecognitionAttemptCount(5);
 
 					// Move arm to its start position.
 					arm->moveToStartPosition(true);
@@ -122,8 +121,7 @@ namespace kinjo
 					// Start the calibration thread.
 					calibrator->calibrateAsync(
 						uiCalibrationPointCount,
-						uiCalibrationRotationCount,
-						uiRecognitionAttemptCount);
+						uiCalibrationRotationCount);
 				}
 			}
 
@@ -255,57 +253,54 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		std::shared_ptr<kinjo::arm::Arm> arm;
+		std::shared_ptr<kinjo::vision::Vision> vision;
+		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator;
+		std::shared_ptr<kinjo::calibration::Calibrator> calibrator;
+
 		std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>());
 		//std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ManualRecognizer>());
-
+		
+#ifndef _MSC_VER
+		std::shared_ptr<kinjo::mock::DirectoryBasedDataProvider> dataProvider;
+#endif
 		if (argc < 2) {
 
 #ifndef KINJO_NO_ARM
-			// Initialize the arm.
-			std::shared_ptr<kinjo::arm::Arm> arm(kinjo::arm::ArmFactory::getInstance());
-#else
-			std::shared_ptr<kinjo::arm::Arm> arm(nullptr);
+			arm = kinjo::arm::ArmFactory::getInstance();
 #endif
-			// Create the vision.
-			std::shared_ptr<kinjo::vision::Vision> vision(std::make_shared<kinjo::vision::OpenNiVision>());
+			vision = std::make_shared<kinjo::vision::OpenNiVision>();
 
 #ifndef KINJO_NO_ARM
-			// Create the calibration point generator.
-			std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator(std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>());
-
-			// Create the calibrator.
-			std::shared_ptr<kinjo::calibration::Calibrator> calibrator(std::make_shared<kinjo::calibration::Calibrator>(
-				arm.get(),
-				vision.get(),
-				recognizer.get(),
-				calibrationPointGenerator.get()));
-#else
-			std::shared_ptr<kinjo::calibration::Calibrator> calibrator(nullptr);
+			calibrationPointGenerator = std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>();
 #endif
-
-			return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get());
 		} else {
 #ifndef _MSC_VER
 			std::string directory = argv[1];
-			kinjo::mock::DirectoryBasedDataProvider provider(directory);
+			dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(directory);
 
-			kinjo::mock::TestdataMock mock(&provider);
+			std::shared_ptr<kinjo::mock::TestdataMock>  = 
+				std::make_shared<kinjo::mock::TestdataMock> mock(dataProvider.get());
 
-			kinjo::arm::Arm *arm = &mock;
-			kinjo::vision::Vision *vision = &mock;
-			kinjo::calibration::CalibrationPointGenerator *generator = &mock;
+			arm = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
+			vision = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
+			calibrationPointGenerator = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
 
-			cv::Vec3f position = generator->getNextCalibrationPoint();
+			cv::Vec3f position = calibrationPointGenerator->getNextCalibrationPoint();
 			arm->moveTo(position);
 
-			std::shared_ptr<kinjo::calibration::Calibrator> calibrator
-				= std::make_shared<kinjo::calibration::Calibrator>(arm, vision, generator);
-
-			return kinjo::run(arm, vision, calibrator.get(), recognizer.get());
 #else
 			throw std::logic_error("DirectoryBasedDataProvider not supported on windows!");
 #endif
 		}
+
+		calibrator = std::make_shared<kinjo::calibration::Calibrator>(
+			arm.get(),
+			vision.get(),
+			recognizer.get(),
+			calibrationPointGenerator.get());
+		
+		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get());
 	}
 	catch (std::exception const & e)
 	{

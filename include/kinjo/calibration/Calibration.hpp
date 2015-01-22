@@ -51,13 +51,12 @@ namespace kinjo
              **/
             void calibrateAsync(
                 std::size_t const uiCalibrationPointCount, 
-				std::size_t const uiCalibrationRotationCount,
-				std::size_t const uiRecognitionAttemptCount);
+				std::size_t const uiCalibrationRotationCount);
 
 			/**
 			 * Filters a point list for outliers.
 			 **/
-			static std::vector<cv::Vec3f> filterPointList(
+			static void filterPointList(
 				std::vector<cv::Vec3f> & vv3fVisionPositions,
 				float fInlierDistanceMm);
 
@@ -80,16 +79,14 @@ namespace kinjo
 			 **/
 			void calibrationThreadMain(
 				std::size_t const uiCalibrationPointCount,
-				std::size_t const uiCalibrationRotationCount,
-				std::size_t const uiRecognitionAttemptCount);
+				std::size_t const uiCalibrationRotationCount);
 
             /**
              * \return The averaged position of the calibration object in the vision over multiple frames/rotations.
 			 *		   The vector is zero if it was not recognized.
              **/
             cv::Vec3f getAveragedCalibrationObjectVisionPosition(
-				std::size_t const uiCalibrationRotationCount,
-				std::size_t const uiRecognitionAttemptCount) const;
+				std::size_t const uiCalibrationRotationCount) const;
 
 		private:
 			std::thread m_Thread;

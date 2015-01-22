@@ -51,15 +51,13 @@ namespace kinjo
 		 **/
 		void Calibrator::calibrateAsync(
 			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount,
-			std::size_t const uiRecognitionAttemptCount)
+			std::size_t const uiCalibrationRotationCount)
 		{
 			m_Thread = std::thread(
 				&Calibrator::calibrationThreadMain,
 				this, 
 				uiCalibrationPointCount,
-				uiCalibrationRotationCount,
-				uiRecognitionAttemptCount);
+				uiCalibrationRotationCount);
 			m_Thread.detach();
 		}
         /**
@@ -67,10 +65,9 @@ namespace kinjo
          **/
         void Calibrator::calibrationThreadMain(
 			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount,
-			std::size_t const uiRecognitionAttemptCount)
+			std::size_t const uiCalibrationRotationCount)
 		{
-			std::cout << "Calib:: Begin calibration..." << std::endl;
+			std::cout << "Calib: Begin calibration..." << std::endl;
 
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> m_vCorrespondences;
 			m_vCorrespondences.reserve(uiCalibrationPointCount);
@@ -78,21 +75,20 @@ namespace kinjo
             // Get the point correspondences.
 			for(std::size_t uiCalibrationPoint(0); uiCalibrationPoint<uiCalibrationPointCount; ++uiCalibrationPoint)
 			{
-				std::cout << "Calib:: uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
+				std::cout << "Calib: uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
 
 				cv::Vec3f v3fAveragedVisionPosition(0.0f, 0.0f, 0.0f);
 				do
 				{
 					auto const v3fArmDesiredPosition(m_pCalibrationPointGenerator->getNextCalibrationPoint());
-					std::cout << "Calib:: v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
+					std::cout << "Calib: v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
 					m_pArm->moveTo(v3fArmDesiredPosition);
-					std::cout << "Calib:: reached psotition: " << m_pArm->getPosition() << std::endl;
+					std::cout << "Calib: reached psotition: " << m_pArm->getPosition() << std::endl;
 					// \TODO: Maybe we should check if the position was approximately reached and retry else.
 
 					v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition(
-						uiCalibrationRotationCount,
-						uiRecognitionAttemptCount);
-					std::cout << "Calib:: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
+						uiCalibrationRotationCount);
+					std::cout << "Calib: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
 				}
 				// If the object was not recognized, retry.
 				while(v3fAveragedVisionPosition[2] == 0.0f);
@@ -107,56 +103,56 @@ namespace kinjo
 			m_matCurrentRigidBodyTransformation = estimateRigidBodyTransformation(m_vCorrespondences);
 			m_bCalibrationAvailable = true;
 
-			std::cout << "Calib:: Finished calibration..." << std::endl;
+			std::cout << "Calib: Finished calibration..." << std::endl;
         }
         /**
          *
          **/
         cv::Vec3f Calibrator::getAveragedCalibrationObjectVisionPosition(
-			std::size_t const uiCalibrationRotationCount,
-			std::size_t const uiRecognitionAttemptCount) const
+			std::size_t const uiCalibrationRotationCount) const
 		{
-			std::cout << "Calib:: [+] getAveragedCalibrationObjectVisionPosition" << std::endl;
+			std::cout << "Calib: [+] getAveragedCalibrationObjectVisionPosition" << std::endl;
 
 			std::vector<cv::Vec3f> vv3fVisionPositions;
 
             // Multiple hand rotations at same position to prevent occultation.
-			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount; ++uiCalibrationRotation)
+			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount+1; ++uiCalibrationRotation)
             {
-                // Rotate the hand.
-				auto const fPi(std::atan2(0, -1));
-				// +1 to not reach the initial position again.
-				auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(uiCalibrationRotationCount+1)));
-				m_pArm->rotateHandBy(fRotationAngle);
-
 				// Multiple recognition attempts at the same position/rotation.
-				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttemptCount; ++uiRecognitionAttempt)
+				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<m_pRecognizer->getRecommendedRecognitionAttempCount(); ++uiRecognitionAttempt)
 				{
-					std::cout << "Calib:: uiRecognitionAttempt: " << uiRecognitionAttempt << std::endl;
+					std::cout << "Calib: uiRecognitionAttempt: " << uiRecognitionAttempt << std::endl;
 					// We need new images.
 					m_pVision->updateImages(true);
 					// Get current calibration object vision position.
-					auto const v2iPointPx(
+					auto const v2iImagePointPx(
 						m_pRecognizer->estimateCalibrationObjectImagePointPx(
 							m_pVision->getRgb()));
 
 					// If this is a valid point.
-					if(v2iPointPx != cv::Point(0,0))
+					if(v2iImagePointPx != cv::Point(0,0))
 					{
-						std::cout << "Calib:: Found at image point: (" << v2iPointPx.x << "," << v2iPointPx.y << ")" << std::endl;
-						// Accumulate the positions for averaging.
-						cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimateVisionPositionFromImagePointPx(
-							v2iPointPx));
+						std::cout << "Calib: v2iImagePointPx: (" << v2iImagePointPx.x << "," << v2iImagePointPx.y << ")" << std::endl;
+						cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimateVisionPositionFromImagePointPx(v2iImagePointPx));
 						vv3fVisionPositions.push_back(v3fEstimatedVisionPosition);
-						std::cout << "Calib:: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
+						std::cout << "Calib: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
 					}
+				}
+
+				if(uiCalibrationRotation<(uiCalibrationRotationCount-1))
+				{
+					// Rotate the hand.
+					auto const fPi(std::atan2(0, -1));
+					// +1 to not reach the initial position again.
+					auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(uiCalibrationRotationCount+1)));
+					m_pArm->rotateHandBy(fRotationAngle);
 				}
             }
 
 			if(vv3fVisionPositions.size()==0)
 			{
 				// If the object could not be recognized (maybe too far away or out of image, return a zero vector)
-				std::cout << "Calib:: No calibration object found..." << std::endl;
+				std::cout << "Calib: No calibration object found..." << std::endl;
 			}
 			else
 			{
@@ -166,18 +162,18 @@ namespace kinjo
 					100.0f);
 			}
 
-			std::cout << "Calib:: [-] getAveragedCalibrationObjectVisionPosition" << std::endl;
+			std::cout << "Calib: [-] getAveragedCalibrationObjectVisionPosition" << std::endl;
 
 			return average(vv3fVisionPositions);
 		}
 		/**
 		 * Filter by iteratively removing the point that is outside the limit and is farthest away.
 		 **/
-		std::vector<cv::Vec3f> Calibrator::filterPointList(
+		void Calibrator::filterPointList(
 			std::vector<cv::Vec3f> & vv3fVisionPositions,
 			float fInlierDistanceMm)
 		{
-			std::cout << "Calib:: #points before filtering: " << vv3fVisionPositions.size() << std::endl;
+			std::cout << "Calib: #points before filtering: " << vv3fVisionPositions.size() << std::endl;
 
 			while(vv3fVisionPositions.size()>1)
 			{
@@ -212,9 +208,7 @@ namespace kinjo
 				}
 			}
 
-			std::cout << "Calib:: #points after filtering: " << vv3fVisionPositions.size() << std::endl;
-
-			return vv3fVisionPositions;
+			std::cout << "Calib: #points after filtering: " << vv3fVisionPositions.size() << std::endl;
 		}
 		/**
 		 *
@@ -244,7 +238,7 @@ namespace kinjo
 		cv::Matx44f Calibrator::estimateRigidBodyTransformation(
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
 		{
-			std::cout << "Calib:: [+] estimateRigidBodyTransformation" << std::endl;
+			std::cout << "Calib: [+] estimateRigidBodyTransformation" << std::endl;
 
 			std::size_t const uiCorrespondenceCount(vv2v3fCorrespondences.size());
 			if(uiCorrespondenceCount < 3)
@@ -305,7 +299,7 @@ namespace kinjo
 			// Compute the translation vector.
 			cv::Vec3f const t(v3CenterLeft - R * v3CenterRight);
 
-			std::cout << "Calib:: [-] estimateRigidBodyTransformation" << std::endl;
+			std::cout << "Calib: [-] estimateRigidBodyTransformation" << std::endl;
 
 			return cv::Matx44f{
 				R(0, 0), R(0, 1), R(0, 2), t(0),

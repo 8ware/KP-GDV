@@ -34,9 +34,16 @@ namespace kinjo
 			return m_v2iClickPosPx;
 		}
 		/**
+		 * 
+		 **/
+		std::size_t ManualRecognizer::getRecommendedRecognitionAttempCount() const
+		{
+			return 1;
+		}
+		/**
 		 *
 		 **/
-		void ManualRecognizer::mouseCallback(int event, int x, int y, int flags, void * param)
+		void ManualRecognizer::mouseCallback(int event, int x, int y, int , void * param)
 		{
 			ManualRecognizer * this_ = static_cast<ManualRecognizer*>(param);
 

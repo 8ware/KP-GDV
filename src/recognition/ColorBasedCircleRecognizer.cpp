@@ -206,5 +206,12 @@ namespace kinjo
 				return std::make_pair(cv::Point(0, 0), 0.0f);
 			}
         }
+		/**
+		 * 
+		 **/
+		std::size_t ColorBasedCircleRecognizer::getRecommendedRecognitionAttempCount() const
+		{
+			return 3;
+		}
     }
 }

@@ -19,6 +19,11 @@ namespace kinjo
 			 **/
 			virtual cv::Point estimateCalibrationObjectImagePointPx(
 				cv::Mat const & matRgb) const override;
+			
+			/**
+			 * \return The number of recognition attempts that should be made.
+			 **/
+			virtual std::size_t getRecommendedRecognitionAttempCount() const override;
 
 		private:
 			/**

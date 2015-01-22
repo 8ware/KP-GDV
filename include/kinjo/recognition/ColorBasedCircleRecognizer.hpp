@@ -20,6 +20,11 @@ namespace kinjo
 			 **/
 			std::pair<cv::Point, float> estimateCalibrationObjectImagePointPxAndRadius(
 				cv::Mat const & matRgb) const;
+			
+			/**
+			 * \return The number of recognition attempts that should be made.
+			 **/
+			virtual std::size_t getRecommendedRecognitionAttempCount() const override;
 		};
 	}
 }
