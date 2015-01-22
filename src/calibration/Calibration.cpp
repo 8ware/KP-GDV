@@ -1,6 +1,6 @@
 #include <kinjo/calibration/Calibration.hpp>
 
-#include <kinjo/recognition/Recognition.hpp>
+#include <kinjo/recognition/Recognizer.hpp>
 
 #include <vector>
 #include <iostream>
@@ -16,11 +16,13 @@ namespace kinjo
         Calibrator::Calibrator(
             arm::Arm * const pArm, 
 			vision::Vision * const pVision,
+			recognition::Recognizer const * const pRecognizer,
 			CalibrationPointGenerator * const pCalibrationPointGenerator) :
             m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
             m_bCalibrationAvailable(false),
             m_pArm(pArm),
             m_pVision(pVision),
+			m_pRecognizer(pRecognizer),
 			m_pCalibrationPointGenerator(pCalibrationPointGenerator)
 		{}
 		/**
@@ -93,7 +95,7 @@ namespace kinjo
 					std::cout << "Calib:: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
 				}
 				// If the object was not recognized, retry.
-				while(v3fAveragedVisionPosition == cv::Vec3f(0.0f, 0.0f, 0.0f));
+				while(v3fAveragedVisionPosition[2] == 0.0f);
 
 				// Get the final position the arm haltet at and store it with the estimated calibration object vision position.
 				m_vCorrespondences.push_back(std::make_pair(
@@ -134,19 +136,17 @@ namespace kinjo
 					// We need new images.
 					m_pVision->updateImages(true);
 					// Get current calibration object vision position.
-					std::pair<cv::Vec2f, float> const calib(
-						recognition::estimateCalibrationObjectImagePointPx(
+					auto const v2iPointPx(
+						m_pRecognizer->estimateCalibrationObjectImagePointPx(
 							m_pVision->getRgb()));
 
 					// If this is a valid point.
-					if(calib.second != 0.0f)
+					if(v2iPointPx != cv::Point(0,0))
 					{
-						std::cout << "Calib:: Found at image point: (" << calib.first[0u] << "," << calib.first[1u] << ")" << std::endl;
+						std::cout << "Calib:: Found at image point: (" << v2iPointPx.x << "," << v2iPointPx.y << ")" << std::endl;
 						// Accumulate the positions for averaging.
 						cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimateVisionPositionFromImagePointPx(
-							cv::Point(
-								static_cast<int>(calib.first[0u]),
-								static_cast<int>(calib.first[1u]))));
+							v2iPointPx));
 						vv3fVisionPositions.push_back(v3fEstimatedVisionPosition);
 						std::cout << "Calib:: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
 					}
@@ -181,25 +181,24 @@ namespace kinjo
 
 			while(vv3fVisionPositions.size()>1)
 			{
-				// std::map automatically sorts by the key.
-				std::map<float, cv::Vec3f> mfv3fPositionDistances;
-
 				// Calculate the average.
 				cv::Vec3f const v3fAverage(average(vv3fVisionPositions));
 
+				// std::map automatically sorts by the key.
+				std::map<float, cv::Vec3f> mfv3fPositionDistances;
 				// Fill a map with the points sorted by distance.
 				for(auto const & v3fVisionPosition : vv3fVisionPositions)
 				{
 					mfv3fPositionDistances[static_cast<float>(norm(v3fVisionPosition-v3fAverage))] = v3fVisionPosition;
 				}
 
-				// Remove the last point ...
+				// Remove the last point if it is too far away ...
 				auto const itLastPoint(std::prev(mfv3fPositionDistances.end()));
 				if(itLastPoint->first > fInlierDistanceMm)
 				{
 					mfv3fPositionDistances.erase(itLastPoint);
 				}
-				// ... or finish if no point is outside.
+				// ... or finish if no more points are outside.
 				else
 				{
 					break;

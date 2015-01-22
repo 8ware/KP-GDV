@@ -2,6 +2,7 @@
 
 #include <kinjo/arm/Arm.hpp>
 #include <kinjo/vision/Vision.hpp>
+#include <kinjo/recognition/Recognizer.hpp>
 #include <kinjo/calibration/CalibrationPointGenerator.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
@@ -23,7 +24,8 @@ namespace kinjo
              **/
             Calibrator(
                 arm::Arm * const pArm, 
-                vision::Vision * const pVision,
+				vision::Vision * const pVision,
+				recognition::Recognizer const * const pRecognizer,
 				CalibrationPointGenerator * const pCalibrationPointGenerator);
 
 			/**
@@ -97,7 +99,8 @@ namespace kinjo
             bool m_bCalibrationAvailable;
 
 			arm::Arm * const m_pArm;
-            vision::Vision * const m_pVision;
+			vision::Vision * const m_pVision; 
+			recognition::Recognizer const * const m_pRecognizer;
 			CalibrationPointGenerator * const m_pCalibrationPointGenerator;
         };
     

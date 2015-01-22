@@ -1,32 +1,48 @@
-#include <kinjo/calibration/Calibration.hpp>
+#include <kinjo/recognition/ColorBasedCircleRecognizer.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <vector>		// std::vector
 #include <cstdint>		// std::uint16_t
 
-#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
 //#define KINJO_RECOGNITION_DEBUG
 //#define KINJO_RECOGNITION_TWEAK_WINDOW
 
+#if defined(KINJO_RECOGNITION_DEBUG) || defined(KINJO_RECOGNITION_TWEAK_WINDOW)
+	#include <opencv2/highgui/highgui.hpp>
+#endif
+
 namespace kinjo
 {
     namespace recognition
 	{
+
+		/**
+		 * 
+		 **/
+		cv::Point ColorBasedCircleRecognizer::estimateCalibrationObjectImagePointPx(
+			cv::Mat const & matRgb) const
+		{
+			auto const calibrationObjectPositionPx(estimateCalibrationObjectImagePointPxAndRadius(matRgb));
+
+			return calibrationObjectPositionPx.first;
+		}
         /**
-        * Algorithm adapted from: http://wiki.elphel.com/index.php?title=OpenCV_Tennis_balls_recognizing_tutorial
-		*
-		* Step 1: Convert RGB -> HSV for better masking in step 2.
-		* Step 2: Mask objects with the expected color to get only the calibration object.
-		* Step 3: Morphological operations on mask to remove some occluders.
-		* Step 4: Blur for better circle detection.
-		* Step 5: Circle detection via Hough transform.
-		* Step 6: Look up the circles vision position.
-		* 
-		* \return	The position of the calibration object in pixels and the circle radius.
-        **/
-		std::pair<cv::Vec2f, float> estimateCalibrationObjectImagePointPx(
-			cv::Mat const & matRgb)
+         * Algorithm adapted from: http://wiki.elphel.com/index.php?title=OpenCV_Tennis_balls_recognizing_tutorial
+		 *
+		 * Step 1: Convert RGB -> HSV for better masking in step 2.
+		 * Step 2: Mask objects with the expected color to get only the calibration object.
+		 * Step 3: Morphological operations on mask to remove some occluders.
+		 * Step 4: Blur for better circle detection.
+		 * Step 5: Circle detection via Hough transform.
+		 * Step 6: Look up the circles vision position.
+		 * 
+		 * \return	The position of the calibration object in pixels and the circle radius.
+         **/
+		std::pair<cv::Point, float> ColorBasedCircleRecognizer::estimateCalibrationObjectImagePointPxAndRadius(
+			cv::Mat const & matRgb) const
 		{
 			static int iMorphSizeDilatePx(4);
 			static int iMorphSizeErodePx(8);
@@ -179,11 +195,15 @@ namespace kinjo
 				// 6: Just take the first circle because they are sorted by confidence.
 				cv::Vec3f const v3fCircle(vv3fCircles[0u]);
 
-				return std::make_pair(cv::Vec2f(v3fCircle[0u], v3fCircle[1u]), v3fCircle[2]);
+				cv::Point const v2iCenter(
+					cvRound(v3fCircle[0]),
+					cvRound(v3fCircle[1]));
+
+				return std::make_pair(v2iCenter, v3fCircle[2]);
 			}
 			else
 			{
-				return std::make_pair(cv::Vec2f(0.0f, 0.0f), 0.0f);
+				return std::make_pair(cv::Point(0, 0), 0.0f);
 			}
         }
     }
