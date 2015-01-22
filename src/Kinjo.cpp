@@ -16,6 +16,8 @@
 #include <kinjo/mock/DirectoryBasedDataProvider.hpp>
 #include <kinjo/mock/TestdataMock.hpp>
 #endif
+// must be explicitly included in Linux
+#include <opencv2/core/affine.hpp>		// cv::Mat44f * cv::Vec3f
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
