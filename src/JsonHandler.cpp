@@ -2,10 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <kinjo/JsonHandler.hpp>
-#include <rapidjson\rapidjson.h>
+#include <stdexcept>
 
-JsonHandler::JsonHandler(const std::string& filename)
+#include <rapidjson/rapidjson.h>
+
+#include <kinjo/JsonHandler.hpp>
+
+JsonHandler::JsonHandler(std::string const & filename)
 	{
 		std::stringstream ss;
 		std::ifstream ifs;
@@ -17,7 +20,7 @@ JsonHandler::JsonHandler(const std::string& filename)
 			throw std::invalid_argument("json parse error");
 	}
 
-float JsonHandler::getAttribute(std::string& section, std::string& attribute){
+float JsonHandler::getAttribute(std::string const & section, std::string const & attribute){
 	std::cout << "section: " << section <<", attribute: " << attribute << "\n";
 	std::string tempA = "";
 	std::string tempB = "";

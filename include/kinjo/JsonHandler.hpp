@@ -10,11 +10,11 @@
 		rapidjson::Document doc_;
 
 	public:
-		JsonHandler(const std::string& json);
+		JsonHandler(std::string const & json);
 	
 		/*
 		returns value of a specific attribute
 		*/
-		float getAttribute(std::string& const section, std::string& const attribute);
+		float getAttribute(std::string const & section, std::string const & attribute);
 	
 		};
