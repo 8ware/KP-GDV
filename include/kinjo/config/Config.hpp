@@ -3,14 +3,14 @@
 
 #include <rapidjson/document.h>
 
-	class JsonHandler final
+	class Config final
 	{
 
 	private:
 		rapidjson::Document doc_;
 
 	public:
-		JsonHandler(const std::string& json);
+		Config(const std::string& json);
 	
 		/*
 		returns value of a specific attribute

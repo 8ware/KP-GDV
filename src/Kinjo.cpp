@@ -10,6 +10,7 @@
 #include <kinjo/arm/ArmFactory.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/Calibration.hpp>
+#include <kinjo/Config/Config.hpp>
 #include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 #include <kinjo/recognition/ColorBasedCircleRecognizer.hpp>
 #include <kinjo/recognition/ManualRecognizer.hpp>
@@ -257,7 +258,10 @@ int main(int argc, char* argv[])
 		std::shared_ptr<kinjo::vision::Vision> vision;
 		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator;
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator;
-
+		
+		//exception if config.json not in built project folder
+		Config h("config.json");
+		
 		std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>());
 		//std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ManualRecognizer>());
 		
