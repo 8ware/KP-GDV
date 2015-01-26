@@ -279,12 +279,12 @@ int main(int argc, char* argv[])
 			std::string directory = argv[1];
 			dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(directory);
 
-			std::shared_ptr<kinjo::mock::TestdataMock>  = 
-				std::make_shared<kinjo::mock::TestdataMock> mock(dataProvider.get());
+			std::shared_ptr<kinjo::mock::TestdataMock> mock = 
+				std::make_shared<kinjo::mock::TestdataMock>(dataProvider.get());
 
 			arm = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
-			vision = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
-			calibrationPointGenerator = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
+			vision = std::dynamic_pointer_cast<kinjo::vision::Vision>(mock);
+			calibrationPointGenerator = std::dynamic_pointer_cast<kinjo::calibration::CalibrationPointGenerator>(mock);
 
 			cv::Vec3f position = calibrationPointGenerator->getNextCalibrationPoint();
 			arm->moveTo(position);
