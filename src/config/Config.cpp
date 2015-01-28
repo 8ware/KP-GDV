@@ -13,13 +13,13 @@ Config::Config(const std::string& filename)
 		ss << ifs.rdbuf();
 		ifs.close();
 
-		if (doc_.Parse<0>(ss.str().c_str()).HasParseError())
+		if (doc.Parse<0>(ss.str().c_str()).HasParseError())
 			throw std::invalid_argument("json parse error");
 	}
 
-float Config::getAttribute(std::string& section, std::string& attribute){
-	rapidjson::Value::ConstMemberIterator itr = doc_.FindMember(section.c_str());
-	if (itr != doc_.MemberEnd()){
+float Config::getAttribute(std::string section, std::string attribute){
+	rapidjson::Value::ConstMemberIterator itr = doc.FindMember(section.c_str());
+	if (itr != doc.MemberEnd()){
 		rapidjson::Value::ConstMemberIterator it = itr->value.FindMember(attribute.c_str());
 		if (it != itr->value.MemberEnd()){
 			std::cout << it->name.GetString();

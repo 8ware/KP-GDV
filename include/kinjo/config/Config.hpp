@@ -1,5 +1,4 @@
 #include <string>
-#include <vector>
 
 #include <rapidjson/document.h>
 
@@ -7,7 +6,7 @@
 	{
 
 	private:
-		rapidjson::Document doc_;
+		rapidjson::Document doc;
 
 	public:
 		Config(const std::string& json);
@@ -15,6 +14,6 @@
 		/*
 		returns value of a specific attribute
 		*/
-		float getAttribute(std::string& const section, std::string& const attribute);
+		float getAttribute(std::string const section, std::string const attribute);
 	
 		};
