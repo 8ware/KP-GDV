@@ -65,13 +65,13 @@ namespace kinjo {
 				break;
 			case 2:
 				// 2 endpoint in a deadzone
-				printf("Endpoint is in deadzone");
+				printf("Endpoint is in deadzone\n");
 				break;
 			case 3:
 				// 3 startpoint in a deadzone
 				break;
 			default:
-				printf("Something went terribly wrong in deadzone handling!");
+				printf("Something went terribly wrong in deadzone handling!\n");
 				break;
 			}
 
