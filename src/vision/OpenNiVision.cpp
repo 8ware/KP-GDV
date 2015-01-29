@@ -12,6 +12,7 @@ namespace kinjo {
 			checkStatus(context.Init(), "Initializing context");
 
 			checkStatus(depthGenerator.Create(context), "Creating depth generator");
+			depthGenerator.SetIntProperty("nearMode", 1u);
 
 			checkStatus(rgbGenerator.Create(context), "Creating RGB generator");
 
