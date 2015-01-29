@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="13.1">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>540</x>
+      <y>440</y>
+      <w>160</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>
+
+Grasp</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>540</x>
+      <y>320</y>
+      <w>160</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>
+
+Calibration</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>870</x>
+      <y>320</y>
+      <w>120</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>
+
+
+
+
+
+Mock</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>710</x>
+      <y>320</y>
+      <w>150</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>
+Recognition</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>710</x>
+      <y>400</y>
+      <w>150</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>
+Vision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>710</x>
+      <y>480</y>
+      <w>150</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>
+Arm</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLDeployment</id>
+    <coordinates>
+      <x>410</x>
+      <y>320</y>
+      <w>120</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>
+
+
+
+
+
+Kinjo</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

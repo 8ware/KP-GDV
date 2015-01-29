@@ -1,6 +1,50 @@
 
 \section{Kinect}
 
-\begin{frame}{Kinect}
+\begin{frame}[b]
+	\begin{figure}
+		\includegraphics[width=0.8\textwidth]{nav_vision}
+	\end{figure}
+	\vspace*{0.7cm}
+\end{frame}
+
+\begin{frame}[t]{Kinect}
+	\begin{block}{Koordinatensystem}
+		\begin{columns}[t]
+			\begin{column}{0.4\textwidth}
+				\begin{itemize}
+					\item Koordinatenursprung im Tiefensensor
+					\item Treiber liefert Angaben in Millimetern
+					\item Distanzen werden auf Kameraebene projeziert wiedergegeben
+				\end{itemize}
+			\end{column}
+			\begin{column}{0.4\textwidth}
+				\begin{figure}
+					\includegraphics[width=0.8\textwidth]{vision_coordsys}
+				\end{figure}
+			\end{column}
+		\end{columns}
+	\end{block}
+\end{frame}
+
+\begin{frame}[t]{Kinect}
+	\begin{block}{API}
+		\begin{itemize}
+			\item Auswahl zwischen Microsoft SDK, OpenKinect, Freenect und
+				OpenNI
+			\item Entscheidung für OpenNI gemäß \cite{andersen2012kdsefcva}
+			\item Umwandlung der Bilddaten in OpenCV Datenstrukturen
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}[t]{Kinect}
+	\begin{block}{Probleme und Lösungen}
+		\begin{itemize}
+			\item Umwandlung der Bilddaten teuer \arrow ?
+			\item Tiefenwerte naher Objekte werden nicht erkannt \arrow
+				Mindestabstand von 50cm (Linux) bzw. 80cm (Windows)
+		\end{itemize}
+	\end{block}
 \end{frame}
 
