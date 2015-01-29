@@ -1,12 +1,19 @@
+#pragma once
+
 #include <opencv2/core/affine.hpp>
-#include <kinjo/arm/JacoArm.hpp>
 
 namespace kinjo {
 	namespace arm {
 
 		class MovementGuard {
-
-			virtual bool LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos, float CircleRadius, JacoArm& arm) = 0;
+		public:
+			virtual void Init_Deadzones() = 0;
+			virtual void Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst) = 0;
+			virtual bool LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos) = 0;
+			virtual cv::Vec3f CalculateDetour(cv::Vec3f startPos, cv::Vec3f endPos) = 0;
+			virtual bool StartpointLegal(cv::Vec3f startPos, bool *InInnerCircle) = 0;
+			virtual bool EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) = 0;
+			virtual bool EndpointNotInTable(cv::Vec3f endPos) = 0;
 		};
 
 	}//arm
