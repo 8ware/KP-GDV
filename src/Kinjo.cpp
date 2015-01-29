@@ -9,7 +9,8 @@
 #include <kinjo/RenderHelper.hpp>
 #include <kinjo/arm/ArmFactory.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
-#include <kinjo/calibration/Calibration.hpp>
+#include <kinjo/calibration/AutomaticCalibrator.hpp>
+#include <kinjo/calibration/HardCodedCalibrator.hpp>
 #include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 #include <kinjo/recognition/ColorBasedCircleRecognizer.hpp>
 #include <kinjo/recognition/ManualRecognizer.hpp>
@@ -27,6 +28,7 @@
 #include <cstdint>		// std::uint16_t
 
 //#define KINJO_NO_ARM
+//#define KINJO_HARD_CODED_CALIBRATOR
 
 namespace kinjo
 {
@@ -112,16 +114,11 @@ namespace kinjo
 				{
 					applicationState = ApplicationState::Calibration;
 
-					std::size_t const uiCalibrationPointCount(8);
-					std::size_t const uiCalibrationRotationCount(3);
-
 					// Move arm to its start position.
 					arm->moveToStartPosition(true);
 
 					// Start the calibration thread.
-					calibrator->calibrateAsync(
-						uiCalibrationPointCount,
-						uiCalibrationRotationCount);
+					calibrator->calibrateAsync();
 				}
 			}
 
@@ -255,7 +252,9 @@ int main(int argc, char* argv[])
 	{
 		std::shared_ptr<kinjo::arm::Arm> arm;
 		std::shared_ptr<kinjo::vision::Vision> vision;
+#ifndef KINJO_HARD_CODED_CALIBRATOR
 		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator;
+#endif
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator;
 
 		std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>());
@@ -271,10 +270,15 @@ int main(int argc, char* argv[])
 #endif
 			vision = std::make_shared<kinjo::vision::OpenNiVision>();
 
-#ifndef KINJO_NO_ARM
-			calibrationPointGenerator = std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>();
+#if !defined(KINJO_NO_ARM) && !defined(KINJO_HARD_CODED_CALIBRATOR)
+			std::size_t const uiSeed(1337u);
+			calibrationPointGenerator = std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>(
+				uiSeed);
 #endif
 		} else {
+#ifdef KINJO_HARD_CODED_CALIBRATOR
+			throw std::logic_error("KINJO_HARD_CODED_CALIBRATOR is incompatible with the mock implementation!");
+#else
 #ifndef _MSC_VER
 			std::string directory = argv[1];
 			dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(directory);
@@ -292,13 +296,23 @@ int main(int argc, char* argv[])
 #else
 			throw std::logic_error("DirectoryBasedDataProvider not supported on windows!");
 #endif
+#endif
 		}
+		
+#ifdef KINJO_HARD_CODED_CALIBRATOR
+		calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>();
+#else
+		std::size_t const uiCalibrationPointCount(8);
+		std::size_t const uiCalibrationRotationCount(3);
 
-		calibrator = std::make_shared<kinjo::calibration::Calibrator>(
+		calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(
 			arm.get(),
 			vision.get(),
 			recognizer.get(),
-			calibrationPointGenerator.get());
+			calibrationPointGenerator.get(),
+			uiCalibrationPointCount,
+			uiCalibrationRotationCount);
+#endif
 		
 		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get());
 	}

@@ -15,7 +15,8 @@ namespace kinjo
 			/**
 			 * Constructor.
 			 **/
-			RandomCalibrationPointGenerator();
+			RandomCalibrationPointGenerator(
+				std::size_t const & uiSeed);
 
 			/**
 			 * \return The next calibration point.

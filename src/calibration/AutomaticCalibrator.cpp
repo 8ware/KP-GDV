@@ -1,4 +1,4 @@
-#include <kinjo/calibration/Calibration.hpp>
+#include <kinjo/calibration/AutomaticCalibrator.hpp>
 
 #include <kinjo/recognition/Recognizer.hpp>
 
@@ -13,29 +13,33 @@ namespace kinjo
         /**
          *
          **/
-        Calibrator::Calibrator(
+        AutomaticCalibrator::AutomaticCalibrator(
             arm::Arm * const pArm, 
 			vision::Vision * const pVision,
 			recognition::Recognizer const * const pRecognizer,
-			CalibrationPointGenerator * const pCalibrationPointGenerator) :
-            m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
-            m_bCalibrationAvailable(false),
-            m_pArm(pArm),
-            m_pVision(pVision),
-			m_pRecognizer(pRecognizer),
-			m_pCalibrationPointGenerator(pCalibrationPointGenerator)
+			CalibrationPointGenerator * const pCalibrationPointGenerator,
+			std::size_t const uiCalibrationPointCount,
+			std::size_t const uiCalibrationRotationCount) :
+				m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
+				m_bCalibrationAvailable(false),
+				m_pArm(pArm),
+				m_pVision(pVision),
+				m_pRecognizer(pRecognizer),
+				m_pCalibrationPointGenerator(pCalibrationPointGenerator),
+				m_uiCalibrationPointCount(uiCalibrationPointCount),
+				m_uiCalibrationRotationCount(uiCalibrationRotationCount)
 		{}
 		/**
 		 *
 		 **/
-		bool Calibrator::getIsValidTransformationAvailable() const
+		bool AutomaticCalibrator::getIsValidTransformationAvailable() const
 		{
 			return m_bCalibrationAvailable;
 		}
         /**
          *
          **/
-		cv::Matx44f Calibrator::getRigidBodyTransformation() const
+		cv::Matx44f AutomaticCalibrator::getRigidBodyTransformation() const
         {
 			if(getIsValidTransformationAvailable())
             {
@@ -49,31 +53,25 @@ namespace kinjo
 		/**
 		 *
 		 **/
-		void Calibrator::calibrateAsync(
-			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount)
+		void AutomaticCalibrator::calibrateAsync()
 		{
 			m_Thread = std::thread(
-				&Calibrator::calibrationThreadMain,
-				this, 
-				uiCalibrationPointCount,
-				uiCalibrationRotationCount);
+				&AutomaticCalibrator::calibrationThreadMain,
+				this);
 			m_Thread.detach();
 		}
         /**
          *
          **/
-        void Calibrator::calibrationThreadMain(
-			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount)
+        void AutomaticCalibrator::calibrationThreadMain()
 		{
 			std::cout << "Calib: Begin calibration..." << std::endl;
 
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> m_vCorrespondences;
-			m_vCorrespondences.reserve(uiCalibrationPointCount);
+			m_vCorrespondences.reserve(m_uiCalibrationPointCount);
 
             // Get the point correspondences.
-			for(std::size_t uiCalibrationPoint(0); uiCalibrationPoint<uiCalibrationPointCount; ++uiCalibrationPoint)
+			for(std::size_t uiCalibrationPoint(0); uiCalibrationPoint<m_uiCalibrationPointCount; ++uiCalibrationPoint)
 			{
 				std::cout << "Calib: uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
 
@@ -86,8 +84,7 @@ namespace kinjo
 					std::cout << "Calib: reached psotition: " << m_pArm->getPosition() << std::endl;
 					// \TODO: Maybe we should check if the position was approximately reached and retry else.
 
-					v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition(
-						uiCalibrationRotationCount);
+					v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition();
 					std::cout << "Calib: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
 				}
 				// If the object was not recognized, retry.
@@ -108,15 +105,14 @@ namespace kinjo
         /**
          *
          **/
-        cv::Vec3f Calibrator::getAveragedCalibrationObjectVisionPosition(
-			std::size_t const uiCalibrationRotationCount) const
+        cv::Vec3f AutomaticCalibrator::getAveragedCalibrationObjectVisionPosition() const
 		{
 			std::cout << "Calib: [+] getAveragedCalibrationObjectVisionPosition" << std::endl;
 
 			std::vector<cv::Vec3f> vv3fVisionPositions;
 
             // Multiple hand rotations at same position to prevent occultation.
-			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<uiCalibrationRotationCount+1; ++uiCalibrationRotation)
+			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<m_uiCalibrationRotationCount+1; ++uiCalibrationRotation)
             {
 				// Multiple recognition attempts at the same position/rotation.
 				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<m_pRecognizer->getRecommendedRecognitionAttempCount(); ++uiRecognitionAttempt)
@@ -139,12 +135,12 @@ namespace kinjo
 					}
 				}
 
-				if(uiCalibrationRotation<(uiCalibrationRotationCount-1))
+				if(uiCalibrationRotation<(m_uiCalibrationRotationCount-1))
 				{
 					// Rotate the hand.
 					auto const fPi(std::atan2(0, -1));
 					// +1 to not reach the initial position again.
-					auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(uiCalibrationRotationCount+1)));
+					auto const fRotationAngle((static_cast<float>(2.0*fPi)/static_cast<float>(m_uiCalibrationRotationCount+1)));
 					m_pArm->rotateHandBy(fRotationAngle);
 				}
             }
@@ -169,7 +165,7 @@ namespace kinjo
 		/**
 		 * Filter by iteratively removing the point that is outside the limit and is farthest away.
 		 **/
-		void Calibrator::filterPointList(
+		void AutomaticCalibrator::filterPointList(
 			std::vector<cv::Vec3f> & vv3fVisionPositions,
 			float fInlierDistanceMm)
 		{
@@ -213,7 +209,7 @@ namespace kinjo
 		/**
 		 *
 		 **/
-		cv::Vec3f Calibrator::average(
+		cv::Vec3f AutomaticCalibrator::average(
 			std::vector<cv::Vec3f> const & vv3fVisionPositions)
 		{
 			cv::Vec3f v3fSumVisionPositions(0.0f, 0.0f, 0.0f);
@@ -235,7 +231,7 @@ namespace kinjo
          * Implements "Least-Squares Rigid Motion Using SVD"
 		 * See: http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
          **/
-		cv::Matx44f Calibrator::estimateRigidBodyTransformation(
+		cv::Matx44f AutomaticCalibrator::estimateRigidBodyTransformation(
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
 		{
 			std::cout << "Calib: [+] estimateRigidBodyTransformation" << std::endl;

@@ -1,11 +1,11 @@
 #pragma once
 
+#include <kinjo/calibration/Calibrator.hpp>
+
 #include <kinjo/arm/Arm.hpp>
 #include <kinjo/vision/Vision.hpp>
 #include <kinjo/recognition/Recognizer.hpp>
 #include <kinjo/calibration/CalibrationPointGenerator.hpp>
-
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include <thread>
 
@@ -16,43 +16,44 @@ namespace kinjo
         /**
          * Allows calibration of arm to vision.
          **/
-        class Calibrator
+        class AutomaticCalibrator : public Calibrator
         {
 		public:
             /**
              * Constructor.
              **/
-            Calibrator(
+            AutomaticCalibrator(
                 arm::Arm * const pArm, 
 				vision::Vision * const pVision,
 				recognition::Recognizer const * const pRecognizer,
-				CalibrationPointGenerator * const pCalibrationPointGenerator);
+				CalibrationPointGenerator * const pCalibrationPointGenerator,
+                std::size_t const uiCalibrationPointCount, 
+				std::size_t const uiCalibrationRotationCount);
 
 			/**
 			 * Copy assignment operator.
 			 **/
-			Calibrator & operator=(Calibrator const &) = delete;
+			AutomaticCalibrator & operator=(AutomaticCalibrator const &) = delete;
 
 			/**
 			 * \return If there is a valid transformation available.
 			 **/
-			bool getIsValidTransformationAvailable() const;
+			virtual bool getIsValidTransformationAvailable() const override;
 
             /**
              * \return The current rigid body transformation betwween vision and arm.
              **/
-			cv::Matx44f getRigidBodyTransformation() const;
-
+			virtual cv::Matx44f getRigidBodyTransformation() const override;
+			
             /**
              * Calibrates the vision and the arm.
              * The calibration object has to be grabbed before!
 			 * This function returns immediately and performs the calibration asynchronously.
 			 * The calibration has finished when getIsValidTransformationAvailable returns true.
              **/
-            void calibrateAsync(
-                std::size_t const uiCalibrationPointCount, 
-				std::size_t const uiCalibrationRotationCount);
+            virtual void calibrateAsync() override;
 
+		private:
 			/**
 			 * Filters a point list for outliers.
 			 **/
@@ -72,21 +73,16 @@ namespace kinjo
 			static cv::Matx44f estimateRigidBodyTransformation(
 				std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences);
 
-		private:
-
 			/**
 			 * Calibrates the vision and the arm.
 			 **/
-			void calibrationThreadMain(
-				std::size_t const uiCalibrationPointCount,
-				std::size_t const uiCalibrationRotationCount);
+			void calibrationThreadMain();
 
             /**
              * \return The averaged position of the calibration object in the vision over multiple frames/rotations.
 			 *		   The vector is zero if it was not recognized.
              **/
-            cv::Vec3f getAveragedCalibrationObjectVisionPosition(
-				std::size_t const uiCalibrationRotationCount) const;
+            cv::Vec3f getAveragedCalibrationObjectVisionPosition() const;
 
 		private:
 			std::thread m_Thread;
@@ -99,6 +95,9 @@ namespace kinjo
 			vision::Vision * const m_pVision; 
 			recognition::Recognizer const * const m_pRecognizer;
 			CalibrationPointGenerator * const m_pCalibrationPointGenerator;
+
+            std::size_t const m_uiCalibrationPointCount;
+			std::size_t const m_uiCalibrationRotationCount;
         };
     
     }

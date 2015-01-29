@@ -9,10 +9,10 @@ namespace kinjo
 		/**
 		 *
 		 **/
-		RandomCalibrationPointGenerator::RandomCalibrationPointGenerator() :
-			m_Rng(42u)	// Magic seed ;-)
+		RandomCalibrationPointGenerator::RandomCalibrationPointGenerator(
+			std::size_t const & uiSeed) :
+				m_Rng(uiSeed)
 		{}
-
 		/**
 		 * 
 		 **/
