@@ -2,8 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <kinjo/config/Config.hpp>
+#include <stdexcept>
 #include <rapidjson/rapidjson.h>
+
+#include <kinjo/config/Config.hpp>
+
 
 Config::Config(std::string const & filename)
 	{
@@ -17,6 +20,8 @@ Config::Config(std::string const & filename)
 			throw std::invalid_argument("json parse error");
 	}
 
+
+//returns -1 if attribute not found
 float Config::getAttribute(std::string const & section, std::string const & attribute){
 	rapidjson::Value::ConstMemberIterator itr = doc.FindMember(section.c_str());
 	if (itr != doc.MemberEnd()){
