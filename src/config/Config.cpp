@@ -5,7 +5,7 @@
 #include <kinjo/config/Config.hpp>
 #include <rapidjson/rapidjson.h>
 
-Config::Config(const std::string& filename)
+Config::Config(std::string const & filename)
 	{
 		std::stringstream ss;
 		std::ifstream ifs;
@@ -17,7 +17,7 @@ Config::Config(const std::string& filename)
 			throw std::invalid_argument("json parse error");
 	}
 
-float Config::getAttribute(std::string section, std::string attribute){
+float Config::getAttribute(std::string const & section, std::string const & attribute){
 	rapidjson::Value::ConstMemberIterator itr = doc.FindMember(section.c_str());
 	if (itr != doc.MemberEnd()){
 		rapidjson::Value::ConstMemberIterator it = itr->value.FindMember(attribute.c_str());

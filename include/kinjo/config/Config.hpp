@@ -9,11 +9,11 @@
 		rapidjson::Document doc;
 
 	public:
-		Config(const std::string& json);
+		Config(std::string const & json);
 	
 		/*
 		returns value of a specific attribute
 		*/
-		float getAttribute(std::string const section, std::string const attribute);
+		float getAttribute(std::string const & section, std::string const & attribute);
 	
 		};
