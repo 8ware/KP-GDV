@@ -4,6 +4,8 @@
 
 #include <kinjo/arm/MovementGuard.hpp>
 
+#include <list>
+
 #include <memory>
 
 // forward declarations
@@ -18,7 +20,7 @@ namespace kinjo {
         {
 
         public:
-            JacoArm();
+			JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList);
 			virtual ~JacoArm() = default;
 
             /**
@@ -88,7 +90,7 @@ namespace kinjo {
 
         private:
             std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
-			std::shared_ptr<MovementGuard> MovGuard;
+			std::list<std::shared_ptr<MovementGuard>> MovGuardList;
 			//std::shared_ptr<MovementGuard> MovGuard;
         };//class
     

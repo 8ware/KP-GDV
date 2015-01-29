@@ -17,11 +17,8 @@ namespace kinjo {
 			* Handling Results will yield a result as an Integer which must be treated after calling this method
 			* 0 everything went fine
 			* 1 simple detour (no problem)
-			* 2 arm is already very close to the center (send back to starting position?)
-			* 3 arm is very far away from its center (send back to starting position?)
-			* 4 arm was send inside the table (be more careful!)
-			* 5 arm tried to reach a position faaaaar away
-			* 6 arm tried to reach a position very close to the center
+			* 2 endpoint in a deadzone
+			* 3 startpoint in a deadzone!
 			**/
 			void Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult ,cv::Vec3f *PosToTravelFirst) override;
 			

@@ -12,11 +12,10 @@ namespace kinjo {
 
 		static const float pi = 3.14159265358979323846f;
 
-		JacoArm::JacoArm()
+		JacoArm::JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList)
 		{
 			TheJacoArm = std::make_shared<KinDrv::JacoArm>();
-			//MovementGuardOne* MovGuard = new MovementGuardOne();
-			MovGuard = std::make_shared<MovementGuardOne>();
+			this->MovGuardList = MovGuardList;
 			std::cout << "JacoArm found, using Jaco Arm." << std::endl;
 		}
 
@@ -33,8 +32,14 @@ namespace kinjo {
 			Position_end[2] = vector[2] / 1000;
 			int handling = -1;
 			cv::Vec3f PosOfDetour = Position_start;
-			//MovementGuardOne MovGuard();
-			MovGuard->Handle_Deathzones(Position_start, Position_end, &handling, &PosOfDetour);
+			
+			for (std::list<std::shared_ptr<MovementGuard>>::iterator it = MovGuardList.begin(); it != MovGuardList.end(); it++){
+				std::shared_ptr<MovementGuard> MovGuard = std::static_pointer_cast<MovementGuard>(*it);
+
+				MovGuard->Handle_Deathzones(Position_start, Position_end, &handling, &PosOfDetour);
+				if (handling != 0)
+					break;
+			}
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 
 			switch (handling)
@@ -48,28 +53,22 @@ namespace kinjo {
 				TheJacoArm->start_api_ctrl();
 				TheJacoArm->set_target_cart(position.position, position.finger_position);
 				waitArmFinishMovement();
-				TheJacoArm->set_target_cart(position.position, position.finger_position);
-				waitArmFinishMovement();
+				//TheJacoArm->set_target_cart(position.position, position.finger_position);
+				//waitArmFinishMovement();
 				TheJacoArm->stop_api_ctrl();
 
 				break;
 			case 1:
 				// 1 simple detour(no problem)
+				moveTo(PosOfDetour * 1000);
+				moveTo(Position_end * 1000);
 				break;
 			case 2:
-				// 2 arm is already very close to the center(send back to starting position ? )
+				// 2 endpoint in a deadzone
+				printf("Endpoint is in deadzone");
 				break;
 			case 3:
-				// 3 arm is very far away from its center(send back to starting position ? )
-				break;
-			case 4:
-				// 4 arm was send inside the table(be more careful!)
-				break;
-			case 5:
-				// 5 arm tried to reach a position faaaaar away
-				break;
-			case 6:
-				// 6 arm tried to reach a position very close to the center
+				// 3 startpoint in a deadzone
 				break;
 			default:
 				printf("Something went terribly wrong in deadzone handling!");

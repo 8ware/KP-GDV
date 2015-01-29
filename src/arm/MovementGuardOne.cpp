@@ -24,32 +24,20 @@ namespace kinjo {
 				*HandlingResult = 0;
 				return;
 			}
-			if (!StartpointLegal(startPos, &InInnerCircle)){
-				if (InInnerCircle){
-					// 2 arm is already too close to the center(send back to starting position ? )
-					*HandlingResult = 2;
-				}
-				else{
-					// 3 arm is too far away from its center(send back to starting position ?/ignore? )
-					*HandlingResult = 3;
-				}
-				return;
-			}
 			if (!EndpointLegal(endPos, &InInnerCircle)){
-				if (InInnerCircle){
-					// 6 arm tried to reach a position very close to the center
-					*HandlingResult = 6;
-				}
-				else{
-					// 5 arm tried to reach a position faaaaar away
-					*HandlingResult = 5;
-				}
+				*HandlingResult = 2;
 				return;
 			}
+			
 
 			if (!EndpointNotInTable(endPos)){
 				//4 arm was send inside the table(be more careful!)
-				*HandlingResult = 4;
+				*HandlingResult = 2;
+				return;
+			}
+			
+			if (!StartpointLegal(startPos, &InInnerCircle)){
+				*HandlingResult = 3;
 				return;
 			}
 
@@ -120,8 +108,10 @@ namespace kinjo {
 			//Z level of P still is zero, we interpolate the Z between Start and End Point
 			P = P / sqrt(P.dot(P));
 			P = P * InnerCircleRadius * 1.5f;
+			S = startPos;
+			B = endPos - startPos;
 			P[2] = S[2] + Lambda * B[2];
-			return P * 1000;
+			return P;
 		}
 
 		bool MovementGuardOne::StartpointLegal(cv::Vec3f startPos, bool *InInnerCircle) {
@@ -129,7 +119,7 @@ namespace kinjo {
 				*InInnerCircle = true;
 				return false;
 			}
-			if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < OuterCircleRadius) {
+			if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) > OuterCircleRadius) {
 				*InInnerCircle = false;
 				return false;
 			}
