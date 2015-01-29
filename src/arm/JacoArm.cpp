@@ -1,7 +1,7 @@
 #pragma once
 
 #include <kinjo/arm/JacoArm.hpp>
-
+#include <kinjo/arm/MovementGuardOne.hpp>
 #include <libkindrv/kindrv.h>   // KinDrv::JacoArm
 
 #include <thread>
@@ -12,9 +12,10 @@ namespace kinjo {
 
 		static const float pi = 3.14159265358979323846f;
 
-		JacoArm::JacoArm()
+		JacoArm::JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList)
 		{
 			TheJacoArm = std::make_shared<KinDrv::JacoArm>();
+			this->MovGuardList = MovGuardList;
 			std::cout << "JacoArm found, using Jaco Arm." << std::endl;
 		}
 
@@ -26,36 +27,64 @@ namespace kinjo {
 			Position_start[1] = position_now.position[1];
 			Position_start[2] = position_now.position[2];
 			cv::Vec3f Position_end;
-			Position_end[0] = vector[0]/1000;
-			Position_end[1] = vector[1]/1000;
-			Position_end[2] = vector[2]/1000;
-			if (LineCircleIntersection(Position_start, Position_end, 0.2f)){
-				//If a Intersection took Place, we dont Move!
-				//LineCircleIntersection Calls moveTo for a better way around the dead zone or
-				//doesn't in case endpoint is inside Deadzone
-#ifdef _DEBUG
-				std::printf("Arm took detour\n");
-#endif
+			Position_end[0] = vector[0] / 1000;
+			Position_end[1] = vector[1] / 1000;
+			Position_end[2] = vector[2] / 1000;
+			int handling = -1;
+			cv::Vec3f PosOfDetour = Position_start;
+			
+			for (std::list<std::shared_ptr<MovementGuard>>::iterator it = MovGuardList.begin(); it != MovGuardList.end(); it++){
+				std::shared_ptr<MovementGuard> MovGuard = std::static_pointer_cast<MovementGuard>(*it);
+
+				MovGuard->Handle_Deathzones(Position_start, Position_end, &handling, &PosOfDetour);
+				if (handling != 0)
+					break;
 			}
-			else{
-#ifdef _DEBUG
-				std::printf("moving to %f,%f,%f ...\n", vector[0], vector[1], vector[2]);
-#endif
+			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
+
+			switch (handling)
+			{
+			case 0:
+				// 0 everything went fine, next thing is to actually move
 				//works with milimeter, accuracy is bad though
-				KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 				position.position[0] = vector[0] / 1000;
 				position.position[1] = vector[1] / 1000;
 				position.position[2] = vector[2] / 1000;
 				TheJacoArm->start_api_ctrl();
 				TheJacoArm->set_target_cart(position.position, position.finger_position);
 				waitArmFinishMovement();
+				//TheJacoArm->set_target_cart(position.position, position.finger_position);
+				//waitArmFinishMovement();
 				TheJacoArm->stop_api_ctrl();
+
+				break;
+			case 1:
+				// 1 simple detour(no problem)
+				moveTo(PosOfDetour * 1000);
+				moveTo(Position_end * 1000);
+				break;
+			case 2:
+				// 2 endpoint in a deadzone
+				printf("Endpoint is in deadzone");
+				break;
+			case 3:
+				// 3 startpoint in a deadzone
+				break;
+			default:
+				printf("Something went terribly wrong in deadzone handling!");
+				break;
+			}
+
+			//If a Intersection took Place, we dont Move!
+			//LineCircleIntersection Calls moveTo for a better way around the dead zone or
+			//doesn't in case endpoint is inside Deadzone
+
 #ifdef _DEBUG
-				cv::Vec3f actual = getPosition();
-				std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
-					actual[0], actual[1], actual[2]);
+			cv::Vec3f actual = getPosition();
+			std::printf("moving done. New \"exact\" Position: %.4f,%.4f,%.4f\n",
+				actual[0], actual[1], actual[2]);
 #endif
-			} //else
+
 
 		} //moveto
 

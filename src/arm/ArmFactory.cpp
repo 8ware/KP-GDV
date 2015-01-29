@@ -3,6 +3,8 @@
 #include <kinjo/arm/JacoArm.hpp>
 #include <libkindrv/kindrv.h>       // KinDrv::JacoArm
 
+#include <kinjo/arm/MovementGuardOne.hpp>
+
 #include <memory>                   // std::shared_ptr
 #include <iostream>
 
@@ -12,7 +14,10 @@ namespace kinjo {
 		{
 			std::shared_ptr<kinjo::arm::Arm> Product;
 			try{
-				Product = std::make_shared<kinjo::arm::JacoArm>();
+				std::list<std::shared_ptr<MovementGuard>> MovGuardList;
+				std::shared_ptr<MovementGuard> MVGuardOne = std::make_shared<MovementGuardOne>();
+				MovGuardList.push_front(MVGuardOne);
+				Product = std::make_shared<kinjo::arm::JacoArm>(MovGuardList);
 			}
 			catch (std::exception const e)
 			{
