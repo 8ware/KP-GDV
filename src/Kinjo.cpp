@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
 		
 		//exception if config.json not in built project folder
 		Config h("config.json");
-
+		
 		std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>());
 		//std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ManualRecognizer>());
 		

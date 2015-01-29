@@ -46,3 +46,8 @@ int Config::getInt(std::string const & section, std::string const & attribute){
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetInt();
 }
+
+bool Config::getBool(std::string const & section, std::string const & attribute){
+	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
+	return iterator->GetBool();
+}

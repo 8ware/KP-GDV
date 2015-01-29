@@ -20,5 +20,6 @@
 		float getFloat(std::string const & section, std::string const & attribute);
 		int Config::getInt(std::string const & section, std::string const & attribute);
 		std::string Config::getString(std::string const & section, std::string const & attribute);
+		bool Config::getBool(std::string const & section, std::string const & attribute);
 
 		};
