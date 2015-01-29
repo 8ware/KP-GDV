@@ -92,6 +92,7 @@ namespace kinjo
 
 		cv::Scalar const depthColor(cv::Scalar(255 << 8));
 		cv::Scalar const rgbColor(cv::Scalar(0, 255, 0));
+		cv::Scalar const rgbGray(200, 200, 200);
 
 		int key = -1;
 		cv::Mat matDepth, matRgb;
@@ -103,6 +104,7 @@ namespace kinjo
 			vision->getDepth().copyTo(matDepth);
 			vision->getRgb().copyTo(matRgb);
 
+			renderRaster(matRgb, rgbGray);
 
 #ifndef KINJO_NO_ARM
 			if(applicationState == ApplicationState::Uncalibrated)

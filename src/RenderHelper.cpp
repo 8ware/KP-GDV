@@ -57,4 +57,31 @@ void renderPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & 
 	cv::Point const shifted = point + cv::Point(15, -5);
 	cv::putText(image, stream.str(), shifted, cv::FONT_HERSHEY_SIMPLEX, 0.3, color, 1, CV_AA);
 }
+
+void renderRaster(cv::Mat& image, cv::Scalar const & color)
+{
+	int length = 30;
+	cv::Point offset_x(length, 0);
+	cv::Point offset_y(0, length);
+
+	int cols = image.cols;
+	int rows = image.rows;
+
+	std::vector<cv::Point> points;
+	points.push_back(cv::Point(cols * 1/6, rows * 1/6)); // top-left
+	points.push_back(cv::Point(cols * 1/2, rows * 1/6)); // top-mid
+	points.push_back(cv::Point(cols * 5/6, rows * 1/6)); // top-right
+	points.push_back(cv::Point(cols * 1/6, rows * 1/2)); // mid-left
+	points.push_back(cv::Point(cols * 1/2, rows * 1/2)); // center
+	points.push_back(cv::Point(cols * 5/6, rows * 1/2)); // mid-right
+	points.push_back(cv::Point(cols * 1/6, rows * 5/6)); // bot-left
+	points.push_back(cv::Point(cols * 1/2, rows * 5/6)); // bot-mid
+	points.push_back(cv::Point(cols * 5/6, rows * 5/6)); // bot-right
+
+	for (auto point : points) {
+		cv::line(image, point-offset_x, point+offset_x, color);
+		cv::line(image, point-offset_y, point+offset_y, color);
+	}
+}
+
 }
