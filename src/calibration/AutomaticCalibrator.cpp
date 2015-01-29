@@ -230,6 +230,7 @@ namespace kinjo
         /**
          * Implements "Least-Squares Rigid Motion Using SVD"
 		 * See: http://igl.ethz.ch/projects/ARAP/svd_rot.pdf
+		 * NOTE: We do not directly follow the paper because we allow mirroring!
          **/
 		cv::Matx44f AutomaticCalibrator::estimateRigidBodyTransformation(
 			std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
@@ -288,7 +289,10 @@ namespace kinjo
 
 			// Correct it so that it is a rotation.
 			cv::Matx33f DCorrect(cv::Matx33f::eye());
-			DCorrect(2, 2) = static_cast<float>(cv::determinant(V*Ut));
+
+			// The original paper only allows rotations and no reflections.
+			// We explicitly want to allow this because the arm coordinate system is not necessarily the same as the vision coordinate system.
+			//DCorrect(2, 2) = static_cast<float>(cv::determinant(V*Ut));
 
 			// Compute the roation matrix.
 			cv::Matx33f const R(V * DCorrect * Ut);
