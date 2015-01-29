@@ -191,6 +191,10 @@ namespace kinjo
 
 						std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
 
+						cv::Vec3f const cap = arm->getPosition();
+						cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
+
+						arm->moveTo(zInvariant);
 						arm->moveTo(v3fArmPosition);
 
 						//arm->closeFingers();
