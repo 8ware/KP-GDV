@@ -7,9 +7,10 @@
 
 #include <kinjo/config/Config.hpp>
 
+namespace kinjo {
+namespace config {
 
-Config::Config(std::string const & filename)
-	{
+Config::Config(std::string const & filename) {
 		std::stringstream ss;
 		std::ifstream ifs;
 		ifs.open(filename.c_str(), std::ios::binary);
@@ -20,7 +21,7 @@ Config::Config(std::string const & filename)
 			throw std::invalid_argument("json parse error");
 	}
 
-rapidjson::Value::ConstValueIterator Config::getValue(std::string const & section, std::string const & attribute){
+rapidjson::Value::ConstValueIterator Config::getValue(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstMemberIterator itr = doc.FindMember(section.c_str());
 	if (itr != doc.MemberEnd()){
 		rapidjson::Value::ConstMemberIterator it = itr->value.FindMember(attribute.c_str());
@@ -32,22 +33,25 @@ rapidjson::Value::ConstValueIterator Config::getValue(std::string const & sectio
 	else return NULL;
 }
 
-std::string Config::getString(std::string const & section, std::string const & attribute){
+std::string Config::getString(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetString();
 }
 
-float Config::getFloat(std::string const & section, std::string const & attribute){
+float Config::getFloat(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return static_cast<float> (iterator->GetDouble());
 }
 
-int Config::getInt(std::string const & section, std::string const & attribute){
+int Config::getInt(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetInt();
 }
 
-bool Config::getBool(std::string const & section, std::string const & attribute){
+bool Config::getBool(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetBool();
 }
+
+} //end of namespace config
+} //end of namespace kinjo
