@@ -30,7 +30,7 @@ rapidjson::Value::ConstValueIterator Config::getValue(std::string const & sectio
 			return &it->value;
 		}
 	}
-	else return NULL;
+	return NULL;
 }
 
 std::string Config::getString(std::string const & section, std::string const & attribute) {

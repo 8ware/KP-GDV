@@ -12,15 +12,20 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/")
 # Settings
 ################################################################################
 
+SET(LIBKINDRV_TARGET_NAME libkindrv)
+SET(LIBKINDRV_INCLUDE_DIR "external/")
+SET(LIBKINDRV_SUFFIXED_INCLUDE_DIR "${LIBKINDRV_INCLUDE_DIR}${LIBKINDRV_TARGET_NAME}/")
+SET(LIBKINDRV_SUFFIXED_SOURCE_DIR ${LIBKINDRV_SUFFIXED_INCLUDE_DIR})
+
+SET(RAPIDJSON_TARGET_NAME rapidjson)
+SET(RAPIDJSON_INCLUDE_DIR "external/")
+SET(RAPIDJSON_SUFFIXED_INCLUDE_DIR "${RAPIDJSON_INCLUDE_DIR}${RAPIDJSON_TARGET_NAME}/")
+SET(RAPIDJSON_SUFFIXED_SOURCE_DIR ${RAPIDJSON_SUFFIXED_INCLUDE_DIR})
+
 SET(KINJO_TARGET_NAME kinjo)
 SET(KINJO_INCLUDE_DIR "include/")
 SET(KINJO_SUFFIXED_INCLUDE_DIR "${KINJO_INCLUDE_DIR}${KINJO_TARGET_NAME}/")
 SET(KINJO_SUFFIXED_SOURCE_DIR "src/")
-
-SET(LIBKINDRV_TARGET_NAME libkindrv)
-SET(LIBKINDRV_INCLUDE_DIR "external/libkindrv/")
-SET(LIBKINDRV_SUFFIXED_INCLUDE_DIR "${LIBKINDRV_INCLUDE_DIR}${LIBKINDRV_TARGET_NAME}/")
-SET(LIBKINDRV_SUFFIXED_SOURCE_DIR "external/libkindrv/")
 
 # The visual studio solution name.
 PROJECT(${KINJO_TARGET_NAME})
@@ -73,6 +78,7 @@ ENDIF()
 
 # Add all the include files in all recursive subdirectories and group them accordingly.
 append_recursive_files_add_to_source_group(${LIBKINDRV_SUFFIXED_INCLUDE_DIR} "hpp" LIBKINDRV_HPP_FILES_ALL)
+append_recursive_files_add_to_source_group(${LIBKINDRV_SUFFIXED_INCLUDE_DIR} "h" LIBKINDRV_HPP_FILES_ALL)
 
 # Add all the source files in all recursive subdirectories and group them accordingly.
 append_recursive_files_add_to_source_group(${LIBKINDRV_SUFFIXED_SOURCE_DIR} "cpp" LIBKINDRV_CPP_FILES_ALL)
@@ -82,8 +88,28 @@ ADD_LIBRARY(${LIBKINDRV_TARGET_NAME}
 	${LIBKINDRV_CPP_FILES_ALL})
 
 TARGET_COMPILE_OPTIONS(${LIBKINDRV_TARGET_NAME} ${COMPILE_OPTIONS})
-TARGET_INCLUDE_DIRECTORIES(${LIBKINDRV_TARGET_NAME} PUBLIC ${LIBKINDRV_INCLUDE_DIR} PUBLIC ${LIBUSB_1_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${LIBKINDRV_TARGET_NAME} PUBLIC ${LIBKINDRV_SUFFIXED_INCLUDE_DIR} PUBLIC ${LIBUSB_1_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${LIBKINDRV_TARGET_NAME} PUBLIC ${LIBUSB_1_LIBRARIES})
+
+
+################################################################################
+# rapidjson
+################################################################################
+
+# Add all the include files in all recursive subdirectories and group them accordingly.
+append_recursive_files_add_to_source_group(${RAPIDJSON_SUFFIXED_INCLUDE_DIR} "hpp" RAPIDJSON_HPP_FILES_ALL)
+append_recursive_files_add_to_source_group(${RAPIDJSON_SUFFIXED_INCLUDE_DIR} "h" RAPIDJSON_HPP_FILES_ALL)
+
+# Add all the source files in all recursive subdirectories and group them accordingly.
+append_recursive_files_add_to_source_group(${RAPIDJSON_SUFFIXED_SOURCE_DIR} "cpp" RAPIDJSON_CPP_FILES_ALL)
+
+ADD_LIBRARY(${RAPIDJSON_TARGET_NAME}
+	${RAPIDJSON_HPP_FILES_ALL}
+	${RAPIDJSON_CPP_FILES_ALL})
+
+TARGET_COMPILE_OPTIONS(${RAPIDJSON_TARGET_NAME} ${COMPILE_OPTIONS})
+TARGET_INCLUDE_DIRECTORIES(${RAPIDJSON_TARGET_NAME} PUBLIC ${RAPIDJSON_INCLUDE_DIR})
+SET_TARGET_PROPERTIES(${RAPIDJSON_TARGET_NAME} PROPERTIES LINKER_LANGUAGE C)
 
 ################################################################################
 # kinjo
