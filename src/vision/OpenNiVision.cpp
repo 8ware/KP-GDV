@@ -27,6 +27,8 @@ namespace kinjo {
 
 		void OpenNiVision::updateImages(bool bRequireUpdates)
 		{
+			std::lock_guard<std::mutex> lock(mutex);
+
 			// Update the internal generator buffers if there is new data.
 			if(bRequireUpdates)
 			{
@@ -38,22 +40,24 @@ namespace kinjo {
 			}
 
 			// Update the depth data.
-			const XnDepthPixel* depthPixels = depthGenerator.GetDepthMap();
+			XnDepthPixel const * depthPixels = depthGenerator.GetDepthMap();
 			matDepth = cv::Mat(depthImageSize, CV_16UC1, const_cast<void*>(reinterpret_cast<void const *>(depthPixels)));
 
 			// Update the color data.
-			const XnRGB24Pixel* rgbPixels = rgbGenerator.GetRGB24ImageMap();
+			XnRGB24Pixel const * rgbPixels = rgbGenerator.GetRGB24ImageMap();
 			cv::Mat bgr(rgbImageSize, CV_8UC3, const_cast<void*>(reinterpret_cast<void const *>(rgbPixels)));
 			cv::cvtColor(bgr, matRgb, CV_RGB2BGR);
 		}
 
-		cv::Mat const & OpenNiVision::getDepth() const
+		cv::Mat OpenNiVision::getDepth() const
 		{
+			std::lock_guard<std::mutex> lock(mutex);
 			return matDepth;
 		}
 
-		cv::Mat const & OpenNiVision::getRgb() const
+		cv::Mat OpenNiVision::getRgb() const
 		{
+			std::lock_guard<std::mutex> lock(mutex);
 			return matRgb;
 		}
 

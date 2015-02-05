@@ -14,14 +14,15 @@ namespace kinjo {
 			 * Updates the images.
 			 **/
 			virtual void updateImages(bool bRequireUpdates) = 0;
+
             /**
              * \return The depth image in millimeters.
              */
-			virtual cv::Mat const & getDepth() const = 0;
+			virtual cv::Mat getDepth() const = 0;
 			/**
 			* \return The color image.
 			*/
-			virtual cv::Mat const & getRgb() const = 0;
+			virtual cv::Mat getRgb() const = 0;
 
 			/**
 			* \return The maximum depth value.

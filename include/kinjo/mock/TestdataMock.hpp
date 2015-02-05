@@ -47,8 +47,8 @@ public:
 	// ---
 
 	virtual void updateImages(bool bRequireUpdates);
-	virtual cv::Mat const & getDepth() const;
-	virtual cv::Mat const & getRgb() const;
+	virtual cv::Mat getDepth() const;
+	virtual cv::Mat getRgb() const;
 	virtual std::uint16_t getMaxDepthValue() const;
 	virtual cv::Vec3f getPositionFromImagePointPx(cv::Point const & v2iPointPx) const;
 

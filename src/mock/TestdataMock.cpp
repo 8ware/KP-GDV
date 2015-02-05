@@ -41,17 +41,17 @@ cv::Vec3f TestdataMock::getRotation() const {
 }
 
 
-void TestdataMock::updateImages(bool bRequireUpdates) {
+void TestdataMock::updateImages(bool ) {
 	checkInitialized();
 	int imgCount = std::min(currDepthImages.size(), currRgbImages.size());
 	imgIndex = (imgIndex + 1) % imgCount;
 }
 
-cv::Mat const & TestdataMock::getDepth() const {
+cv::Mat TestdataMock::getDepth() const {
 	return currDepthImages[imgIndex];
 }
 
-cv::Mat const & TestdataMock::getRgb() const {
+cv::Mat TestdataMock::getRgb() const {
 	return currRgbImages[imgIndex];
 }
 

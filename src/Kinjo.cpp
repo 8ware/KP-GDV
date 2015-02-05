@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
 #ifdef KINJO_HARD_CODED_CALIBRATOR
 		calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>();
 #else
-		std::size_t const uiCalibrationPointCount(8);
+		std::size_t const uiCalibrationPointCount(10);
 		std::size_t const uiCalibrationRotationCount(3);
 
 		calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(

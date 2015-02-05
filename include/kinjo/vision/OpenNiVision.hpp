@@ -3,6 +3,7 @@
 #include <kinjo/vision/Vision.hpp>
 
 #include <string>
+#include <mutex>
 
 // OpenNI
 #include <XnCppWrapper.h>
@@ -30,14 +31,14 @@ namespace kinjo {
 			virtual void updateImages(bool bRequireUpdates) override;
 
 			/**
-			 * \return the depth values normalized to centimeters.
-			 */
-			virtual cv::Mat const & getDepth() const override;
-			/**
 			 * \return the RGB image already translated to OpenCV's internal
 			 * BGR representation.
 			 */
-			virtual cv::Mat const & getRgb() const override;
+			virtual cv::Mat getRgb() const override;
+			/**
+			 * \return the depth values normalized to centimeters.
+			 */
+			virtual cv::Mat getDepth() const override;
 
 			/**
 			 * \return The maximum depth value.
@@ -63,19 +64,17 @@ namespace kinjo {
 			 * \return the (OpenCV) size of the generated image.
 			 */
 			cv::Size getImageSize(xn::MapGenerator const & generator) const;
+			
+			/**
+			 * Synchronization.
+			 */
+			std::mutex mutable mutex;
 
 			/**
 			 * The context which keeps the depth- and RGB-production nodes.
 			 */
 			xn::Context context;
-			/**
-			 * The actual depth image generator (production node).
-			 */
-			xn::DepthGenerator depthGenerator;
-			/**
-			 * The size of the depth-generator's images.
-			 */
-			cv::Size depthImageSize;
+
 			/**
 			 * The actual RGB image generator (production node).
 			 */
@@ -84,11 +83,19 @@ namespace kinjo {
 			 * The size of the RGB-generator's images.
 			 */
 			cv::Size rgbImageSize;
-
 			/**
 			 * The RGB image.
 			 */
 			cv::Mat matRgb;
+
+			/**
+			 * The actual depth image generator (production node).
+			 */
+			xn::DepthGenerator depthGenerator;
+			/**
+			 * The size of the depth-generator's images.
+			 */
+			cv::Size depthImageSize;
 			/**
 			 * The depth image.
 			 */
