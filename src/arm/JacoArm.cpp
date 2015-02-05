@@ -60,6 +60,7 @@ namespace kinjo {
 				break;
 			case 1:
 				// 1 simple detour(no problem)
+				printf("taking detour");
 				moveTo(PosOfDetour * 1000);
 				moveTo(Position_end * 1000);
 				break;
@@ -69,6 +70,7 @@ namespace kinjo {
 				break;
 			case 3:
 				// 3 startpoint in a deadzone
+				printf("Startpoint is in a deadzone\n");
 				break;
 			default:
 				printf("Something went terribly wrong in deadzone handling!\n");
@@ -107,6 +109,7 @@ namespace kinjo {
 
 		void JacoArm::rotateTo(cv::Vec3f vector)
 		{
+			TheJacoArm->start_api_ctrl();
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: calculate Degree vector to euler
 			position.rotation[0] = vector[0];
@@ -117,21 +120,23 @@ namespace kinjo {
 				position.rotation[0], position.rotation[1], position.rotation[2],
 				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
 			waitArmFinishMovement();
-
+			TheJacoArm->stop_api_ctrl();
 
 		}
 		void JacoArm::moveBy(cv::Vec3f vector)
 		{
-			// TODO: Test
+			TheJacoArm->start_api_ctrl();
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			position.position[0] += vector[0] / 1000;
 			position.position[1] += vector[1] / 1000;
 			position.position[2] += vector[2] / 1000;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
+			TheJacoArm->stop_api_ctrl();
 		}
 		void JacoArm::rotateBy(cv::Vec3f vector)
 		{
+			TheJacoArm->start_api_ctrl();
 			std::printf("rotating to %f,%f,%f ...\n", vector[0], vector[1], vector[2]);
 			// vector 0-360 0-360 0-360
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
@@ -148,6 +153,8 @@ namespace kinjo {
 			cv::Vec3f actual = getRotation();
 			std::printf("moving done. New \"exact\" Rotation: %.4f,%.4f,%.4f\n",
 				actual[0], actual[1], actual[2]);
+
+			TheJacoArm->stop_api_ctrl();
 
 		}
 
@@ -202,6 +209,7 @@ namespace kinjo {
 
 		void JacoArm::openFingers()
 		{
+			TheJacoArm->start_api_ctrl();
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: test if the numbers are right
 			position.finger_position[0] = 0;
@@ -209,9 +217,11 @@ namespace kinjo {
 			position.finger_position[2] = 0;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
+			TheJacoArm->stop_api_ctrl();
 		}
 		void JacoArm::closeFingers()
 		{
+			TheJacoArm->start_api_ctrl();
 			KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
 			//TODO: test if the numbers are right
 			position.finger_position[0] = 55;
@@ -219,6 +229,7 @@ namespace kinjo {
 			position.finger_position[2] = 55;
 			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			waitArmFinishMovement();
+			TheJacoArm->stop_api_ctrl();
 		}
 
 		void JacoArm::waitArmFinishMovement() const

@@ -129,17 +129,21 @@ namespace kinjo {
 		bool MovementGuardOne::EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) {
 			if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCircleRadius){
 				*InInnerCircle = true;
+				printf("endpoint too close to socket");
 				return false;
 			}
 			if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) > OuterCircleRadius){
 				*InInnerCircle = false;
+				printf("endpoint not reachable, too far away");
 				return false;
 			}
 			return true;
 		}
 		bool MovementGuardOne::EndpointNotInTable(cv::Vec3f endPos){
-			if (endPos[1] <= 0.0f && endPos[2] <= tableHeight)
+			if (endPos[2] <= tableHeight){
+				printf("endpoint in table\n");
 				return false;
+			}
 			return true;
 		}
 	}//arm
