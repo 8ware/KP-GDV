@@ -15,10 +15,11 @@ namespace kinjo {
 			InnerCircleRadius = 0.2f;
 			OuterCircleRadius = 0.7f;
 			maxHeight = 0.8f;
-			tableHeight = 0.0f;
+			tableHeight = -0.1f;
 		}
 
 		void MovementGuardOne::Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst){
+			Init_Deadzones();
 			bool InInnerCircle = false;
 			if (startPos == endPos){
 				*HandlingResult = 0;
@@ -141,7 +142,7 @@ namespace kinjo {
 		}
 		bool MovementGuardOne::EndpointNotInTable(cv::Vec3f endPos){
 			if (endPos[2] <= tableHeight){
-				printf("endpoint in table\n");
+				printf("endpoint in table, Z = %f \n", endPos[2]);
 				return false;
 			}
 			return true;

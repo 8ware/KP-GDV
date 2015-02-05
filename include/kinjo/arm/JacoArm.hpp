@@ -63,15 +63,24 @@ namespace kinjo {
             void closeFingers() override;
 
         private:
-            /**
-            * Helper to wait for the arm finish moving.
+			/**
+			* Helper to wait for the arm finish moving.
+			**/
+			void waitArmFinishMovement() const;
+			/**
+            * Helper to wait for the fingers finish moving.
             **/
-            void waitArmFinishMovement() const;
-            /**
-            * Helper to find out if the arm is moving.
+			void waitFingersFinishMovement() const;
+			/**
+			* Helper to find out if the arm is moving.
+			* \return True if the arm is moving (or tries to move).
+			**/
+			bool isArmMoving() const;
+			/**
+            * Helper to find out if the Fingers are moving.
             * \return True if the arm is moving (or tries to move).
             **/
-            bool isArmMoving() const;
+			bool areFingersMoving() const;
 
 			/**
 			* Helper to get a bool if 2 float values are the same

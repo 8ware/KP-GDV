@@ -183,7 +183,8 @@ namespace kinjo
 
 					if(v3fVisionPosition[2]>0.0f)
 					{
-						//arm->openFingers();
+						arm->moveToStartPosition(false);
+						arm->openFingers();
 
 						std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
 
@@ -197,7 +198,9 @@ namespace kinjo
 						arm->moveTo(zInvariant);
 						arm->moveTo(v3fArmPosition);
 
-						//arm->closeFingers();
+						arm->closeFingers();
+
+						arm->moveToStartPosition(true);
 					}
 					else
 					{
