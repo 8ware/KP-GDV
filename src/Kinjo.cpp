@@ -183,8 +183,8 @@ namespace kinjo
 
 					if(v3fVisionPosition[2]>0.0f)
 					{
-						arm->moveToStartPosition(false);
-						arm->openFingers();
+						//arm->moveToStartPosition(false);
+						//arm->openFingers();
 
 						std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
 
@@ -192,15 +192,17 @@ namespace kinjo
 
 						std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
 
-						cv::Vec3f const cap = arm->getPosition();
-						cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
+						//cv::Vec3f const cap = arm->getPosition();
+						//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
 
-						arm->moveTo(zInvariant);
-						arm->moveTo(v3fArmPosition);
+						//arm->moveTo(zInvariant);
+						//arm->moveTo(v3fArmPosition);
 
-						arm->closeFingers();
+						arm->GrabItem(v3fArmPosition);
 
-						arm->moveToStartPosition(true);
+						//arm->closeFingers();
+
+						//arm->moveToStartPosition(true);
 					}
 					else
 					{

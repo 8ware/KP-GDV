@@ -209,9 +209,13 @@ namespace arm {
 
 	void JacoArm::openFingers()
 	{
+		//KinDrv::jaco_joystick_t joy = { 0 };
+		//joy.button[0];
+		//TheJacoArm->move_joystick(joy);
+		//TheJacoArm->release_joystick();
+
 		TheJacoArm->start_api_ctrl();
 		KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
-		//TODO: test if the numbers are right
 		position.finger_position[0] = 0;
 		position.finger_position[1] = 0;
 		position.finger_position[2] = 0;
@@ -228,7 +232,6 @@ namespace arm {
 		position.finger_position[2] = 55;
 		TheJacoArm->set_target_cart(position.position, position.finger_position);
 		waitFingersFinishMovement();
-		//std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 		TheJacoArm->stop_api_ctrl();
 	}
 
@@ -277,6 +280,65 @@ namespace arm {
 
 	bool JacoArm::DiffIsZero(float X, float Y) const{
 		return (static_cast<int> (X * 1000) == static_cast<int>(Y * 1000));
+	}
+
+	void JacoArm::LowerHand(int Distance) const{
+
+		KinDrv::jaco_joystick_axis_t axes = { 0 };
+		
+		cv::Vec3f const start = getPosition();
+		cv::Vec3f const end = { start[0], start[1], start[2] - Distance };
+		float actualdist = start[2] - end[2];
+		actualdist = sqrtf(actualdist*actualdist);
+
+		if (Distance < 0) {
+			axes.trans_rot = -1.0f;
+		}
+		else {
+			axes.trans_rot = 1.0f;
+		}
+		
+		TheJacoArm->start_api_ctrl();
+		//wait 50ms to make sure trans rot is set correctly
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		TheJacoArm->move_joystick_axis(axes);
+		float lastdist = 9999990;
+		while (lastdist>actualdist)
+		{
+			lastdist = actualdist;
+			actualdist = getPosition()[2] - end[2];
+			actualdist = sqrtf(actualdist*actualdist);
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		}
+		TheJacoArm->release_joystick();
+		TheJacoArm->stop_api_ctrl();
+		axes.trans_rot = 0.f;
+	}
+
+	void JacoArm::GrabItem(cv::Vec3f ItemPosition){
+		moveToStartPosition(false);
+		openFingers();
+
+		cv::Vec3f const cap = getPosition();
+		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], cap[2]);
+		moveTo(zInvariant);
+		LowerHand(cap[2]-ItemPosition[2]);
+		closeFingers();
+		moveToStartPosition(true);
+
+		printf("Grab Item done! \n");
+	}
+
+	void JacoArm::DropItem(cv::Vec3f DropPosition, int DropHeight){
+		moveToStartPosition(true);
+
+		cv::Vec3f const cap = getPosition();
+		cv::Vec3f const zInvariant(DropPosition[0], DropPosition[1], cap[2]);
+		moveTo(zInvariant);
+		LowerHand(cap[2] - DropPosition[2]+DropHeight);
+		openFingers();
+		moveToStartPosition(false);
+		printf("Drop Item done! \n");
 	}
 
 }//arm

@@ -62,6 +62,9 @@ namespace arm {
         void openFingers() override;
         void closeFingers() override;
 
+		void GrabItem(cv::Vec3f ItemPosition) override;
+		void DropItem(cv::Vec3f DropPosition, int DropHeight) override;
+
     private:
 		/**
 		* Helper to wait for the arm finish moving.
@@ -89,13 +92,10 @@ namespace arm {
 		bool DiffIsZero(float X, float Y) const;
 
 		/**
-		* Helper to find out if a line between 2 Points intersects with a Circle at 0,0,0
-		* \param startPos
-		* \param endPos
-		* \param CircleRadius
-		* \return true if intersection, false if no intersection
+		* Helper to lower the hand carefully
+		* \param Distance to lower the Hand in Millimeter
 		**/
-		bool LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos, float CircleRadius);
+		void LowerHand(int Distance) const;
 
     private:
         std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
