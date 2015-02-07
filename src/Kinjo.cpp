@@ -28,9 +28,6 @@
 #include <limits>		// std::numeric_limits
 #include <cstdint>		// std::uint16_t
 
-//#define KINJO_NO_ARM
-//#define KINJO_HARD_CODED_CALIBRATOR
-
 namespace kinjo
 {
 	static std::string const g_sWindowTitleDepth("Vision (Depth)");
@@ -72,13 +69,20 @@ namespace kinjo
 		Calibration,
 		Calibrated,
 	};
-
+	
+	/**
+	 * The main kinjo function.
+	 **/
 	int run(
 		arm::Arm* arm,
 		vision::Vision* vision,
 		calibration::Calibrator* calibrator,
 		recognition::Recognizer* recognizer)
 	{
+		// At least a vision is required to have minimum functionality.
+		assert(vision);
+
+		// Uncalibrated is the initial state.
 		ApplicationState applicationState(ApplicationState::Uncalibrated);
 
 		// Initialize the main windows.
@@ -104,113 +108,121 @@ namespace kinjo
 			vision->getDepth().copyTo(matDepth);
 			vision->getRgb().copyTo(matRgb);
 
-			renderRaster(matRgb, rgbGray);
-
-#ifndef KINJO_NO_ARM
-			if(applicationState == ApplicationState::Uncalibrated)
+			// If there is no arm, the application runs only with minimum functionality (camera view only)
+			if(arm)
 			{
-				// Render the text centered.
-				renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
-
-				// Start calibration after pressing c.
-				if(key == 'c')
+				if(applicationState == ApplicationState::Uncalibrated)
 				{
-					applicationState = ApplicationState::Calibration;
+					// Render the text centered.
+					renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
 
-					// Move arm to its start position.
-					arm->moveToStartPosition(true);
-
-					// Start the calibration thread.
-					calibrator->calibrateAsync();
-				}
-			}
-
-
-			else if(applicationState == ApplicationState::Calibration)
-			{
-				// Render the text centered.
-				kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
-
-				auto const pColorBasedCircleRecognizer(dynamic_cast<kinjo::recognition::ColorBasedCircleRecognizer*>(recognizer));
-				if(pColorBasedCircleRecognizer)
-				{
-					std::pair<cv::Point, float> const calibrationObjectPositionPx(
-						pColorBasedCircleRecognizer->estimateCalibrationObjectImagePointPxAndRadius(matRgb));
-
-					// If recognition was successfull.
-					if(calibrationObjectPositionPx.second > 0.0f)
+					// Start calibration after pressing c.
+					if(key == 'c')
 					{
-						cv::Point const v2iCenter(calibrationObjectPositionPx.first);
-						int const iRadius(cvRound(calibrationObjectPositionPx.second));
-						// Draw the center point.
-						cv::circle(matRgb, v2iCenter, 3, cv::Scalar(0, 255, 0), -1, CV_AA, 0);
-						// Draw the circle.
-						cv::circle(matRgb, v2iCenter, iRadius, cv::Scalar(255, 0, 0), 3, CV_AA, 0);
+						applicationState = ApplicationState::Calibration;
 
-						// Get the 3d position from the 2d point.
+						// Move arm to its start position.
+						arm->moveToStartPosition(true);
+
+						// Start the calibration thread.
+						calibrator->calibrateAsync();
+					}
+				}
+
+
+				else if(applicationState == ApplicationState::Calibration)
+				{
+					// Render the text centered.
+					kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
+
+					auto const pColorBasedCircleRecognizer(dynamic_cast<kinjo::recognition::ColorBasedCircleRecognizer*>(recognizer));
+					if(pColorBasedCircleRecognizer)
+					{
+						std::pair<cv::Point, float> const calibrationObjectPositionPx(
+							pColorBasedCircleRecognizer->estimateCalibrationObjectImagePointPxAndRadius(matRgb));
+
+						// If recognition was successfull.
+						if(calibrationObjectPositionPx.second > 0.0f)
+						{
+							cv::Point const v2iCenter(calibrationObjectPositionPx.first);
+							int const iRadius(cvRound(calibrationObjectPositionPx.second));
+							// Draw the center point.
+							cv::circle(matRgb, v2iCenter, 3, cv::Scalar(0, 255, 0), -1, CV_AA, 0);
+							// Draw the circle.
+							cv::circle(matRgb, v2iCenter, iRadius, cv::Scalar(255, 0, 0), 3, CV_AA, 0);
+
+							// Get the 3d position from the 2d point.
+							cv::Vec3f const v3fVisionPosition(
+								vision->estimateVisionPositionFromImagePointPx(v2iCenter));
+
+							// Display its coordinates.
+							renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
+							renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
+						}
+					}
+
+					// If the calibration is finished.
+					if(calibrator->getIsValidTransformationAvailable())
+					{
+						applicationState = ApplicationState::Calibrated;
+
+						std::cout << "rigidBodyTransformation: " << std::endl << calibrator->getRigidBodyTransformation() << std::endl;
+					}
+				}
+
+
+				else if(applicationState == ApplicationState::Calibrated)
+				{
+					// \TODO: This movement should be asynchronous to show it immediately.
+					if(mouseState.pointChanged)
+					{
+						mouseState.pointChanged = false;
+
+						cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
+
+						std::cout << "Click: image pixel position: " << mouseState.point << std::endl;
+
 						cv::Vec3f const v3fVisionPosition(
-							vision->estimateVisionPositionFromImagePointPx(v2iCenter));
+							vision->estimateVisionPositionFromImagePointPx(mouseState.point));
 
-						// Display its coordinates.
-						renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
-						renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
+						if(v3fVisionPosition[2]>0.0f)
+						{
+							//arm->moveToStartPosition(false);
+							//arm->openFingers();
+
+							std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
+
+							cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
+
+							std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
+
+							//cv::Vec3f const cap = arm->getPosition();
+							//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
+
+							//arm->moveTo(zInvariant);
+							//arm->moveTo(v3fArmPosition);
+
+							arm->GrabItem(v3fArmPosition);
+
+							//arm->closeFingers();
+
+							//arm->moveToStartPosition(true);
+						}
+						else
+						{
+							std::cout << "Click: Can not move there! Unknown depth!" << std::endl;
+						}
 					}
 				}
 
-				// If the calibration is finished.
-				if(calibrator->getIsValidTransformationAvailable())
-				{
-					applicationState = ApplicationState::Calibrated;
-
-					std::cout << "rigidBodyTransformation: " << std::endl << calibrator->getRigidBodyTransformation() << std::endl;
-				}
+				// Render current arm position(in arm coordinate system).
+				cv::Vec3f const v3fArmPosition(
+					arm->getPosition());
+				renderPosition(matRgb, cv::Point(0, 30), rgbColor, v3fArmPosition);
 			}
 
-
-			else if(applicationState == ApplicationState::Calibrated)
-			{
-				// \TODO: This movement should be asynchronous to show it immediately.
-				if(mouseState.pointChanged)
-				{
-					mouseState.pointChanged = false;
-
-					cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
-
-					std::cout << "Click: image pixel position: " << mouseState.point << std::endl;
-
-					cv::Vec3f const v3fVisionPosition(
-						vision->estimateVisionPositionFromImagePointPx(mouseState.point));
-
-					if(v3fVisionPosition[2]>0.0f)
-					{
-						//arm->moveToStartPosition(false);
-						//arm->openFingers();
-
-						std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
-
-						cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
-
-						std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
-
-						//cv::Vec3f const cap = arm->getPosition();
-						//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
-
-						//arm->moveTo(zInvariant);
-						//arm->moveTo(v3fArmPosition);
-
-						arm->GrabItem(v3fArmPosition);
-
-						//arm->closeFingers();
-
-						//arm->moveToStartPosition(true);
-					}
-					else
-					{
-						std::cout << "Click: Can not move there! Unknown depth!" << std::endl;
-					}
-				}
-			}
-#endif
+			// Render a raster into the image.
+			renderRaster(matRgb, rgbGray);
 
 			// Show depth, color and selected point.
 			if(0 <= mouseState.point.x && mouseState.point.x < matDepth.cols
@@ -227,13 +239,6 @@ namespace kinjo
 					renderPosition(matRgb, mouseState.point, rgbColor, v3fVisionPosition);
 				}
 			}
-
-#ifndef KINJO_NO_ARM
-			// Render current arm position(in arm coordinate system).
-			cv::Vec3f const v3fArmPosition(
-				arm->getPosition());
-			renderPosition(matRgb, cv::Point(0, 30), rgbColor, v3fArmPosition);
-#endif
 
 			// Scale the depth image to use the whole 16-bit and make it more visible.
 			// This value seems not to be correct...
@@ -262,73 +267,126 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		// Declare the components being used by the kinjo application.
 		std::shared_ptr<kinjo::arm::Arm> arm;
 		std::shared_ptr<kinjo::vision::Vision> vision;
-#ifndef KINJO_HARD_CODED_CALIBRATOR
 		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator;
-#endif
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator;
-		
-		//exception if config.json not in built project folder
-//		kinjo::config::Config h("config.json");
-		
-		std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>());
-		//std::shared_ptr<kinjo::recognition::Recognizer> recognizer(std::make_shared<kinjo::recognition::ManualRecognizer>());
-		
+		std::shared_ptr<kinjo::recognition::Recognizer> recognizer;
 #ifndef _MSC_VER
 		std::shared_ptr<kinjo::mock::DirectoryBasedDataProvider> dataProvider;
 #endif
+
+		std::string sConfigPath;
+		// If there is no command line argument, take the config path from the current directory.
 		if (argc < 2) {
+			sConfigPath = "config.json";
+		}
+		else {
+			sConfigPath = argv[1u];
+		}
 
-#ifndef KINJO_NO_ARM
-			arm = kinjo::arm::ArmFactory::getInstance();
-#endif
+		// Load the configuration.
+		kinjo::config::Config config(sConfigPath);
+
+		// In the minimal vision only mode we only load the vision component.
+		bool const bMinimalVisionOnly(config.getBool("other", "bMinimalVisionOnly"));
+		if(bMinimalVisionOnly) {
 			vision = std::make_shared<kinjo::vision::OpenNiVision>();
+		}
+		else
+		{
+			// Load a recognizer if the calibration is not hard coded.
+			bool const bUseHardCodedCalibration(config.getBool("calibration", "bUseHardCodedCalibration"));
+			if(!bUseHardCodedCalibration) {
+				bool const bUseManualRecognizer(config.getBool("recognition", "bUseManualRecognizer"));
+				if(bUseManualRecognizer) {
+					recognizer = std::make_shared<kinjo::recognition::ManualRecognizer>();
+				}
+				else {
+					int const iMorphSizeDilatePx(config.getInt("colorBasedCircleRecognizer", "iMorphSizeDilatePx"));
+					int const iMorphSizeErodePx(config.getInt("colorBasedCircleRecognizer", "iMorphSizeErodePx"));
+					int const iGaussianBlurFilterWidthHalf(config.getInt("colorBasedCircleRecognizer", "iGaussianBlurFilterWidthHalf"));
+					int const iInvRatioAccuSize(config.getInt("colorBasedCircleRecognizer", "iInvRatioAccuSize"));
+					int const iMinCircleDistImageHeightPercent(config.getInt("colorBasedCircleRecognizer", "iMinCircleDistImageHeightPercent"));
+					int const iCannyEdgeThreshold(config.getInt("colorBasedCircleRecognizer", "iCannyEdgeThreshold"));
+					int const iHoughAccuThreshold(config.getInt("colorBasedCircleRecognizer", "iHoughAccuThreshold"));
+					int const iMinCircleRadiusImageHeightPercent(config.getInt("colorBasedCircleRecognizer", "iMinCircleRadiusImageHeightPercent"));
+					int const iMaxCircleRadiusImageHeightPercent(config.getInt("colorBasedCircleRecognizer", "iMaxCircleRadiusImageHeightPercent"));
+					int const iMinHuePercent(config.getInt("colorBasedCircleRecognizer", "iMinHuePercent"));
+					int const iMaxHuePercent(config.getInt("colorBasedCircleRecognizer", "iMaxHuePercent"));
+					int const iMinSatPercent(config.getInt("colorBasedCircleRecognizer", "iMinSatPercent"));
+					int const iMinValPercent(config.getInt("colorBasedCircleRecognizer", "iMinValPercent"));
+					recognizer = std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>(
+						iMorphSizeDilatePx,
+						iMorphSizeErodePx,
+						iGaussianBlurFilterWidthHalf,
+						iInvRatioAccuSize,
+						iMinCircleDistImageHeightPercent,
+						iCannyEdgeThreshold,
+						iHoughAccuThreshold,
+						iMinCircleRadiusImageHeightPercent,
+						iMaxCircleRadiusImageHeightPercent,
+						iMinHuePercent,
+						iMaxHuePercent,
+						iMinSatPercent,
+						iMinValPercent);
+				}
+			}
 
-#if !defined(KINJO_NO_ARM) && !defined(KINJO_HARD_CODED_CALIBRATOR)
-			std::size_t const uiSeed(1337u);
-			calibrationPointGenerator = std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>(
-				uiSeed);
-#endif
-		} else {
-#ifdef KINJO_HARD_CODED_CALIBRATOR
-			throw std::logic_error("KINJO_HARD_CODED_CALIBRATOR is incompatible with the mock implementation!");
-#else
+			// Load the arm and the vision.
+			bool const bUseMockImplementation(config.getBool("mock", "bUseMockImplementation"));
+			if (!bUseMockImplementation) {
+				arm = kinjo::arm::ArmFactory::getInstance();
+
+				// Load a random calibration point generator if the calibration is not hard coded.
+				if(!bUseHardCodedCalibration) {
+					std::size_t const uiRandomCalibrationPointGeneratorSeed(config.getInt("calibration", "uiRandomCalibrationPointGeneratorSeed"));
+					calibrationPointGenerator = std::make_shared<kinjo::calibration::RandomCalibrationPointGenerator>(
+						uiRandomCalibrationPointGeneratorSeed);
+				}
+
+				vision = std::make_shared<kinjo::vision::OpenNiVision>();
+
+			} else {
 #ifndef _MSC_VER
-			std::string directory = argv[1];
-			dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(directory);
+				std::string const sMockDataDirectory(config.getString("mock", "sMockDataDirectory"));
+				dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(sMockDataDirectory);
 
-			std::shared_ptr<kinjo::mock::TestdataMock> mock = 
-				std::make_shared<kinjo::mock::TestdataMock>(dataProvider.get());
+				std::shared_ptr<kinjo::mock::TestdataMock> mock = 
+					std::make_shared<kinjo::mock::TestdataMock>(dataProvider.get());
 
-			arm = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
-			vision = std::dynamic_pointer_cast<kinjo::vision::Vision>(mock);
-			calibrationPointGenerator = std::dynamic_pointer_cast<kinjo::calibration::CalibrationPointGenerator>(mock);
+				arm = std::dynamic_pointer_cast<kinjo::arm::Arm>(mock);
+				vision = std::dynamic_pointer_cast<kinjo::vision::Vision>(mock);
+				calibrationPointGenerator = std::dynamic_pointer_cast<kinjo::calibration::CalibrationPointGenerator>(mock);
 
-			cv::Vec3f position = calibrationPointGenerator->getNextCalibrationPoint();
-			arm->moveTo(position);
-
+				cv::Vec3f position = calibrationPointGenerator->getNextCalibrationPoint();
+				arm->moveTo(position);
 #else
-			throw std::logic_error("DirectoryBasedDataProvider not supported on windows!");
+				throw std::logic_error("DirectoryBasedDataProvider not supported on windows!");
 #endif
-#endif
+			}
+
+			// Load a calibrator.
+			if(bUseHardCodedCalibration) {
+				std::string const sMat44fRigidBodyTransformation(config.getString("hardCodedCalibrator", "mat44fRigidBodyTransformation"));
+				// \TODO: Parse string content and give matrix as argument to HardCodedCalibrator.
+				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>();
+			}
+			else {
+				std::size_t const uiCalibrationPointCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationPointCount")));
+				std::size_t const uiCalibrationRotationCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationRotationCount")));
+				calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(
+					arm.get(),
+					vision.get(),
+					recognizer.get(),
+					calibrationPointGenerator.get(),
+					uiCalibrationPointCount,
+					uiCalibrationRotationCount);
+			}
 		}
 		
-#ifdef KINJO_HARD_CODED_CALIBRATOR
-		calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>();
-#else
-		std::size_t const uiCalibrationPointCount(10);
-		std::size_t const uiCalibrationRotationCount(3);
-
-		calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(
-			arm.get(),
-			vision.get(),
-			recognizer.get(),
-			calibrationPointGenerator.get(),
-			uiCalibrationPointCount,
-			uiCalibrationRotationCount);
-#endif
-		
+		// Execute the kinjo main loop.
 		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get());
 	}
 	catch (std::exception const & e)

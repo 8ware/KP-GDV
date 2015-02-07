@@ -18,6 +18,37 @@ namespace kinjo
 {
     namespace recognition
 	{
+		/**
+		 * 
+		 **/
+		ColorBasedCircleRecognizer::ColorBasedCircleRecognizer(
+			int iMorphSizeDilatePx,
+			int iMorphSizeErodePx,
+			int iGaussianBlurFilterWidthHalf,
+			int iInvRatioAccuSize,
+			int iMinCircleDistImageHeightPercent,
+			int iCannyEdgeThreshold,
+			int iHoughAccuThreshold,
+			int iMinCircleRadiusImageHeightPercent,
+			int iMaxCircleRadiusImageHeightPercent,
+			int iMinHuePercent,
+			int iMaxHuePercent,
+			int iMinSatPercent,
+			int iMinValPercent) :
+				m_iMorphSizeDilatePx(iMorphSizeDilatePx),
+				m_iMorphSizeErodePx(iMorphSizeErodePx),
+				m_iGaussianBlurFilterWidthHalf(iGaussianBlurFilterWidthHalf),
+				m_iInvRatioAccuSize(iInvRatioAccuSize),
+				m_iMinCircleDistImageHeightPercent(iMinCircleDistImageHeightPercent),
+				m_iCannyEdgeThreshold(iCannyEdgeThreshold),
+				m_iHoughAccuThreshold(iHoughAccuThreshold),
+				m_iMinCircleRadiusImageHeightPercent(iMinCircleRadiusImageHeightPercent),
+				m_iMaxCircleRadiusImageHeightPercent(iMaxCircleRadiusImageHeightPercent),
+				m_iMinHuePercent(iMinHuePercent),
+				m_iMaxHuePercent(iMaxHuePercent),
+				m_iMinSatPercent(iMinSatPercent),
+				m_iMinValPercent(iMinValPercent)
+		{}
 
 		/**
 		 * 
@@ -44,48 +75,34 @@ namespace kinjo
 		std::pair<cv::Point, float> ColorBasedCircleRecognizer::estimateCalibrationObjectImagePointPxAndRadius(
 			cv::Mat const & matRgb) const
 		{
-			static int iMorphSizeDilatePx(4);
-			static int iMorphSizeErodePx(8);
-			static int iGaussianBlurFilterWidthHalf(8);
-			static int iInvRatioAccuSize(2);
-			static int iMinCircleDistImageHeightPercent(50);
-			static int iCannyEdgeThreshold(100);
-			static int iHoughAccuThreshold(15);
-			static int iMinCircleRadiusImageHeightPercent(1);
-			static int iMaxCircleRadiusImageHeightPercent(25);
-			static int iMinHuePercent(11);
-			static int iMaxHuePercent(15);
-			static int iMinSatPercent(30);
-			static int iMinValPercent(40);
-
 #ifdef KINJO_RECOGNITION_TWEAK_WINDOW
 			static bool bInitialized(false);
 			if(!bInitialized)
 			{
 				std::string const sRecognitionTweakWindowTitle("Recognition Tweak Window");
 				cv::namedWindow(sRecognitionTweakWindowTitle, CV_WINDOW_NORMAL|CV_GUI_EXPANDED);
-				cv::createTrackbar("MorphSizeDilatePx", sRecognitionTweakWindowTitle, &iMorphSizeDilatePx, 100, nullptr);
-				cv::createTrackbar("MorphSizeErodePx", sRecognitionTweakWindowTitle, &iMorphSizeErodePx, 100, nullptr);
-				cv::createTrackbar("BlurWidthHalf", sRecognitionTweakWindowTitle, &iGaussianBlurFilterWidthHalf, 50, nullptr);
-				cv::createTrackbar("InvRatioAccuSize", sRecognitionTweakWindowTitle, &iInvRatioAccuSize, 10, nullptr);
-				cv::createTrackbar("MinCircleDist%", sRecognitionTweakWindowTitle, &iMinCircleDistImageHeightPercent, 100, nullptr);
-				cv::createTrackbar("EdgeThreashold", sRecognitionTweakWindowTitle, &iCannyEdgeThreshold, 1000, nullptr);
-				cv::createTrackbar("HoughThreashold", sRecognitionTweakWindowTitle, &iHoughAccuThreshold, 500, nullptr);
-				cv::createTrackbar("MinCircleRad%", sRecognitionTweakWindowTitle, &iMinCircleRadiusImageHeightPercent, 100, nullptr);
-				cv::createTrackbar("MaxCircleRad%", sRecognitionTweakWindowTitle, &iMaxCircleRadiusImageHeightPercent, 100, nullptr);
-				cv::createTrackbar("MinHue%", sRecognitionTweakWindowTitle, &iMinHuePercent, 100, nullptr);
-				cv::createTrackbar("MaxHue%", sRecognitionTweakWindowTitle, &iMaxHuePercent, 100, nullptr);
-				cv::createTrackbar("MinSat%", sRecognitionTweakWindowTitle, &iMinSatPercent, 100, nullptr);
-				cv::createTrackbar("MinVal%", sRecognitionTweakWindowTitle, &iMinValPercent, 100, nullptr);
+				cv::createTrackbar("MorphSizeDilatePx", sRecognitionTweakWindowTitle, &m_iMorphSizeDilatePx, 100, nullptr);
+				cv::createTrackbar("MorphSizeErodePx", sRecognitionTweakWindowTitle, &m_iMorphSizeErodePx, 100, nullptr);
+				cv::createTrackbar("BlurWidthHalf", sRecognitionTweakWindowTitle, &m_iGaussianBlurFilterWidthHalf, 50, nullptr);
+				cv::createTrackbar("InvRatioAccuSize", sRecognitionTweakWindowTitle, &m_iInvRatioAccuSize, 10, nullptr);
+				cv::createTrackbar("MinCircleDist%", sRecognitionTweakWindowTitle, &m_iMinCircleDistImageHeightPercent, 100, nullptr);
+				cv::createTrackbar("EdgeThreashold", sRecognitionTweakWindowTitle, &m_iCannyEdgeThreshold, 1000, nullptr);
+				cv::createTrackbar("HoughThreashold", sRecognitionTweakWindowTitle, &m_iHoughAccuThreshold, 500, nullptr);
+				cv::createTrackbar("MinCircleRad%", sRecognitionTweakWindowTitle, &m_iMinCircleRadiusImageHeightPercent, 100, nullptr);
+				cv::createTrackbar("MaxCircleRad%", sRecognitionTweakWindowTitle, &m_iMaxCircleRadiusImageHeightPercent, 100, nullptr);
+				cv::createTrackbar("MinHue%", sRecognitionTweakWindowTitle, &m_iMinHuePercent, 100, nullptr);
+				cv::createTrackbar("MaxHue%", sRecognitionTweakWindowTitle, &m_iMaxHuePercent, 100, nullptr);
+				cv::createTrackbar("MinSat%", sRecognitionTweakWindowTitle, &m_iMinSatPercent, 100, nullptr);
+				cv::createTrackbar("MinVal%", sRecognitionTweakWindowTitle, &m_iMinValPercent, 100, nullptr);
 				bInitialized = true;
 			}
 			// Fix some inputs not allowed to be zero.
-			if(iMorphSizeDilatePx==0) { iMorphSizeDilatePx = 1; }
-			if(iMorphSizeErodePx==0) { iMorphSizeErodePx = 1; }
-			if(iInvRatioAccuSize==0) { iInvRatioAccuSize = 1; }
-			if(iCannyEdgeThreshold==0) { iCannyEdgeThreshold = 1; }
-			if(iHoughAccuThreshold==0) { iHoughAccuThreshold = 1; }
-			if(iMinCircleDistImageHeightPercent==0) { iMinCircleDistImageHeightPercent = 1; }
+			if(m_iMorphSizeDilatePx==0) { m_iMorphSizeDilatePx = 1; }
+			if(m_iMorphSizeErodePx==0) { m_iMorphSizeErodePx = 1; }
+			if(m_iInvRatioAccuSize==0) { m_iInvRatioAccuSize = 1; }
+			if(m_iCannyEdgeThreshold==0) { m_iCannyEdgeThreshold = 1; }
+			if(m_iHoughAccuThreshold==0) { m_iHoughAccuThreshold = 1; }
+			if(m_iMinCircleDistImageHeightPercent==0) { m_iMinCircleDistImageHeightPercent = 1; }
 
 #endif
 			// 1: Make a copy of the image and convert RGB to HSV color space.
@@ -98,10 +115,10 @@ namespace kinjo
 			// 2: Mask the calibration object.
 			// TODO: Maybe pick it first and give the position as input value to get the current color from hsv?
 			cv::Mat matMask(matHsv.rows, matHsv.cols, CV_8UC1);
-			double fMinHue(static_cast<double>(iMinHuePercent)/100.0);
-			double fMaxHue(static_cast<double>(iMaxHuePercent)/100.0);
-			double fMinSat(static_cast<double>(iMinSatPercent)/100.0);
-			double fMinVal(static_cast<double>(iMinValPercent)/100.0);
+			double fMinHue(static_cast<double>(m_iMinHuePercent)/100.0);
+			double fMaxHue(static_cast<double>(m_iMaxHuePercent)/100.0);
+			double fMinSat(static_cast<double>(m_iMinSatPercent)/100.0);
+			double fMinVal(static_cast<double>(m_iMinValPercent)/100.0);
 			cv::inRange(
 				matHsv,
 				cv::Scalar(fMinHue*255, fMinSat*255, fMinVal*255, 0),
@@ -120,8 +137,8 @@ namespace kinjo
 			cv::Mat matStructureElementDilation(
 				cv::getStructuringElement(
 				cv::MORPH_ELLIPSE,
-				cv::Size(2*iMorphSizeDilatePx+1, 2*iMorphSizeDilatePx+1),
-				cv::Point(iMorphSizeDilatePx, iMorphSizeDilatePx)));
+				cv::Size(2*m_iMorphSizeDilatePx+1, 2*m_iMorphSizeDilatePx+1),
+				cv::Point(m_iMorphSizeDilatePx, m_iMorphSizeDilatePx)));
 			cv::morphologyEx(matMask, matMask, cv::MORPH_DILATE, matStructureElementDilation);
 			matStructureElementDilation.release();
 
@@ -129,8 +146,8 @@ namespace kinjo
 			cv::Mat matStructureElementErosion(
 				cv::getStructuringElement(
 				cv::MORPH_ELLIPSE,
-				cv::Size(2*iMorphSizeErodePx+1, 2*iMorphSizeErodePx+1),
-				cv::Point(iMorphSizeErodePx, iMorphSizeErodePx)));
+				cv::Size(2*m_iMorphSizeErodePx+1, 2*m_iMorphSizeErodePx+1),
+				cv::Point(m_iMorphSizeErodePx, m_iMorphSizeErodePx)));
 			cv::morphologyEx(matMask, matMask, cv::MORPH_ERODE, matStructureElementErosion);
 			matStructureElementErosion.release();
 
@@ -143,8 +160,8 @@ namespace kinjo
 				matMask, 
 				matMask, 
 				cv::Size(
-					2*iGaussianBlurFilterWidthHalf+1,
-					2*iGaussianBlurFilterWidthHalf+1),
+					2*m_iGaussianBlurFilterWidthHalf+1,
+					2*m_iGaussianBlurFilterWidthHalf+1),
 				0.0, 
 				0.0);
 
@@ -156,22 +173,22 @@ namespace kinjo
 			std::vector<cv::Vec3f> vv3fCircles;		// (x, y, radius)
 			int const iMinCircleDistPx(static_cast<int>(
 				static_cast<float>(matMask.rows)
-				* (static_cast<float>(iMinCircleDistImageHeightPercent)/100.0f)));
+				* (static_cast<float>(m_iMinCircleDistImageHeightPercent)/100.0f)));
 			int const iMinCircleRadiusPx(static_cast<int>(
 				static_cast<float>(matMask.rows)
-				* (static_cast<float>(iMinCircleRadiusImageHeightPercent)/100.0f)));
+				* (static_cast<float>(m_iMinCircleRadiusImageHeightPercent)/100.0f)));
 			int const iMaxCircleRadiusPx(static_cast<int>(
 				static_cast<float>(matMask.rows)
-				* (static_cast<float>(iMaxCircleRadiusImageHeightPercent)/100.0f)));
+				* (static_cast<float>(m_iMaxCircleRadiusImageHeightPercent)/100.0f)));
 
 			cv::HoughCircles(
 				matMask,
 				vv3fCircles,
 				CV_HOUGH_GRADIENT,
-				iInvRatioAccuSize,		// Inverse ratio of the accumulator size. 1=input image res, 2=half res, ...
+				m_iInvRatioAccuSize,	// Inverse ratio of the accumulator size. 1=input image res, 2=half res, ...
 				iMinCircleDistPx,		// Minimum circle distance. OpenCV example uses /4 but we only want one circle. Is it better to use high value?
-				iCannyEdgeThreshold,	// Canny edge detector threshold.
-				iHoughAccuThreshold,	// Accumulator threshold. Higher->Less circles.
+				m_iCannyEdgeThreshold,	// Canny edge detector threshold.
+				m_iHoughAccuThreshold,	// Accumulator threshold. Higher->Less circles.
 				iMinCircleRadiusPx,		// Minimum circle radius.
 				iMaxCircleRadiusPx);	// Maximum circle radius.
 
