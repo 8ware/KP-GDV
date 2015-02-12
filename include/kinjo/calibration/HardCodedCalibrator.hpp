@@ -15,7 +15,8 @@ namespace kinjo
             /**
              * Constructor.
              **/
-            HardCodedCalibrator();
+            HardCodedCalibrator(
+				cv::Matx44f const & mat44fRigidBodyTransformation);
 
 			/**
 			 * \return If there is a valid transformation available.
@@ -34,6 +35,9 @@ namespace kinjo
 			 * The calibration has finished when getIsValidTransformationAvailable returns true.
              **/
             virtual void calibrateAsync() override;
+
+		private:
+			cv::Matx44f m_mat44fRigidBodyTransformation;
         };
     
     }

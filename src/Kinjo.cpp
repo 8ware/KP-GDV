@@ -278,7 +278,7 @@ int main(int argc, char* argv[])
 #endif
 
 		std::string sConfigPath;
-		// If there is no command line argument, take the config path from the current directory.
+		// If there is no command line argument, take the config from the current directory.
 		if (argc < 2) {
 			sConfigPath = "config.json";
 		}
@@ -373,7 +373,12 @@ int main(int argc, char* argv[])
 			if(bUseHardCodedCalibration) {
 				std::string const sMat44fRigidBodyTransformation(config.getString("hardCodedCalibrator", "mat44fRigidBodyTransformation"));
 				// \TODO: Parse string content and give matrix as argument to HardCodedCalibrator.
-				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>();
+				cv::Matx44f const mat44fRigidBodyTransformation(
+					1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, -1100.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 0.0f, 1.0f);
+				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>(mat44fRigidBodyTransformation);
 			}
 			else {
 				std::size_t const uiCalibrationPointCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationPointCount")));

@@ -7,7 +7,9 @@ namespace kinjo
         /**
          *
          **/
-        HardCodedCalibrator::HardCodedCalibrator()
+        HardCodedCalibrator::HardCodedCalibrator(
+			cv::Matx44f const & mat44fRigidBodyTransformation):
+				m_mat44fRigidBodyTransformation(mat44fRigidBodyTransformation)
 		{}
 		/**
 		 *
@@ -21,11 +23,7 @@ namespace kinjo
          **/
 		cv::Matx44f HardCodedCalibrator::getRigidBodyTransformation() const
         {
-			return cv::Matx44f(
-				1.0f, 0.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 1.0f, -1100.0f,
-				0.0f, 1.0f, 0.0f, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f);
+			return m_mat44fRigidBodyTransformation;
 		}
 		/**
 		 *
