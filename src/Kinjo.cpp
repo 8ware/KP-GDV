@@ -304,6 +304,7 @@ int main(int argc, char* argv[])
 					recognizer = std::make_shared<kinjo::recognition::ManualRecognizer>();
 				}
 				else {
+					std::size_t const uiRecognitionAttemptPerRotationCount(static_cast<std::size_t>(config.getInt("colorBasedCircleRecognizer", "uiRecognitionAttemptCount")));
 					int const iMorphSizeDilatePx(config.getInt("colorBasedCircleRecognizer", "iMorphSizeDilatePx"));
 					int const iMorphSizeErodePx(config.getInt("colorBasedCircleRecognizer", "iMorphSizeErodePx"));
 					int const iGaussianBlurFilterWidthHalf(config.getInt("colorBasedCircleRecognizer", "iGaussianBlurFilterWidthHalf"));
@@ -318,6 +319,7 @@ int main(int argc, char* argv[])
 					int const iMinSatPercent(config.getInt("colorBasedCircleRecognizer", "iMinSatPercent"));
 					int const iMinValPercent(config.getInt("colorBasedCircleRecognizer", "iMinValPercent"));
 					recognizer = std::make_shared<kinjo::recognition::ColorBasedCircleRecognizer>(
+						uiRecognitionAttemptPerRotationCount,
 						iMorphSizeDilatePx,
 						iMorphSizeErodePx,
 						iGaussianBlurFilterWidthHalf,
@@ -376,13 +378,15 @@ int main(int argc, char* argv[])
 			else {
 				std::size_t const uiCalibrationPointCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationPointCount")));
 				std::size_t const uiCalibrationRotationCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationRotationCount")));
+				std::size_t const uiMinimumValidPositionsAfterFilteringPercent(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiMinimumValidPositionsAfterFilteringPercent")));
 				calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(
 					arm.get(),
 					vision.get(),
 					recognizer.get(),
 					calibrationPointGenerator.get(),
 					uiCalibrationPointCount,
-					uiCalibrationRotationCount);
+					uiCalibrationRotationCount,
+					uiMinimumValidPositionsAfterFilteringPercent);
 			}
 		}
 		

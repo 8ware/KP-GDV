@@ -27,8 +27,9 @@ namespace kinjo
 				vision::Vision * const pVision,
 				recognition::Recognizer const * const pRecognizer,
 				CalibrationPointGenerator * const pCalibrationPointGenerator,
-                std::size_t const uiCalibrationPointCount, 
-				std::size_t const uiCalibrationRotationCount);
+                std::size_t const & uiCalibrationPointCount, 
+				std::size_t const & uiCalibrationRotationCount,
+				std::size_t const & uiMinimumValidPositionsAfterFilteringPercent);
 
 			/**
 			 * Copy assignment operator.
@@ -98,6 +99,7 @@ namespace kinjo
 
             std::size_t const m_uiCalibrationPointCount;
 			std::size_t const m_uiCalibrationRotationCount;
+			std::size_t const m_uiMinimumValidPositionsAfterFilteringPercent;
         };
     
     }

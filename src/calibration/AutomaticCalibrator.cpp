@@ -18,8 +18,9 @@ namespace kinjo
 			vision::Vision * const pVision,
 			recognition::Recognizer const * const pRecognizer,
 			CalibrationPointGenerator * const pCalibrationPointGenerator,
-			std::size_t const uiCalibrationPointCount,
-			std::size_t const uiCalibrationRotationCount) :
+			std::size_t const & uiCalibrationPointCount,
+			std::size_t const & uiCalibrationRotationCount,
+			std::size_t const & uiMinimumValidPositionsAfterFilteringPercent) :
 				m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
 				m_bCalibrationAvailable(false),
 				m_pArm(pArm),
@@ -27,7 +28,8 @@ namespace kinjo
 				m_pRecognizer(pRecognizer),
 				m_pCalibrationPointGenerator(pCalibrationPointGenerator),
 				m_uiCalibrationPointCount(uiCalibrationPointCount),
-				m_uiCalibrationRotationCount(uiCalibrationRotationCount)
+				m_uiCalibrationRotationCount(uiCalibrationRotationCount),
+				m_uiMinimumValidPositionsAfterFilteringPercent(uiMinimumValidPositionsAfterFilteringPercent)
 		{}
 		/**
 		 *
@@ -111,11 +113,13 @@ namespace kinjo
 
 			std::vector<cv::Vec3f> vv3fVisionPositions;
 
+			std::size_t const uiRecognitionAttempts(m_pRecognizer->getRecommendedRecognitionAttempCount());
+
             // Multiple hand rotations at same position to prevent occultation.
 			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<m_uiCalibrationRotationCount+1; ++uiCalibrationRotation)
             {
 				// Multiple recognition attempts at the same position/rotation.
-				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<m_pRecognizer->getRecommendedRecognitionAttempCount(); ++uiRecognitionAttempt)
+				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttempts; ++uiRecognitionAttempt)
 				{
 					std::cout << "Calib: uiRecognitionAttempt: " << uiRecognitionAttempt << std::endl;
 					// We need new images.
@@ -145,17 +149,20 @@ namespace kinjo
 				}
             }
 
-			if(vv3fVisionPositions.size()==0)
+			// Filter out outliers.
+			filterPointList(
+				vv3fVisionPositions,
+				100.0f);
+			
+			std::size_t const uiMaxPositions(m_uiCalibrationRotationCount * uiRecognitionAttempts);
+			std::size_t const uiMinimumValidPositionsAfterFilteringCount(
+				static_cast<std::size_t>(static_cast<float>(uiMaxPositions) * static_cast<float>(m_uiMinimumValidPositionsAfterFilteringPercent)*0.01f));
+			// If the object could not be recognized (maybe too far away or out of image).
+			if(vv3fVisionPositions.size() < uiMinimumValidPositionsAfterFilteringCount)
 			{
-				// If the object could not be recognized (maybe too far away or out of image, return a zero vector)
-				std::cout << "Calib: No calibration object found..." << std::endl;
-			}
-			else
-			{
-				// Filter out outliers.
-				filterPointList(
-					vv3fVisionPositions,
-					100.0f);
+				std::cout << "Calib: No valid calibration object found..." << std::endl;
+				// Delete all points from the list to return a zero vector.
+				vv3fVisionPositions.clear();
 			}
 
 			std::cout << "Calib: [-] getAveragedCalibrationObjectVisionPosition" << std::endl;
@@ -184,7 +191,7 @@ namespace kinjo
 					mfv3fPositionDistances[static_cast<float>(norm(v3fVisionPosition-v3fAverage))] = v3fVisionPosition;
 				}
 
-				// Remove the last point if it is too far away ...
+				// Remove the last point int the list if it is too far away ...
 				auto const itLastPoint(std::prev(mfv3fPositionDistances.end()));
 				if(itLastPoint->first > fInlierDistanceMm)
 				{
@@ -210,22 +217,23 @@ namespace kinjo
 		 *
 		 **/
 		cv::Vec3f AutomaticCalibrator::average(
-			std::vector<cv::Vec3f> const & vv3fVisionPositions)
+			std::vector<cv::Vec3f> const & vv3fPositions)
 		{
-			cv::Vec3f v3fSumVisionPositions(0.0f, 0.0f, 0.0f);
-			for(auto const & v3fVisionPosition : vv3fVisionPositions)
+			// Sum them up.
+			cv::Vec3f v3fSumPositions(0.0f, 0.0f, 0.0f);
+			for(auto const & v3fPosition : vv3fPositions)
 			{
-				v3fSumVisionPositions += v3fVisionPosition;
+				v3fSumPositions += v3fPosition;
 			}
 
-			cv::Vec3f v3fAveragedVisionPosition(v3fSumVisionPositions);
-			if(vv3fVisionPositions.size()>0)
+			// Divide by the number of entries.
+			cv::Vec3f v3fAveragedPosition(v3fSumPositions);
+			if(vv3fPositions.size()>0)
 			{
-				// Average the positions.
-				v3fAveragedVisionPosition *= (1.0f / static_cast<float>(vv3fVisionPositions.size()));
+				v3fAveragedPosition *= (1.0f / static_cast<float>(vv3fPositions.size()));
 			}
 
-			return v3fAveragedVisionPosition;
+			return v3fAveragedPosition;
 		}
         /**
          * Implements "Least-Squares Rigid Motion Using SVD"

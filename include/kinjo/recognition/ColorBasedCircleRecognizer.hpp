@@ -12,19 +12,20 @@ namespace recognition {
 		 * Constructor
 		 **/
 		ColorBasedCircleRecognizer(
-			int iMorphSizeDilatePx,
-			int iMorphSizeErodePx,
-			int iGaussianBlurFilterWidthHalf,
-			int iInvRatioAccuSize,
-			int iMinCircleDistImageHeightPercent,
-			int iCannyEdgeThreshold,
-			int iHoughAccuThreshold,
-			int iMinCircleRadiusImageHeightPercent,
-			int iMaxCircleRadiusImageHeightPercent,
-			int iMinHuePercent,
-			int iMaxHuePercent,
-			int iMinSatPercent,
-			int iMinValPercent);
+			std::size_t const & uiRecognitionAttemptCount,
+			int const & iMorphSizeDilatePx,
+			int const & iMorphSizeErodePx,
+			int const & iGaussianBlurFilterWidthHalf,
+			int const & iInvRatioAccuSize,
+			int const & iMinCircleDistImageHeightPercent,
+			int const & iCannyEdgeThreshold,
+			int const & iHoughAccuThreshold,
+			int const & iMinCircleRadiusImageHeightPercent,
+			int const & iMaxCircleRadiusImageHeightPercent,
+			int const & iMinHuePercent,
+			int const & iMaxHuePercent,
+			int const & iMinSatPercent,
+			int const & iMinValPercent);
 
 		/**
 		 * \return The position of the calibration object in the image.
@@ -44,6 +45,8 @@ namespace recognition {
 		virtual std::size_t getRecommendedRecognitionAttempCount() const override;
 
 	private:
+		std::size_t m_uiRecognitionAttemptCount;
+
 		int m_iMorphSizeDilatePx;
 		int m_iMorphSizeErodePx;
 		int m_iGaussianBlurFilterWidthHalf;

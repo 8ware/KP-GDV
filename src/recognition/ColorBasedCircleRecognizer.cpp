@@ -21,19 +21,21 @@ namespace recognition {
 	 * 
 	 **/
 	ColorBasedCircleRecognizer::ColorBasedCircleRecognizer(
-		int iMorphSizeDilatePx,
-		int iMorphSizeErodePx,
-		int iGaussianBlurFilterWidthHalf,
-		int iInvRatioAccuSize,
-		int iMinCircleDistImageHeightPercent,
-		int iCannyEdgeThreshold,
-		int iHoughAccuThreshold,
-		int iMinCircleRadiusImageHeightPercent,
-		int iMaxCircleRadiusImageHeightPercent,
-		int iMinHuePercent,
-		int iMaxHuePercent,
-		int iMinSatPercent,
-		int iMinValPercent) :
+		std::size_t const & uiRecognitionAttemptCount,
+		int const & iMorphSizeDilatePx,
+		int const & iMorphSizeErodePx,
+		int const & iGaussianBlurFilterWidthHalf,
+		int const & iInvRatioAccuSize,
+		int const & iMinCircleDistImageHeightPercent,
+		int const & iCannyEdgeThreshold,
+		int const & iHoughAccuThreshold,
+		int const & iMinCircleRadiusImageHeightPercent,
+		int const & iMaxCircleRadiusImageHeightPercent,
+		int const & iMinHuePercent,
+		int const & iMaxHuePercent,
+		int const & iMinSatPercent,
+		int const & iMinValPercent) :
+			m_uiRecognitionAttemptCount(uiRecognitionAttemptCount),
 			m_iMorphSizeDilatePx(iMorphSizeDilatePx),
 			m_iMorphSizeErodePx(iMorphSizeErodePx),
 			m_iGaussianBlurFilterWidthHalf(iGaussianBlurFilterWidthHalf),
@@ -227,7 +229,7 @@ namespace recognition {
  	 **/
 	std::size_t ColorBasedCircleRecognizer::getRecommendedRecognitionAttempCount() const
 	{
-		return 3;
+		return m_uiRecognitionAttemptCount;
 	}
 }
 }

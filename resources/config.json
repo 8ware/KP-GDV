@@ -1,7 +1,7 @@
 {
     "other": {
-        "pi": 3.14159265358979323846,
-		"bNoArm": true
+		"bNoArm": true,
+		"bMinimalVisionOnly": false
     },
 	
     "mock": {
@@ -41,13 +41,15 @@
     },
     "automaticCalibrator" : {
 		"uiCalibrationPointCount": 10,
-		"uiCalibrationRotationCount": 3
+		"uiCalibrationRotationCount": 3,
+		"uiMinimumValidPositionsAfterFilteringPercent": 30
     },
 
     "recognition": {
 		"bUseManualRecognizer": false
     },
     "colorBasedCircleRecognizer": {
+		"uiRecognitionAttemptCount": 5,
 		"iMorphSizeDilatePx": 4,
 		"iMorphSizeErodePx": 8,
 		"iGaussianBlurFilterWidthHalf": 8,
