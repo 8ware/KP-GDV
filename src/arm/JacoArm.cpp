@@ -164,19 +164,18 @@ namespace arm {
 
 	void JacoArm::rotateHandBy(float MultiplesOfPI)
 	{
-
 		TheJacoArm->start_api_ctrl();
 		KinDrv::jaco_position_t position = TheJacoArm->get_ang_pos();
+		KinDrv::jaco_position_t position2 = TheJacoArm->get_cart_pos();
 		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],
 		//	position.joints[2], position.joints[3], position.joints[4],	position.joints[5]);
 		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
 		position.joints[2] += 0.6; //this offset prevents the arm from dropping
 		position.joints[5] += 180*MultiplesOfPI/pi;
-		TheJacoArm->set_target_ang(position.joints, position.finger_position);
+		TheJacoArm->set_target_ang(position.joints, position2.finger_position);
 		waitArmFinishMovement();
 		TheJacoArm->stop_api_ctrl();
 		TheJacoArm->set_control_cart();
-
 	}
 
 	cv::Vec3f JacoArm::getRotation() const
