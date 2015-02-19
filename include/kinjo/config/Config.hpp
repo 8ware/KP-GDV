@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #include <rapidjson/document.h>
 
@@ -17,6 +18,9 @@ public:
 	int getInt(std::string const & section, std::string const & attribute);
 	std::string getString(std::string const & section, std::string const & attribute);
 	bool getBool(std::string const & section, std::string const & attribute);
+
+	static bool readMatrixFromFile(std::string const & fileName, std::vector<std::vector< float>> &matrix);
+	static bool writeMatrixToFile(std::string const & fileName, std::vector<std::vector< float>> &matrix);
 
 private:
 	rapidjson::Document doc;
