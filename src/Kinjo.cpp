@@ -77,7 +77,8 @@ namespace kinjo
 		arm::Arm* arm,
 		vision::Vision* vision,
 		calibration::Calibrator* calibrator,
-		recognition::Recognizer* recognizer)
+		recognition::Recognizer* recognizer,
+		std::string matrixFileName)
 	{
 		// At least a vision is required to have minimum functionality.
 		assert(vision);
@@ -166,7 +167,10 @@ namespace kinjo
 					{
 						applicationState = ApplicationState::Calibrated;
 
-						std::cout << "rigidBodyTransformation: " << std::endl << calibrator->getRigidBodyTransformation() << std::endl;
+						cv::Matx44f calibMatrix = calibrator->getRigidBodyTransformation();
+						std::cout << "rigidBodyTransformation: " << std::endl << calibMatrix << std::endl;
+
+						kinjo::config::Config::writeMatrixToFile(matrixFileName,calibMatrix);
 					}
 				}
 
@@ -371,13 +375,14 @@ int main(int argc, char* argv[])
 
 			// Load a calibrator.
 			if(bUseHardCodedCalibration) {
-				std::string const sMat44fRigidBodyTransformation(config.getString("hardCodedCalibrator", "mat44fRigidBodyTransformation"));
+				std::string const sMatrixFilePath(config.getString("hardCodedCalibrator", "matrixFileName"));
 				// \TODO: Parse string content and give matrix as argument to HardCodedCalibrator.
-				cv::Matx44f const mat44fRigidBodyTransformation(
+				cv::Matx44f mat44fRigidBodyTransformation/*(
 					1.0f, 0.0f, 0.0f, 0.0f,
 					0.0f, 0.0f, 1.0f, -1100.0f,
 					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.0f, 1.0f);
+					0.0f, 0.0f, 0.0f, 1.0f)*/;
+				kinjo::config::Config::readMatrixFromFile(sMatrixFilePath, mat44fRigidBodyTransformation);
 				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>(mat44fRigidBodyTransformation);
 			}
 			else {
@@ -396,16 +401,18 @@ int main(int argc, char* argv[])
 		}
 		
 		// Execute the kinjo main loop.
-		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get());
+		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get(), config.getString("hardCodedCalibrator", "matrixFileName"));
 	}
 	catch (std::exception const & e)
 	{
 		std::cerr << e.what() << std::endl;
+		std::cin.ignore();
 		return 1;
 	}
 	catch (...)
 	{
 		std::cerr << "Unknown exception!" << std::endl;
+		std::cin.ignore();
 		return 1;
 	}
 }

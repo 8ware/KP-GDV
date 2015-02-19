@@ -37,7 +37,7 @@
 		"uiRandomCalibrationPointGeneratorSeed": 1337
     },
     "hardCodedCalibrator" : {
-		"mat44fRigidBodyTransformation": "1.0, 0.0, 0.0, 0.0,    0.0, 0.0, 1.0, -1100.0,    0.0, 1.0, 0.0, 0.0,    0.0, 0.0, 0.0, 1.0"
+		"matrixFileName": "CalibrationMatrix.json"
     },
     "automaticCalibrator" : {
 		"uiCalibrationPointCount": 10,

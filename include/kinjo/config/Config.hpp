@@ -3,6 +3,8 @@
 
 #include <rapidjson/document.h>
 
+#include <opencv\cv.h>
+
 namespace kinjo {
 namespace config {
 
@@ -19,8 +21,8 @@ public:
 	std::string getString(std::string const & section, std::string const & attribute);
 	bool getBool(std::string const & section, std::string const & attribute);
 
-	static bool readMatrixFromFile(std::string const & fileName, std::vector<std::vector< float>> &matrix);
-	static bool writeMatrixToFile(std::string const & fileName, std::vector<std::vector< float>> &matrix);
+	static bool readMatrixFromFile(std::string const & fileName, cv::Matx44f &matrix);
+	static bool writeMatrixToFile(std::string const & fileName, cv::Matx44f &matrix);
 
 private:
 	rapidjson::Document doc;

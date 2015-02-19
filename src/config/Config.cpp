@@ -9,6 +9,7 @@
 
 #include "rapidjson/prettywriter.h"	// for stringify JSON
 
+#include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
 
 namespace kinjo {
 namespace config {
@@ -17,6 +18,8 @@ Config::Config(std::string const & filename) {
 		std::stringstream ss;
 		std::ifstream ifs;
 		ifs.open(filename.c_str(), std::ios::binary);
+		if (!ifs)
+			throw std::invalid_argument("Config File could not be opened!");
 		ss << ifs.rdbuf();
 		ifs.close();
 
@@ -56,7 +59,7 @@ bool Config::getBool(std::string const & section, std::string const & attribute)
 	return iterator->GetBool();
 }
 
-bool Config::readMatrixFromFile(std::string const & fileName, std::vector<std::vector< float>> &matrix){
+bool Config::readMatrixFromFile(std::string const & fileName, cv::Matx44f &matrix){
 	//read File
 	std::stringstream ss;
 	std::ifstream ifs;
@@ -71,23 +74,25 @@ bool Config::readMatrixFromFile(std::string const & fileName, std::vector<std::v
 
 	//Read values in result vector
 	if (d.IsArray()){
-		matrix.clear();
+		matrix.zeros();
+		size_t rowNr = 0;
 		for (rapidjson::Value::ConstValueIterator irow = d.Begin(); irow != d.End(); irow++){
 			if (irow->IsArray()){
-				std::vector<float> vCol;
+				size_t colNr = 0;
 				for (rapidjson::Value::ConstValueIterator icol = irow->Begin(); icol != irow->End(); icol++){
-					vCol.push_back(static_cast<float> (icol->GetDouble()));
+					matrix.row(rowNr).col(colNr).val[0]=(static_cast<float> (icol->GetDouble()));
+					colNr++;
 				}
-				matrix.push_back(vCol);
 			}
 			else return false;
+			rowNr++;
 		}
 		return true;
 	}
 	else return false;
 }
 
-bool Config::writeMatrixToFile(std::string const & fileName, std::vector<std::vector< float>> &matrix){
+bool Config::writeMatrixToFile(std::string const & fileName, cv::Matx44f &matrix){
 	//write matrix to document
 	rapidjson::Document d;
 	d.SetArray();
@@ -95,7 +100,7 @@ bool Config::writeMatrixToFile(std::string const & fileName, std::vector<std::ve
 	for (int row = 0; row < 4; row++){
 		rapidjson::Value cols(rapidjson::kArrayType);
 		for (int col = 0; col < 4; col++){
-			cols.PushBack(matrix[row][col], allocator);
+			cols.PushBack(matrix.row(row).col(col).val[0], allocator);
 		}
 		d.PushBack(cols, allocator);
 	}
