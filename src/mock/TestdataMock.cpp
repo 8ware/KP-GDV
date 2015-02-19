@@ -77,15 +77,6 @@ void TestdataMock::checkInitialized() const {
 }
 
 
-void TestdataMock::moveToStartPosition(bool hasFingersClosed) {}
-void TestdataMock::rotateTo(cv::Vec3f vector) {}
-void TestdataMock::moveBy(cv::Vec3f vector) {}
-void TestdataMock::rotateBy(cv::Vec3f vector) {}
-void TestdataMock::rotateHandBy(float MultiplesOfPI) {}
-void TestdataMock::openFingers() {}
-void TestdataMock::closeFingers() {}
-
-
 } // end namespace mock
 } // end namespace kinjo
 

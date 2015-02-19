@@ -32,27 +32,29 @@ public:
 	 */
 	TestdataMock(DataProvider* provider);
 
-	virtual void moveTo(cv::Vec3f vector);
-	virtual cv::Vec3f getPosition() const;
-	virtual cv::Vec3f getRotation() const;
+	void moveTo(cv::Vec3f vector) override;
+	cv::Vec3f getPosition() const override;
+	cv::Vec3f getRotation() const override;
 
 	// The following methods are not implemented
-	virtual void moveToStartPosition(bool hasFingersClosed);
-	virtual void rotateTo(cv::Vec3f vector);
-	virtual void moveBy(cv::Vec3f vector);
-	virtual void rotateBy(cv::Vec3f vector);
-	virtual void rotateHandBy(float MultiplesOfPI);
-	virtual void openFingers();
-	virtual void closeFingers();
+	void moveToStartPosition(bool hasFingersClosed) override {}
+	void rotateTo(cv::Vec3f vector) override {}
+	void moveBy(cv::Vec3f vector) override {}
+	void rotateBy(cv::Vec3f vector) override {}
+	void rotateHandBy(float MultiplesOfPI) override {}
+	void openFingers() override {}
+	void closeFingers() override {}
+	void GrabItem(cv::Vec3f ItemPosition) override {}
+	void DropItem(cv::Vec3f DropPosition, int DropHeight) override {}
 	// ---
 
-	virtual void updateImages(bool bRequireUpdates);
-	virtual cv::Mat getDepth() const;
-	virtual cv::Mat getRgb() const;
-	virtual std::uint16_t getMaxDepthValue() const;
-	virtual cv::Vec3f getPositionFromImagePointPx(cv::Point const & v2iPointPx) const;
+	void updateImages(bool bRequireUpdates) override;
+	cv::Mat getDepth() const override;
+	cv::Mat getRgb() const override;
+	std::uint16_t getMaxDepthValue() const override;
+	cv::Vec3f getPositionFromImagePointPx(cv::Point const & v2iPointPx) const override;
 
-	virtual cv::Vec3f getNextCalibrationPoint() const;
+	cv::Vec3f getNextCalibrationPoint() const override;
 
 private:
 

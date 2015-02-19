@@ -292,10 +292,10 @@ namespace arm {
 		actualdist = sqrtf(actualdist*actualdist);
 
 		if (Distance < 0) {
-			axes.trans_rot = -1.0f;
+			axes.trans_rot = 1.0f;
 		}
 		else {
-			axes.trans_rot = 1.0f;
+			axes.trans_rot = -1.0f;
 		}
 		
 		TheJacoArm->start_api_ctrl();
@@ -303,7 +303,7 @@ namespace arm {
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 		TheJacoArm->move_joystick_axis(axes);
 		float lastdist = 9999990;
-		while (lastdist>actualdist)
+		while (lastdist>=actualdist)
 		{
 			lastdist = actualdist;
 			actualdist = getPosition()[2] - end[2];

@@ -134,8 +134,11 @@ namespace kinjo
 					{
 						std::cout << "Calib: v2iImagePointPx: (" << v2iImagePointPx.x << "," << v2iImagePointPx.y << ")" << std::endl;
 						cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimateVisionPositionFromImagePointPx(v2iImagePointPx));
-						vv3fVisionPositions.push_back(v3fEstimatedVisionPosition);
-						std::cout << "Calib: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
+						if(v3fEstimatedVisionPosition[2] != 0.0f)
+						{
+							vv3fVisionPositions.push_back(v3fEstimatedVisionPosition);
+							std::cout << "Calib: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
+						}
 					}
 				}
 
