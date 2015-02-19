@@ -2,29 +2,29 @@
 
 #include <kinjo/calibration/CalibrationPointGenerator.hpp>
 
-namespace kinjo
-{
-	namespace calibration
+namespace kinjo {
+namespace calibration {
+
+	/**
+	 * Generates random points for calibration.
+	 **/
+	class RandomCalibrationPointGenerator : public CalibrationPointGenerator
 	{
+	public:
 		/**
-		 * Generates random points for calibration.
+		 * Constructor.
 		 **/
-		class RandomCalibrationPointGenerator : public CalibrationPointGenerator
-		{
-		public:
-			/**
-			 * Constructor.
-			 **/
-			RandomCalibrationPointGenerator(
-				std::size_t const & uiSeed);
+		RandomCalibrationPointGenerator(
+			std::size_t const & uiSeed);
 
-			/**
-			 * \return The next calibration point.
-			 **/
-			virtual cv::Vec3f getNextCalibrationPoint() const override;
+		/**
+		 * \return The next calibration point.
+		 **/
+		virtual cv::Vec3f getNextCalibrationPoint() const override;
 
-		private:
-			cv::RNG mutable m_Rng;
-		};
-	}
+	private:
+		cv::RNG mutable m_Rng;
+	};
+
+}
 }
