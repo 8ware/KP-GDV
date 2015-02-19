@@ -116,7 +116,7 @@ namespace kinjo
 			std::size_t const uiRecognitionAttempts(m_pRecognizer->getRecommendedRecognitionAttempCount());
 
             // Multiple hand rotations at same position to prevent occultation.
-			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<m_uiCalibrationRotationCount+1; ++uiCalibrationRotation)
+			for(std::size_t uiCalibrationRotation(0); uiCalibrationRotation<m_uiCalibrationRotationCount; ++uiCalibrationRotation)
             {
 				// Multiple recognition attempts at the same position/rotation.
 				for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttempts; ++uiRecognitionAttempt)
