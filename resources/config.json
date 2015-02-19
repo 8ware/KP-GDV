@@ -1,6 +1,5 @@
 {
     "other": {
-		"bNoArm": true,
 		"bMinimalVisionOnly": false
     },
 	
@@ -43,6 +42,7 @@
 		"uiCalibrationPointCount": 10,
 		"uiCalibrationRotationCount": 3,
 		"uiMinimumValidPositionsAfterFilteringPercent": 30
+        "fMaximumFilterEuclideanDistancePointToAverage": 100.0
     },
 
     "recognition": {

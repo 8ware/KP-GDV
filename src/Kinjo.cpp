@@ -389,6 +389,7 @@ int main(int argc, char* argv[])
 				std::size_t const uiCalibrationPointCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationPointCount")));
 				std::size_t const uiCalibrationRotationCount(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiCalibrationRotationCount")));
 				std::size_t const uiMinimumValidPositionsAfterFilteringPercent(static_cast<std::size_t>(config.getInt("automaticCalibrator", "uiMinimumValidPositionsAfterFilteringPercent")));
+				float const fMaximumFilterEuclideanDistancePointToAverage(config.getFloat("automaticCalibrator", "fMaximumFilterEuclideanDistancePointToAverage"));
 				calibrator = std::make_shared<kinjo::calibration::AutomaticCalibrator>(
 					arm.get(),
 					vision.get(),
@@ -396,7 +397,8 @@ int main(int argc, char* argv[])
 					calibrationPointGenerator.get(),
 					uiCalibrationPointCount,
 					uiCalibrationRotationCount,
-					uiMinimumValidPositionsAfterFilteringPercent);
+					uiMinimumValidPositionsAfterFilteringPercent,
+					fMaximumFilterEuclideanDistancePointToAverage);
 			}
 		}
 		

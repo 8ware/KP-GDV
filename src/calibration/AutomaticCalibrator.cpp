@@ -19,7 +19,8 @@ namespace calibration {
 		CalibrationPointGenerator * const pCalibrationPointGenerator,
 		std::size_t const & uiCalibrationPointCount,
 		std::size_t const & uiCalibrationRotationCount,
-		std::size_t const & uiMinimumValidPositionsAfterFilteringPercent) :
+		std::size_t const & uiMinimumValidPositionsAfterFilteringPercent,
+		std::size_t const & fMaximumFilterEuclideanDistancePointToAverage) :
 			m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
 			m_bCalibrationAvailable(false),
 			m_pArm(pArm),
@@ -28,7 +29,8 @@ namespace calibration {
 			m_pCalibrationPointGenerator(pCalibrationPointGenerator),
 			m_uiCalibrationPointCount(uiCalibrationPointCount),
 			m_uiCalibrationRotationCount(uiCalibrationRotationCount),
-			m_uiMinimumValidPositionsAfterFilteringPercent(uiMinimumValidPositionsAfterFilteringPercent)
+			m_uiMinimumValidPositionsAfterFilteringPercent(uiMinimumValidPositionsAfterFilteringPercent),
+			m_fMaximumFilterEuclideanDistancePointToAverage(fMaximumFilterEuclideanDistancePointToAverage)
 	{}
 	/**
 	 *
@@ -154,7 +156,7 @@ namespace calibration {
 		// Filter out outliers.
 		filterPointList(
 			vv3fVisionPositions,
-			100.0f);
+			m_fMaximumFilterEuclideanDistancePointToAverage);
 			
 		std::size_t const uiMaxPositions(m_uiCalibrationRotationCount * uiRecognitionAttempts);
 		std::size_t const uiMinimumValidPositionsAfterFilteringCount(

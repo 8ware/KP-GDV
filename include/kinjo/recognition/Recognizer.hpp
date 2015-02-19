@@ -6,6 +6,7 @@
 
 namespace kinjo {
 namespace recognition {
+
 	class Recognizer
 	{
 	public:
@@ -20,5 +21,6 @@ namespace recognition {
 		 **/
 		virtual std::size_t getRecommendedRecognitionAttempCount() const = 0;
 	};
+
 }
 }
