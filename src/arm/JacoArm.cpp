@@ -4,13 +4,14 @@
 #include <kinjo/arm/MovementGuardOne.hpp>
 #include <libkindrv/kindrv.h>   // KinDrv::JacoArm
 
+#include <cmath>
 #include <thread>
 #include <iostream>
 
 namespace kinjo {
 namespace arm {
 
-	static const float pi = 3.14159265358979323846f;
+	static const float pi = std::atan2(0, -1);
 
 	JacoArm::JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList)
 	{
@@ -51,7 +52,9 @@ namespace arm {
 			position.position[1] = vector[1] / 1000;
 			position.position[2] = vector[2] / 1000;
 			TheJacoArm->start_api_ctrl();
-			TheJacoArm->set_target_cart(position.position, position.finger_position);
+			TheJacoArm->set_target_cart(position.position[0], position.position[1], position.position[2],
+				position.rotation[0], position.rotation[1], position.rotation[2],
+				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
 			waitArmFinishMovement();
 			//TheJacoArm->set_target_cart(position.position, position.finger_position);
 			//waitArmFinishMovement();
@@ -161,30 +164,17 @@ namespace arm {
 
 	void JacoArm::rotateHandBy(float MultiplesOfPI)
 	{
-		KinDrv::jaco_joystick_axis_t axes = { 0 };
-
-		float waittime;
-		//decide which way to turn
-
-		if (MultiplesOfPI < 0) {
-			axes.wrist_rot = -2.5f;
-			waittime = (MultiplesOfPI / pi) * -1;
-		}
-		else {
-			axes.wrist_rot = 2.5f;
-			waittime = (MultiplesOfPI / pi);
-		}
 
 		TheJacoArm->start_api_ctrl();
-		//wait 50ms to make sure wrist rot is set correctly
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-		TheJacoArm->move_joystick_axis(axes);
-		//TODO rotating the arm for 8 happens to be 'exactly' 180 degrees or 360, depends on... find out!
-		std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(waittime * 4000)));
-		TheJacoArm->release_joystick();
-		TheJacoArm->stop_api_ctrl();
-		axes.wrist_rot = 0.f;
+		KinDrv::jaco_position_t position = TheJacoArm->get_ang_pos();
+		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],
+		//	position.joints[2], position.joints[3], position.joints[4],	position.joints[5]);
+		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6; //this offset prevents the arm from dropping
+		position.joints[5] += 180*MultiplesOfPI/pi;
+		TheJacoArm->set_target_ang(position.joints, position.finger_position);
 		waitArmFinishMovement();
+		TheJacoArm->stop_api_ctrl();
 		TheJacoArm->set_control_cart();
 
 	}
@@ -209,30 +199,36 @@ namespace arm {
 
 	void JacoArm::openFingers()
 	{
-		//KinDrv::jaco_joystick_t joy = { 0 };
-		//joy.button[0];
-		//TheJacoArm->move_joystick(joy);
-		//TheJacoArm->release_joystick();
-
 		TheJacoArm->start_api_ctrl();
-		KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
+		KinDrv::jaco_position_t position = TheJacoArm->get_ang_pos();
 		position.finger_position[0] = 0;
 		position.finger_position[1] = 0;
 		position.finger_position[2] = 0;
-		TheJacoArm->set_target_cart(position.position, position.finger_position);
+		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1], position.joints[2],
+		//	position.joints[3], position.joints[4], position.joints[5]);
+		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6; //this offset prevents the arm from dropping
+		//TheJacoArm->set_target_cart(position.position, position.finger_position);
+		TheJacoArm->set_target_ang(position.joints, position.finger_position);
 		waitFingersFinishMovement();
 		TheJacoArm->stop_api_ctrl();
+		TheJacoArm->set_control_cart();
 	}
 	void JacoArm::closeFingers()
 	{
 		TheJacoArm->start_api_ctrl();
-		KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
+		KinDrv::jaco_position_t position = TheJacoArm->get_ang_pos();
 		position.finger_position[0] = 55;
 		position.finger_position[1] = 55;
 		position.finger_position[2] = 55;
-		TheJacoArm->set_target_cart(position.position, position.finger_position);
+		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],	position.joints[2],
+		//	position.joints[3],	position.joints[4], position.joints[5]);
+		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6; //this offset prevents the arm from dropping
+		TheJacoArm->set_target_ang(position.joints, position.finger_position);
 		waitFingersFinishMovement();
 		TheJacoArm->stop_api_ctrl();
+		TheJacoArm->set_control_cart();
 	}
 
 	void JacoArm::waitArmFinishMovement() const
@@ -282,39 +278,6 @@ namespace arm {
 		return (static_cast<int> (X * 1000) == static_cast<int>(Y * 1000));
 	}
 
-	void JacoArm::LowerHand(int Distance) const{
-
-		KinDrv::jaco_joystick_axis_t axes = { 0 };
-		
-		cv::Vec3f const start = getPosition();
-		cv::Vec3f const end = { start[0], start[1], start[2] - Distance };
-		float actualdist = start[2] - end[2];
-		actualdist = sqrtf(actualdist*actualdist);
-
-		if (Distance < 0) {
-			axes.trans_rot = 1.0f;
-		}
-		else {
-			axes.trans_rot = -1.0f;
-		}
-		
-		TheJacoArm->start_api_ctrl();
-		//wait 50ms to make sure trans rot is set correctly
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-		TheJacoArm->move_joystick_axis(axes);
-		float lastdist = 9999990;
-		while (lastdist>=actualdist)
-		{
-			lastdist = actualdist;
-			actualdist = getPosition()[2] - end[2];
-			actualdist = sqrtf(actualdist*actualdist);
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-		}
-		TheJacoArm->release_joystick();
-		TheJacoArm->stop_api_ctrl();
-		axes.trans_rot = 0.f;
-	}
-
 	void JacoArm::GrabItem(cv::Vec3f ItemPosition){
 		moveToStartPosition(false);
 		openFingers();
@@ -322,7 +285,7 @@ namespace arm {
 		cv::Vec3f const cap = getPosition();
 		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], cap[2]);
 		moveTo(zInvariant);
-		LowerHand(cap[2]-ItemPosition[2]);
+		moveTo(ItemPosition);
 		closeFingers();
 		moveToStartPosition(true);
 
@@ -335,7 +298,8 @@ namespace arm {
 		cv::Vec3f const cap = getPosition();
 		cv::Vec3f const zInvariant(DropPosition[0], DropPosition[1], cap[2]);
 		moveTo(zInvariant);
-		LowerHand(cap[2] - DropPosition[2]+DropHeight);
+		DropPosition[2] += DropHeight;
+		moveTo(DropPosition);
 		openFingers();
 		moveToStartPosition(false);
 		printf("Drop Item done! \n");
