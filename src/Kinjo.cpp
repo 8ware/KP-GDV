@@ -78,7 +78,8 @@ namespace kinjo
 		vision::Vision* vision,
 		calibration::Calibrator* calibrator,
 		recognition::Recognizer* recognizer,
-		std::string matrixFileName)
+		std::string matrixFileName,
+		float graspXOffset, float graspYOffset, float graspZOffset)
 	{
 		// At least a vision is required to have minimum functionality.
 		assert(vision);
@@ -196,9 +197,13 @@ namespace kinjo
 
 							std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
 
-							cv::Vec3f const v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
-
+							cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
 							std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
+
+							v3fArmPosition[0] += graspXOffset;
+							v3fArmPosition[1] += graspYOffset;
+							v3fArmPosition[2] += graspZOffset;
+							std::cout << "        arm position + offset: " << v3fArmPosition << std::endl;
 
 							//cv::Vec3f const cap = arm->getPosition();
 							//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
@@ -401,9 +406,16 @@ int main(int argc, char* argv[])
 					fMaximumFilterEuclideanDistancePointToAverage);
 			}
 		}
+
+		std::string matrixFileName = config.getString("hardCodedCalibrator", "matrixFileName");
+
+		float graspXOffset = config.getFloat("grasping", "x-offset");
+		float graspYOffset = config.getFloat("grasping", "y-offset");
+		float graspZOffset = config.getFloat("grasping", "z-offset");
 		
 		// Execute the kinjo main loop.
-		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get(), config.getString("hardCodedCalibrator", "matrixFileName"));
+		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get(),
+				matrixFileName, graspXOffset, graspYOffset, graspZOffset);
 	}
 	catch (std::exception const & e)
 	{
