@@ -29,7 +29,7 @@ namespace calibration {
 			std::size_t const & uiCalibrationPointCount, 
 			std::size_t const & uiCalibrationRotationCount,
 			std::size_t const & uiMinimumValidPositionsAfterFilteringPercent,
-			std::size_t const & fMaximumFilterEuclideanDistancePointToAverage;);
+			std::size_t const & fMaximumFilterEuclideanDistancePointToAverage);
 
 		/**
 		 * Copy assignment operator.
