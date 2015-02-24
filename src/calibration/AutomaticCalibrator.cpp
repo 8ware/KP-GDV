@@ -82,7 +82,7 @@ namespace calibration {
 				auto const v3fArmDesiredPosition(m_pCalibrationPointGenerator->getNextCalibrationPoint());
 				std::cout << "Calib: v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
 				m_pArm->moveTo(v3fArmDesiredPosition);
-				std::cout << "Calib: reached psotition: " << m_pArm->getPosition() << std::endl;
+				std::cout << "Calib: reached position: " << m_pArm->getPosition() << std::endl;
 				// \TODO: Maybe we should check if the position was approximately reached and retry else.
 
 				v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition();
