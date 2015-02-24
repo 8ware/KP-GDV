@@ -3,7 +3,7 @@
 
 #include <rapidjson/document.h>
 
-#include <opencv\cv.h>
+#include <opencv/cv.h>
 
 namespace kinjo {
 namespace config {
