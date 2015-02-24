@@ -41,7 +41,7 @@
     "automaticCalibrator" : {
 		"uiCalibrationPointCount": 10,
 		"uiCalibrationRotationCount": 3,
-		"uiMinimumValidPositionsAfterFilteringPercent": 30
+		"uiMinimumValidPositionsAfterFilteringPercent": 30,
         "fMaximumFilterEuclideanDistancePointToAverage": 100.0
     },
 
