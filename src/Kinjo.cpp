@@ -19,6 +19,11 @@
 #include <kinjo/mock/TestdataMock.hpp>
 #include <kinjo/config/Config.hpp>
 
+#include <kinjo/app/InitialState.hpp>
+#include <kinjo/app/ColoredCircleBasedCalibrationState.hpp>
+#include <kinjo/app/ReadyState.hpp>
+#include <kinjo/app/GraspState.hpp>
+
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
 #include <opencv2/highgui/highgui.hpp>
 #include <easylogging++.h>
@@ -27,13 +32,16 @@
 #include <limits>		// std::numeric_limits
 #include <cstdint>		// std::uint16_t
 
+
 INITIALIZE_EASYLOGGINGPP
+
+
+static const int ESCAPE = 27;
 
 namespace kinjo
 {
 	static std::string const g_sWindowTitleDepth("Vision (Depth)");
 	static std::string const g_sWindowTitleColor("Vision (RGB)");
-	static std::string const g_sWindowTitleArm("Arm");
 	static const int g_iRefreshIntervallMs(50);
 
 	/**
@@ -43,6 +51,7 @@ namespace kinjo
 	{
 		cv::Point point;
 		bool pointChanged;
+		app::State* state;
 	};
 
 	/**
@@ -51,224 +60,186 @@ namespace kinjo
 	void mouseCallback(int event, int x, int y, int /*flags*/, void *param)
 	{
 		MouseCallback* mouseState = static_cast<MouseCallback*>(param);
+		mouseState->state->process(event, cv::Point(x, y));
 
+		// TODO only trigger callbacks if point is within image range
 		switch(event)
 		{
 		case CV_EVENT_LBUTTONUP:
 			mouseState->point = cv::Point(x, y);
 			mouseState->pointChanged = true;
 			break;
+		case CV_EVENT_RBUTTONUP:
+			mouseState->point = cv::Point(-1, -1);
 		}
 	}
 
-	/**
-	 * The application states.
-	 **/
-	enum class ApplicationState
-	{
-		Uncalibrated,
-		Calibration,
-		Calibrated,
+
+	struct DepthView {
+		void (*invoke)(MouseCallback&, DepthView&, bool&);
 	};
-	
+
+	void enableDepthView(MouseCallback& mouseState, DepthView& depthView, bool& showDepthView);
+	void disableDepthView(MouseCallback& mouseState, DepthView& depthView, bool& showDepthView);
+
+	void enableDepthView(MouseCallback& mouseState, DepthView& depthView, bool& showDepthView) {
+		cv::namedWindow(g_sWindowTitleDepth);
+		cv::setMouseCallback(g_sWindowTitleDepth, mouseCallback, &mouseState);
+
+		depthView.invoke = &disableDepthView;
+		showDepthView = true;
+	}
+
+	void disableDepthView(MouseCallback& mouseState, DepthView& depthView, bool& showDepthView) {
+		cv::destroyWindow(g_sWindowTitleDepth);
+
+		depthView.invoke = &enableDepthView;
+		showDepthView = false;
+	}
+
+
+	struct FingerState {
+		void (*invoke)(arm::Arm*, FingerState&);
+	};
+
+	void openFingers(arm::Arm* arm, FingerState& state);
+	void closeFingers(arm::Arm* arm, FingerState& state);
+
+	void openFingers(arm::Arm* arm, FingerState& state) {
+		LOG(DEBUG) << "Opening fingers...";
+		arm->openFingers();
+		state.invoke = &closeFingers;
+	}
+
+	void closeFingers(arm::Arm* arm, FingerState& state) {
+		LOG(DEBUG) << "Closing fingers...";
+		arm->closeFingers();
+		state.invoke = &openFingers;
+	}
+
+
 	/**
 	 * The main kinjo function.
 	 **/
-	int run(
-		arm::Arm* arm,
-		vision::Vision* vision,
-		calibration::Calibrator* calibrator,
-		recognition::Recognizer* recognizer,
-		std::string matrixFileName,
-		float graspXOffset, float graspYOffset, float graspZOffset)
-	{
-		// At least a vision is required to have minimum functionality.
-		assert(vision);
+	int run(app::State* state, arm::Arm* arm, vision::Vision* vision,
+			bool showDepthImage, bool showGrid) {
+		int key = -1;
+		cv::Mat depthImage, rgbImage;
 
-		// Uncalibrated is the initial state.
-		ApplicationState applicationState(ApplicationState::Uncalibrated);
+		DepthView depthView;
+		depthView.invoke = showDepthImage ? &enableDepthView : &disableDepthView;
 
-		// Initialize the main windows.
+		FingerState fingers;
+		fingers.invoke = &openFingers;
+		// TODO prevent change of finger state if grasping or calibrating
+		// TODO open/close fingers asynchronously
+
+		const cv::Scalar rgbColor(0, 255, 0);
+		const cv::Scalar rgbGray(200, 200, 200);
+		const cv::Scalar depthColor(255 << 8);
+
 		MouseCallback mouseState;
 		mouseState.point = cv::Point(-1, -1);
 		mouseState.pointChanged = false;
-		cv::namedWindow(g_sWindowTitleDepth);
+		mouseState.state = state;
 		cv::namedWindow(g_sWindowTitleColor);
-		cv::setMouseCallback(g_sWindowTitleDepth, mouseCallback, &mouseState);
 		cv::setMouseCallback(g_sWindowTitleColor, mouseCallback, &mouseState);
 
-		cv::Scalar const depthColor(cv::Scalar(255 << 8));
-		cv::Scalar const rgbColor(cv::Scalar(0, 255, 0));
-		cv::Scalar const rgbGray(200, 200, 200);
-
-		int key = -1;
-		cv::Mat matDepth, matRgb;
+		depthView.invoke(mouseState, depthView, showDepthImage);
 
 		do
 		{
+			if (key == 'd')
+				depthView.invoke(mouseState, depthView, showDepthImage);
+
+			if (key == 'f')
+				fingers.invoke(arm, fingers);
+
+			if (key == 'g')
+				showGrid ^= 1;
+
+			state->process(key);
+			app::State* tmp = state;
+			state = state->getNext();
+			if (tmp != state) {
+				LOG(INFO) << "State changed from " << tmp->getDesignator() << " to " << state->getDesignator();
+				state->initialize();
+			}
+			mouseState.state = state;
+
 			// Update the vision images.
 			vision->updateImages(false);
-			vision->getDepth().copyTo(matDepth);
-			vision->getRgb().copyTo(matRgb);
+			vision->getDepth().copyTo(depthImage);
+			vision->getRgb().copyTo(rgbImage);
 
-			// If there is no arm, the application runs only with minimum functionality (camera view only)
-			if(arm)
-			{
-				if(applicationState == ApplicationState::Uncalibrated)
-				{
-					// Render the text centered.
-					renderTextCenter(matRgb, rgbColor, "Press 'c' to start calibration!", 1.0, 3);
+			state->process(rgbImage, depthImage);
 
-					// Start calibration after pressing c.
-					if(key == 'c')
-					{
-						applicationState = ApplicationState::Calibration;
+			const std::string designator = state->getDesignator();
+			std::stringstream designatorStream;
+			designatorStream << "STATE[ " << designator << " ]";
+			cv::putText(rgbImage, designatorStream.str(), cv::Point(15, 25),
+					cv::FONT_HERSHEY_SIMPLEX, 0.3, rgbColor, 1, CV_AA);
 
-						// Move arm to its start position.
-						arm->moveToStartPosition(true);
-
-						// Start the calibration thread.
-						calibrator->calibrateAsync();
-					}
-				}
-
-
-				else if(applicationState == ApplicationState::Calibration)
-				{
-					// Render the text centered.
-					kinjo::renderTextCenter(matRgb, rgbColor, "Calibrating...", 1.0, 3);
-
-					auto const pColorBasedCircleRecognizer(dynamic_cast<kinjo::recognition::ColorBasedCircleRecognizer*>(recognizer));
-					if(pColorBasedCircleRecognizer)
-					{
-						std::pair<cv::Point, float> const calibrationObjectPositionPx(
-							pColorBasedCircleRecognizer->estimateCalibrationObjectImagePointPxAndRadius(matRgb));
-
-						// If recognition was successfull.
-						if(calibrationObjectPositionPx.second > 0.0f)
-						{
-							cv::Point const v2iCenter(calibrationObjectPositionPx.first);
-							int const iRadius(cvRound(calibrationObjectPositionPx.second));
-							// Draw the center point.
-							cv::circle(matRgb, v2iCenter, 3, cv::Scalar(0, 255, 0), -1, CV_AA, 0);
-							// Draw the circle.
-							cv::circle(matRgb, v2iCenter, iRadius, cv::Scalar(255, 0, 0), 3, CV_AA, 0);
-
-							// Get the 3d position from the 2d point.
-							cv::Vec3f const v3fVisionPosition(
-								vision->estimateVisionPositionFromImagePointPx(v2iCenter));
-
-							// Display its coordinates.
-							renderPosition(matDepth, v2iCenter, depthColor, v3fVisionPosition);
-							renderPosition(matRgb, v2iCenter, rgbColor, v3fVisionPosition);
-						}
-					}
-
-					// If the calibration is finished.
-					if(calibrator->getIsValidTransformationAvailable())
-					{
-						applicationState = ApplicationState::Calibrated;
-
-						cv::Matx44f calibMatrix = calibrator->getRigidBodyTransformation();
-						LOG(INFO) << "rigidBodyTransformation: " << calibMatrix;
-
-						kinjo::config::Config::writeMatrixToFile(matrixFileName,calibMatrix);
-					}
-				}
-
-
-				else if(applicationState == ApplicationState::Calibrated)
-				{
-					// \TODO: This movement should be asynchronous to show it immediately.
-					if(mouseState.pointChanged)
-					{
-						mouseState.pointChanged = false;
-
-						cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
-						
-						LOG(INFO) << "Click: image pixel position: " << mouseState.point;
-
-						cv::Vec3f const v3fVisionPosition(
-							vision->estimateVisionPositionFromImagePointPx(mouseState.point));
-
-						if(v3fVisionPosition[2]>0.0f)
-						{
-							//arm->moveToStartPosition(false);
-							//arm->openFingers();
-							
-							LOG(INFO) << "Click: vision position: " << v3fVisionPosition;
-
-							cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
-							LOG(INFO) << "Click: resulting arm position: " << v3fArmPosition;
-
-							v3fArmPosition[0] += graspXOffset;
-							v3fArmPosition[1] += graspYOffset;
-							v3fArmPosition[2] += graspZOffset;
-							LOG(INFO) << "Click: arm position + offset: " << v3fArmPosition;
-
-							//cv::Vec3f const cap = arm->getPosition();
-							//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
-
-							//arm->moveTo(zInvariant);
-							//arm->moveTo(v3fArmPosition);
-
-							arm->GrabItem(v3fArmPosition);
-
-							//arm->closeFingers();
-
-							//arm->moveToStartPosition(true);
-						}
-						else
-						{
-							LOG(WARNING) << "Click: Can not move there! Unknown depth!";
-						}
-					}
-				}
-
-				// Render current arm position(in arm coordinate system).
-				cv::Vec3f const v3fArmPosition(
-					arm->getPosition());
-				renderPosition(matRgb, cv::Point(0, 30), rgbColor, v3fArmPosition);
+			const std::string details = state->getDetails();
+			if (!details.empty()) {
+				std::stringstream detailsStream;
+				detailsStream << details;
+				cv::putText(rgbImage, detailsStream.str(), cv::Point(15, 40),
+						cv::FONT_HERSHEY_SIMPLEX, 0.3, rgbColor, 1, CV_AA);
 			}
 
+			const std::vector<std::string> infos = state->getInfos();
+			renderInfos(rgbImage, infos);
+
+			// Render current arm position(in arm coordinate system).
+			cv::Vec3f const v3fArmPosition = arm->getPosition();
+			cv::Point posPoint(0 + rgbImage.cols - 220, 30);
+			renderPosition(rgbImage, posPoint, rgbColor, v3fArmPosition, "ARM");
+
 			// Render a raster into the image.
-			renderRaster(matRgb, rgbGray);
+			if (showGrid)
+				renderRaster(rgbImage, rgbGray);
 
 			// Show depth, color and selected point.
-			if(0 <= mouseState.point.x && mouseState.point.x < matDepth.cols
-				&& 0 <= mouseState.point.y && mouseState.point.y < matDepth.rows)
+			if(0 <= mouseState.point.x && mouseState.point.x < depthImage.cols
+				&& 0 <= mouseState.point.y && mouseState.point.y < depthImage.rows)
 			{
-				renderDoubleCircle(matDepth, mouseState.point, depthColor);
-				renderDoubleCircle(matRgb, mouseState.point, rgbColor);
+				renderDoubleCircle(depthImage, mouseState.point, depthColor);
+				renderDoubleCircle(rgbImage, mouseState.point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
 					vision->estimateVisionPositionFromImagePointPx(mouseState.point));
 				if(v3fVisionPosition[2u] > 0)
 				{
-					renderPosition(matDepth, mouseState.point, depthColor, v3fVisionPosition);
-					renderPosition(matRgb, mouseState.point, rgbColor, v3fVisionPosition);
+					renderPosition(depthImage, mouseState.point, depthColor, v3fVisionPosition);
+					renderPosition(rgbImage, mouseState.point, rgbColor, v3fVisionPosition);
+					cv::Point visPoint(0 + rgbImage.cols - 215, 45);
+					renderPosition(rgbImage, visPoint, rgbColor, v3fVisionPosition, "VIS");
 				}
 			}
 
-			// Scale the depth image to use the whole 16-bit and make it more visible.
-			// This value seems not to be correct...
-			//float const fMaxVisionDepthValue(static_cast<float>(vision->getMaxDepthValue()));
-			float const fMaxVisionDepthValue(4000.0f);
-			float const fImageValueScale(
-				static_cast<float>(std::numeric_limits<std::uint16_t>::max())/fMaxVisionDepthValue);
-			cv::imshow(g_sWindowTitleDepth, matDepth * fImageValueScale);
-			cv::imshow(g_sWindowTitleColor, matRgb);
+			if (showDepthImage) {
+				// Scale the depth image to use the whole 16-bit and make it more visible.
+				// This value seems not to be correct...
+				//float const fMaxVisionDepthValue(static_cast<float>(vision->getMaxDepthValue()));
+				float const fMaxVisionDepthValue(4000.0f);
+				float const fImageValueScale(
+					static_cast<float>(std::numeric_limits<std::uint16_t>::max())/fMaxVisionDepthValue);
+				cv::imshow(g_sWindowTitleDepth, depthImage * fImageValueScale);
+			}
 
-			// Get currently pressed keys and wait to restrict the framerate.
+			cv::imshow(g_sWindowTitleColor, rgbImage);
+
 			key = cv::waitKey(g_iRefreshIntervallMs);
-
-		} while(key != 27);
+		} while (key != ESCAPE);
 
 		cv::destroyAllWindows();
 
 		return 0;
 	}
+
 }
+
 
 /**
  * The application entry point.
@@ -406,13 +377,36 @@ int main(int argc, char* argv[])
 
 		std::string matrixFileName = config.getString("hardCodedCalibrator", "matrixFileName");
 
-		float graspXOffset = config.getFloat("grasping", "x-offset");
-		float graspYOffset = config.getFloat("grasping", "y-offset");
-		float graspZOffset = config.getFloat("grasping", "z-offset");
-		
+		bool showDepthImage = config.getBool("GUI", "ShowDepthImage");
+		bool showGrid = config.getBool("GUI", "ShowGrid");
+
+		int graspXOffset = config.getInt("grasping", "x-offset");
+		int graspYOffset = config.getInt("grasping", "y-offset");
+		int graspZOffset = config.getInt("grasping", "z-offset");
+
+		kinjo::app::State* initStatePtr;
+		kinjo::app::State* calibStatePtr;
+		kinjo::app::State* readyStatePtr;
+		kinjo::app::State* graspStatePtr;
+
+		std::shared_ptr<kinjo::app::State> initState;
+		initState = std::make_shared<kinjo::app::InitialState>(&calibStatePtr);
+		std::shared_ptr<kinjo::app::State> calibState = std::make_shared<kinjo::app::ColoredCircleBasedCalibrationState>(
+					&initStatePtr, &readyStatePtr, arm.get(), calibrator.get(), vision.get(), recognizer.get());
+		std::shared_ptr<kinjo::app::State> readyState = std::make_shared<kinjo::app::ReadyState>(
+				&calibStatePtr, &graspStatePtr, calibrator.get(), matrixFileName);
+		std::shared_ptr<kinjo::app::State> graspState = std::make_shared<kinjo::app::GraspState>(&readyStatePtr,
+				arm.get(), vision.get(), calibrator.get(), &graspXOffset, &graspYOffset, &graspZOffset);
+
+		initStatePtr = initState.get();
+		calibStatePtr = calibState.get();
+		readyStatePtr = readyState.get();
+		graspStatePtr = graspState.get();
+
+//		initOffsetSliders(&graspXOffset, &graspYOffset, &graspZOffset);
+
 		// Execute the kinjo main loop.
-		return kinjo::run(arm.get(), vision.get(), calibrator.get(), recognizer.get(),
-				matrixFileName, graspXOffset, graspYOffset, graspZOffset);
+		return kinjo::run(initState.get(), arm.get(), vision.get(), showDepthImage, showGrid);
 	}
 	catch (std::exception const & e)
 	{
