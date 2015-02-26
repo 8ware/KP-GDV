@@ -1,5 +1,3 @@
-#pragma once
-
 #include <kinjo/arm/MockArm.hpp>
 
 //#include <libkindrv/kindrv.h>   //// KinDrv::MockArm

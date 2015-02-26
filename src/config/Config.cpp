@@ -59,7 +59,7 @@ bool Config::getBool(std::string const & section, std::string const & attribute)
 	return iterator->GetBool();
 }
 
-bool Config::readMatrixFromFile(std::string const & fileName, cv::Matx44f &matrix){
+cv::Matx44f Config::readMatrixFromFile(std::string const & fileName){
 	//read File
 	std::stringstream ss;
 	std::ifstream ifs;
@@ -74,22 +74,29 @@ bool Config::readMatrixFromFile(std::string const & fileName, cv::Matx44f &matri
 
 	//Read values in result vector
 	if (d.IsArray()){
+		cv::Matx44f matrix;
 		matrix.zeros();
 		size_t rowNr = 0;
 		for (rapidjson::Value::ConstValueIterator irow = d.Begin(); irow != d.End(); irow++){
-			if (irow->IsArray()){
+			if (irow->IsArray())
+			{
 				size_t colNr = 0;
 				for (rapidjson::Value::ConstValueIterator icol = irow->Begin(); icol != irow->End(); icol++){
 					matrix(rowNr, colNr) = (static_cast<float> (icol->GetDouble()));
 					colNr++;
 				}
 			}
-			else return false;
+			else{
+				throw std::invalid_argument("json parse error: Matrix column has to be an array!");
+			}
 			rowNr++;
 		}
-		return true;
+		return matrix;
 	}
-	else return false;
+	else{
+		throw std::invalid_argument("json parse error: Matrix row has to be an array!");
+	}
+
 }
 
 bool Config::writeMatrixToFile(std::string const & fileName, cv::Matx44f &matrix){

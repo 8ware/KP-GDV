@@ -1,5 +1,3 @@
-#pragma once
-
 #include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 
 namespace kinjo {

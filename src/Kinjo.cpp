@@ -7,7 +7,8 @@
 #define NOMINMAX
 
 #include <kinjo/RenderHelper.hpp>
-#include <kinjo/arm/ArmFactory.hpp>
+#include <kinjo/arm/JacoArm.hpp>
+#include <kinjo/arm/MovementGuardOne.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/AutomaticCalibrator.hpp>
 #include <kinjo/calibration/HardCodedCalibrator.hpp>
@@ -353,7 +354,9 @@ int main(int argc, char* argv[])
 			// Load the arm and the vision.
 			bool const bUseMockImplementation(config.getBool("mock", "bUseMockImplementation"));
 			if (!bUseMockImplementation) {
-				arm = kinjo::arm::ArmFactory::getInstance();
+				std::list<std::shared_ptr<kinjo::arm::MovementGuard>> MovGuardList;
+				MovGuardList.push_back(std::make_shared<kinjo::arm::MovementGuardOne>());
+				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList);
 
 				// Load a random calibration point generator if the calibration is not hard coded.
 				if(!bUseHardCodedCalibration) {
@@ -386,13 +389,7 @@ int main(int argc, char* argv[])
 			// Load a calibrator.
 			if(bUseHardCodedCalibration) {
 				std::string const sMatrixFilePath(config.getString("hardCodedCalibrator", "matrixFileName"));
-				// \TODO: Parse string content and give matrix as argument to HardCodedCalibrator.
-				cv::Matx44f mat44fRigidBodyTransformation/*(
-					1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, -1100.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 0.0f, 1.0f)*/;
-				kinjo::config::Config::readMatrixFromFile(sMatrixFilePath, mat44fRigidBodyTransformation);
+				cv::Matx44f mat44fRigidBodyTransformation(kinjo::config::Config::readMatrixFromFile(sMatrixFilePath));
 				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>(mat44fRigidBodyTransformation);
 			}
 			else {

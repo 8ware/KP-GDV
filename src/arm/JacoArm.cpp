@@ -1,5 +1,3 @@
-#pragma once
-
 #include <kinjo/arm/JacoArm.hpp>
 #include <kinjo/arm/MovementGuardOne.hpp>
 
