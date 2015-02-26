@@ -1,4 +1,8 @@
 {
+	"Logging" : {
+		"ConfigFile" : "../resources/logging.conf"
+	},
+
 	"other" : {
 		"bMinimalVisionOnly" : false
 	},

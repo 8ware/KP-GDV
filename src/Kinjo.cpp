@@ -300,6 +300,9 @@ int main(int argc, char* argv[])
 		// Load the configuration.
 		kinjo::config::Config config(sConfigPath);
 
+		el::Configurations logConf(config.getString("Logging", "ConfigFile"));
+		el::Loggers::reconfigureAllLoggers(logConf);
+
 		// In the minimal vision only mode we only load the vision component.
 		bool const bMinimalVisionOnly(config.getBool("other", "bMinimalVisionOnly"));
 		if(bMinimalVisionOnly) {
