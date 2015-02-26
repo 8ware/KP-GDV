@@ -46,14 +46,13 @@ void renderTextCenter(
 		fontFace, fFontScale,
 		color, iThickness);
 }
-
 /**
 * Render the given 3d-vector at the given point.
 **/
-void renderPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, cv::Vec3f const & v3fVisionPosition)
+void renderPosition(cv::Mat& image, cv::Point const & point, cv::Scalar const & color, cv::Vec3f const & v3fPosition, std::string const & what)
 {
 	std::stringstream stream;
-	stream << "[" << v3fVisionPosition[0u] << ", " << v3fVisionPosition[1u] << ", " << v3fVisionPosition[2u] << "] mm";
+	stream << what << v3fPosition << " mm";
 	cv::Point const shifted = point + cv::Point(15, -5);
 	cv::putText(image, stream.str(), shifted, cv::FONT_HERSHEY_SIMPLEX, 0.3, color, 1, CV_AA);
 }
@@ -81,6 +80,33 @@ void renderRaster(cv::Mat& image, cv::Scalar const & color)
 	for (auto point : points) {
 		cv::line(image, point-offset_x, point+offset_x, color);
 		cv::line(image, point-offset_y, point+offset_y, color);
+	}
+}
+
+void renderInfos(cv::Mat& image, std::vector<std::string> lines) {
+	float fontSize = 0.4f;
+	int textFont = cv::FONT_HERSHEY_SIMPLEX;
+	int thickness = 1;
+	int baseline;
+
+	cv::Size lineSize = cv::getTextSize(lines[0], textFont, fontSize, thickness, &baseline);
+
+	int lineHeight = lineSize.height;
+	int lineCount = lines.size();
+	int linePitch = 3;
+	int textHeight = lineHeight * lineCount + linePitch * (lineCount-1);
+
+	int imgHeight = image.rows;
+	int bottomMargin = 10;
+	int leftMargin = 10;
+	int textOrigin = imgHeight - bottomMargin - textHeight + linePitch;
+
+	cv::Scalar textColor(0, 255, 0);
+
+	for (int idx = 0; idx < lineCount; idx++) {
+		cv::putText(image, lines[idx], cv::Point(leftMargin, textOrigin),
+				textFont, fontSize, textColor, thickness, CV_AA);
+		textOrigin += lineHeight + linePitch;
 	}
 }
 
