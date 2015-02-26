@@ -69,9 +69,9 @@ namespace arm {
 			std::printf("moving done. New position: %.4f,%.4f,%.4f\n",
 				actual2[0], actual2[1], actual2[2]); 
 
-			if (std::sqrtf((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
-				std::sqrtf((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
-				std::sqrtf((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
+			if (std::sqrt((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
+				std::sqrt((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
+				std::sqrt((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
 				LOG(INFO) << "movement failed! RETRY";
 				// printf("status: %s\n", TheJacoArm->get_status());
 				TheJacoArm->start_api_ctrl();
