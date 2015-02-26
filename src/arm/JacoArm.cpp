@@ -68,9 +68,17 @@ namespace arm {
 			if (std::sqrtf((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
 				std::sqrtf((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
 				std::sqrtf((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
-				printf("movement failed!\n\n\n");
-				printf("status: %s\n", TheJacoArm->get_status());
+				printf("movement failed! RETRY\n");
+				// printf("status: %s\n", TheJacoArm->get_status());
+				TheJacoArm->start_api_ctrl();
+				TheJacoArm->set_control_cart();
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				TheJacoArm->push_joystick_button(2);
+				printf("push\n");
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				TheJacoArm->release_joystick();
+				TheJacoArm->stop_api_ctrl();
+				printf("release\n");
 				moveTo(vector);
 				//moveToStartPosition(true);
 			}
@@ -306,7 +314,7 @@ namespace arm {
 		openFingers();
 
 		cv::Vec3f const cap = getPosition();
-		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], cap[2]+200);
+		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], ItemPosition[2] + 200);
 		moveTo(zInvariant);
 		moveTo(ItemPosition);
 		closeFingers();
