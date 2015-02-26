@@ -42,12 +42,13 @@ namespace arm {
 				break;
 		}
 		KinDrv::jaco_position_t position = TheJacoArm->get_cart_pos();
-
+		cv::Vec3f actual2;
 		switch (handling)
 		{
 		case 0:
 			// 0 everything went fine, next thing is to actually move
 			//works with milimeter, accuracy is bad though
+			printf("Lets Move!\n");
 			position.position[0] = vector[0] / 1000;
 			position.position[1] = vector[1] / 1000;
 			position.position[2] = vector[2] / 1000;
@@ -56,10 +57,23 @@ namespace arm {
 				position.rotation[0], position.rotation[1], position.rotation[2],
 				position.finger_position[0], position.finger_position[1], position.finger_position[2]);
 			waitArmFinishMovement();
-			//TheJacoArm->set_target_cart(position.position, position.finger_position);
+			TheJacoArm->set_target_cart(position.position, position.finger_position);
 			//waitArmFinishMovement();
 			TheJacoArm->stop_api_ctrl();
+			std::printf("position we were to move to: %.4f,%.4f,%.4f\n", vector[0], vector[1], vector[2]);
+			actual2 = getPosition();
+			std::printf("moving done. New   Position: %.4f,%.4f,%.4f\n",
+				actual2[0], actual2[1], actual2[2]); 
 
+			if (std::sqrtf((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
+				std::sqrtf((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
+				std::sqrtf((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
+				printf("movement failed!\n\n\n");
+				printf("status: %s\n", TheJacoArm->get_status());
+				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				moveTo(vector);
+				//moveToStartPosition(true);
+			}
 			break;
 		case 1:
 			// 1 simple detour(no problem)
@@ -167,11 +181,21 @@ namespace arm {
 		TheJacoArm->start_api_ctrl();
 		KinDrv::jaco_position_t position = TheJacoArm->get_ang_pos();
 		KinDrv::jaco_position_t position2 = TheJacoArm->get_cart_pos();
-		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],
-		//	position.joints[2], position.joints[3], position.joints[4],	position.joints[5]);
+		printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],
+			position.joints[2], position.joints[3], position.joints[4],	position.joints[5]);
 		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
 		position.joints[2] += 0.6; //this offset prevents the arm from dropping
-		position.joints[5] += 180*MultiplesOfPI/pi;
+		position.joints[5] += 180 * MultiplesOfPI / pi;
+		//printf("MultiplesOfPI: %f\n", MultiplesOfPI);
+		//printf("rotation: %f\n", (position.joints[5]+(180 * MultiplesOfPI / pi)));
+		if (position.joints[5] > 8000 || position.joints[5] < -8000){
+			printf("WARNING: AND ROTATION NEAR MAXIMUM! RESTART ARM OR EXPECT WRONG HANDROTATION SOON");
+		}
+		if (position.joints[5] > 9500){
+			printf("WARNING: AND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL");
+			position.joints[5] = 360;
+		}
+
 		TheJacoArm->set_target_ang(position.joints, position2.finger_position);
 		waitArmFinishMovement();
 		TheJacoArm->stop_api_ctrl();
@@ -282,7 +306,7 @@ namespace arm {
 		openFingers();
 
 		cv::Vec3f const cap = getPosition();
-		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], cap[2]);
+		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], cap[2]+200);
 		moveTo(zInvariant);
 		moveTo(ItemPosition);
 		closeFingers();
