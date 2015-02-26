@@ -322,5 +322,9 @@ namespace calibration {
 			0.0f, 0.0f, 0.0f, 1.0f};
 	}
 
+	void AutomaticCalibrator::reset() {
+		m_bCalibrationAvailable = false;
+	}
+
 }
 }

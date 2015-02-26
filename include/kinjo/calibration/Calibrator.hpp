@@ -29,6 +29,11 @@ namespace kinjo
 			 * The calibration has finished when getIsValidTransformationAvailable returns true.
              **/
             virtual void calibrateAsync() = 0;
+
+			/**
+			 * Resets the calibrator for re-calibration.
+			 */
+			virtual void reset() = 0;
 		};
 	}
 }

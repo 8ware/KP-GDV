@@ -54,6 +54,11 @@ namespace calibration {
 		 **/
 		virtual void calibrateAsync() override;
 
+		/**
+		 * Refer to Calibrator::reset()
+		 */
+		virtual void reset() override;
+
 	private:
 		/**
 		 * Filters a point list for outliers.

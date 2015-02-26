@@ -35,6 +35,11 @@ namespace calibration {
 		 **/
 		virtual void calibrateAsync() override;
 
+		/**
+		 * Actually do nothing.
+		 */
+		void reset() override {}
+
 	private:
 		cv::Matx44f m_mat44fRigidBodyTransformation;
 	};
