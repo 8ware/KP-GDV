@@ -12,7 +12,7 @@
 namespace kinjo {
 namespace arm {
 
-	static const float pi = std::atan2(0, -1);
+	static const float pi = static_cast<float>(std::atan2(0, -1));
 
 	JacoArm::JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList)
 	{
@@ -193,9 +193,9 @@ namespace arm {
 		KinDrv::jaco_position_t position2 = TheJacoArm->get_cart_pos();
 		printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],
 			position.joints[2], position.joints[3], position.joints[4],	position.joints[5]);
-		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
-		position.joints[2] += 0.6; //this offset prevents the arm from dropping
-		position.joints[5] += 180 * MultiplesOfPI / pi;
+		position.joints[1] -= 1.4f; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6f; //this offset prevents the arm from dropping
+		position.joints[5] += 180.0f * MultiplesOfPI / pi;
 		//printf("MultiplesOfPI: %f\n", MultiplesOfPI);
 		//printf("rotation: %f\n", (position.joints[5]+(180 * MultiplesOfPI / pi)));
 		if (position.joints[5] > 8000 || position.joints[5] < -8000){
@@ -239,8 +239,8 @@ namespace arm {
 		position.finger_position[2] = 0;
 		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1], position.joints[2],
 		//	position.joints[3], position.joints[4], position.joints[5]);
-		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
-		position.joints[2] += 0.6; //this offset prevents the arm from dropping
+		position.joints[1] -= 1.4f; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6f; //this offset prevents the arm from dropping
 		//TheJacoArm->set_target_cart(position.position, position.finger_position);
 		TheJacoArm->set_target_ang(position.joints, position.finger_position);
 		waitFingersFinishMovement();
@@ -256,8 +256,8 @@ namespace arm {
 		position.finger_position[2] = 55;
 		//printf("joints: %f,%f,%f,%f,%f,%f \n", position.joints[0], position.joints[1],	position.joints[2],
 		//	position.joints[3],	position.joints[4], position.joints[5]);
-		position.joints[1] -= 1.4; //this offset prevents the arm from dropping
-		position.joints[2] += 0.6; //this offset prevents the arm from dropping
+		position.joints[1] -= 1.4f; //this offset prevents the arm from dropping
+		position.joints[2] += 0.6f; //this offset prevents the arm from dropping
 		TheJacoArm->set_target_ang(position.joints, position.finger_position);
 		waitFingersFinishMovement();
 		TheJacoArm->stop_api_ctrl();

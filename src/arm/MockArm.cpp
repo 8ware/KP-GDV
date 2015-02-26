@@ -13,12 +13,12 @@ namespace kinjo {
 		MockArm::MockArm()
 		{
 			//any start values
-			pos_offset = 0.1;
-			rot_offset = 0.1;
-			fin_offset = 10;
-			cart_pos = cv::Vec3f(0.050, 0.050, 0.050);
-			cart_rot = cv::Vec3f(1, 1, 1);
-			cart_fin = cv::Vec3f(10, 10, 10); 
+			pos_offset = 0.1f;
+			rot_offset = 0.1f;
+			fin_offset = 10.0f;
+			cart_pos = cv::Vec3f(0.050f, 0.050f, 0.050f);
+			cart_rot = cv::Vec3f(1.0f, 1.0f, 1.0f);
+			cart_fin = cv::Vec3f(10.0f, 10.0f, 10.0f); 
 			
 			std::cout << "MockArm found, using Mock Arm." << std::endl;
 		}
@@ -26,31 +26,31 @@ namespace kinjo {
 		void MockArm::moveTo(cv::Vec3f vector)
 		{
 			//works with milimeter, accuracy is bad though
-			cart_pos[0] = vector[0] / 1000 + pos_offset;
-			cart_pos[1] = vector[1] / 1000 + pos_offset;
-			cart_pos[2] = vector[2] / 1000 + pos_offset;
+			cart_pos[0] = vector[0] / 1000.0f + pos_offset;
+			cart_pos[1] = vector[1] / 1000.0f + pos_offset;
+			cart_pos[2] = vector[2] / 1000.0f + pos_offset;
 			waitArmFinishMovement();
 		}
 		void MockArm::rotateTo(cv::Vec3f vector)
 		{
-			cart_rot[0] = vector[0] / 1000 + rot_offset;
-			cart_rot[1] = vector[1] / 1000 + rot_offset;
-			cart_rot[2] = vector[2] / 1000 + rot_offset;
+			cart_rot[0] = vector[0] / 1000.0f + rot_offset;
+			cart_rot[1] = vector[1] / 1000.0f + rot_offset;
+			cart_rot[2] = vector[2] / 1000.0f + rot_offset;
 			waitArmFinishMovement();
 		}
 		void MockArm::moveBy(cv::Vec3f vector)
 		{
-			cart_pos[0] += vector[0] / 1000 + pos_offset;
-			cart_pos[1] += vector[1] / 1000 + pos_offset;
-			cart_pos[2] += vector[2] / 1000 + pos_offset;
+			cart_pos[0] += vector[0] / 1000.0f + pos_offset;
+			cart_pos[1] += vector[1] / 1000.0f + pos_offset;
+			cart_pos[2] += vector[2] / 1000.0f + pos_offset;
 			waitArmFinishMovement();
 		}
 		void MockArm::rotateBy(cv::Vec3f vector)
 		{
 			// TODO: Test
-			cart_rot[0] += vector[0] / 1000 + rot_offset;
-			cart_rot[1] += vector[1] / 1000 + rot_offset;
-			cart_rot[2] += vector[2] / 1000 + rot_offset;
+			cart_rot[0] += vector[0] / 1000.0f + rot_offset;
+			cart_rot[1] += vector[1] / 1000.0f + rot_offset;
+			cart_rot[2] += vector[2] / 1000.0f + rot_offset;
 
 			waitArmFinishMovement();
 		}
@@ -97,7 +97,7 @@ namespace kinjo {
 		}
 
 		bool MockArm::DiffIsZero(float X, float Y) const{
-			return (static_cast<int> (X * 1000) == static_cast<int>(Y * 1000));
+			return (static_cast<int> (X * 1000.0f) == static_cast<int>(Y * 1000.0f));
 		}
 	}
 }

@@ -62,7 +62,7 @@ std::uint16_t TestdataMock::getMaxDepthValue() const {
 cv::Vec3f TestdataMock::getPositionFromImagePointPx(cv::Point const & point) const {
 	// FIXME this is NO correct implemention
 	float depth = static_cast<float>(currDepthImages[imgIndex].at<ushort>(point));
-	return cv::Vec3f(point.x, point.y, depth);
+	return cv::Vec3f(static_cast<float>(point.x), static_cast<float>(point.y), depth);
 }
 
 

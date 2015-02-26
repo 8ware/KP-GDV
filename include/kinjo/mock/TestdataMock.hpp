@@ -37,15 +37,15 @@ public:
 	cv::Vec3f getRotation() const override;
 
 	// The following methods are not implemented
-	void moveToStartPosition(bool hasFingersClosed) override {}
-	void rotateTo(cv::Vec3f vector) override {}
-	void moveBy(cv::Vec3f vector) override {}
-	void rotateBy(cv::Vec3f vector) override {}
-	void rotateHandBy(float MultiplesOfPI) override {}
+	void moveToStartPosition(bool) override {}
+	void rotateTo(cv::Vec3f) override {}
+	void moveBy(cv::Vec3f) override {}
+	void rotateBy(cv::Vec3f) override {}
+	void rotateHandBy(float) override {}
 	void openFingers() override {}
 	void closeFingers() override {}
-	void GrabItem(cv::Vec3f ItemPosition) override {}
-	void DropItem(cv::Vec3f DropPosition, int DropHeight) override {}
+	void GrabItem(cv::Vec3f) override {}
+	void DropItem(cv::Vec3f, int) override {}
 	// ---
 
 	void updateImages(bool bRequireUpdates) override;
