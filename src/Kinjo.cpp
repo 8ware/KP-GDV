@@ -22,11 +22,13 @@
 
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
 #include <opencv2/highgui/highgui.hpp>
+#include <easylogging++.h>
 
-#include <iostream>		// std::cout
 #include <cmath>		// std::modf
 #include <limits>		// std::numeric_limits
 #include <cstdint>		// std::uint16_t
+
+INITIALIZE_EASYLOGGINGPP
 
 namespace kinjo
 {
@@ -169,7 +171,7 @@ namespace kinjo
 						applicationState = ApplicationState::Calibrated;
 
 						cv::Matx44f calibMatrix = calibrator->getRigidBodyTransformation();
-						std::cout << "rigidBodyTransformation: " << std::endl << calibMatrix << std::endl;
+						LOG(INFO) << "rigidBodyTransformation: " << calibMatrix;
 
 						kinjo::config::Config::writeMatrixToFile(matrixFileName,calibMatrix);
 					}
@@ -184,8 +186,8 @@ namespace kinjo
 						mouseState.pointChanged = false;
 
 						cv::Matx44f const mat44fRigidBodyTransformation(calibrator->getRigidBodyTransformation());
-
-						std::cout << "Click: image pixel position: " << mouseState.point << std::endl;
+						
+						LOG(INFO) << "Click: image pixel position: " << mouseState.point;
 
 						cv::Vec3f const v3fVisionPosition(
 							vision->estimateVisionPositionFromImagePointPx(mouseState.point));
@@ -194,16 +196,16 @@ namespace kinjo
 						{
 							//arm->moveToStartPosition(false);
 							//arm->openFingers();
-
-							std::cout << "Click: vision position: " << v3fVisionPosition << std::endl;
+							
+							LOG(INFO) << "Click: vision position: " << v3fVisionPosition;
 
 							cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
-							std::cout << "Click: resulting arm position: " << v3fArmPosition << std::endl;
+							LOG(INFO) << "Click: resulting arm position: " << v3fArmPosition;
 
 							v3fArmPosition[0] += graspXOffset;
 							v3fArmPosition[1] += graspYOffset;
 							v3fArmPosition[2] += graspZOffset;
-							std::cout << "        arm position + offset: " << v3fArmPosition << std::endl;
+							LOG(INFO) << "Click: arm position + offset: " << v3fArmPosition;
 
 							//cv::Vec3f const cap = arm->getPosition();
 							//cv::Vec3f const zInvariant(v3fArmPosition[0], v3fArmPosition[1], cap[2]);
@@ -219,7 +221,7 @@ namespace kinjo
 						}
 						else
 						{
-							std::cout << "Click: Can not move there! Unknown depth!" << std::endl;
+							LOG(WARNING) << "Click: Can not move there! Unknown depth!";
 						}
 					}
 				}
@@ -276,6 +278,9 @@ int main(int argc, char* argv[])
 {
 	try
 	{
+		// Initialize logging.
+		START_EASYLOGGINGPP(argc, argv);
+
 		// Declare the components being used by the kinjo application.
 		std::shared_ptr<kinjo::arm::Arm> arm;
 		std::shared_ptr<kinjo::vision::Vision> vision;
@@ -419,13 +424,13 @@ int main(int argc, char* argv[])
 	}
 	catch (std::exception const & e)
 	{
-		std::cerr << e.what() << std::endl;
+		LOG(FATAL) << e.what();
 		std::cin.ignore();
 		return 1;
 	}
 	catch (...)
 	{
-		std::cerr << "Unknown exception!" << std::endl;
+		LOG(FATAL) << "Unknown exception!";
 		std::cin.ignore();
 		return 1;
 	}

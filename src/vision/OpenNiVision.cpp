@@ -92,7 +92,7 @@ namespace vision {
 		if (status != XN_STATUS_OK) {
 			std::string cause = xnGetStatusString(status);
 			std::stringstream ss;
-			ss << action << " failed: " << cause << std::endl;
+			ss << action << " failed: " << cause;
 			throw std::runtime_error(ss.str().c_str());
 		}
 	}

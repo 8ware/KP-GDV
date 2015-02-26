@@ -1,7 +1,7 @@
 #include <kinjo/arm/MovementGuardOne.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-
+#include <easylogging++.h>
 
 namespace kinjo {
 namespace arm {
@@ -130,19 +130,19 @@ namespace arm {
 	bool MovementGuardOne::EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) {
 		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCircleRadius){
 			*InInnerCircle = true;
-			printf("endpoint too close to socket");
+			LOG(INFO) << "endpoint too close to socket";
 			return false;
 		}
 		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) > OuterCircleRadius){
 			*InInnerCircle = false;
-			printf("endpoint not reachable, too far away");
+			LOG(INFO) << "endpoint not reachable, too far away";
 			return false;
 		}
 		return true;
 	}
 	bool MovementGuardOne::EndpointNotInTable(cv::Vec3f endPos){
 		if (endPos[2] <= tableHeight){
-			printf("endpoint in table, Z = %f \n", endPos[2]);
+			LOG(INFO) << "endpoint in table, Z = " << endPos[2];
 			return false;
 		}
 		return true;

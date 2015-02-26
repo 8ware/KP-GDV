@@ -2,7 +2,10 @@
 
 #include <kinjo/arm/JacoArm.hpp>
 #include <kinjo/arm/MovementGuardOne.hpp>
+
 #include <libkindrv/kindrv.h>   // KinDrv::JacoArm
+
+#include <easylogging++.h>
 
 #include <cmath>
 #include <thread>
@@ -17,7 +20,8 @@ namespace arm {
 	{
 		TheJacoArm = std::make_shared<KinDrv::JacoArm>();
 		this->MovGuardList = MovGuardList;
-		std::cout << "JacoArm found, using Jaco Arm." << std::endl;
+		
+		LOG(INFO) << "JacoArm found, using Jaco Arm.";
 	}
 
 	void JacoArm::moveTo(cv::Vec3f vector)
@@ -48,7 +52,7 @@ namespace arm {
 		case 0:
 			// 0 everything went fine, next thing is to actually move
 			//works with milimeter, accuracy is bad though
-			printf("Lets Move!\n");
+			LOG(INFO) << "Lets Move!";
 			position.position[0] = vector[0] / 1000;
 			position.position[1] = vector[1] / 1000;
 			position.position[2] = vector[2] / 1000;
@@ -62,43 +66,43 @@ namespace arm {
 			TheJacoArm->stop_api_ctrl();
 			std::printf("position we were to move to: %.4f,%.4f,%.4f\n", vector[0], vector[1], vector[2]);
 			actual2 = getPosition();
-			std::printf("moving done. New   Position: %.4f,%.4f,%.4f\n",
+			std::printf("moving done. New position: %.4f,%.4f,%.4f\n",
 				actual2[0], actual2[1], actual2[2]); 
 
 			if (std::sqrtf((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
 				std::sqrtf((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
 				std::sqrtf((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
-				printf("movement failed! RETRY\n");
+				LOG(INFO) << "movement failed! RETRY";
 				// printf("status: %s\n", TheJacoArm->get_status());
 				TheJacoArm->start_api_ctrl();
 				TheJacoArm->set_control_cart();
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 				TheJacoArm->push_joystick_button(2);
-				printf("push\n");
+				LOG(INFO) << "push";
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 				TheJacoArm->release_joystick();
 				TheJacoArm->stop_api_ctrl();
-				printf("release\n");
+				LOG(INFO) << "release";
 				moveTo(vector);
 				//moveToStartPosition(true);
 			}
 			break;
 		case 1:
 			// 1 simple detour(no problem)
-			printf("taking detour\n");
+			LOG(INFO) << "taking detour";
 			moveTo(PosOfDetour * 1000);
 			moveTo(Position_end * 1000);
 			break;
 		case 2:
 			// 2 endpoint in a deadzone
-			printf("Endpoint is in deadzone\n");
+			LOG(INFO) << "Endpoint is in deadzone";
 			break;
 		case 3:
 			// 3 startpoint in a deadzone
-			printf("Startpoint is in a deadzone\n");
+			LOG(INFO) << "Startpoint is in a deadzone";
 			break;
 		default:
-			printf("Something went terribly wrong in deadzone handling!\n");
+			LOG(INFO) << "Something went terribly wrong in deadzone handling!";
 			break;
 		}
 
@@ -197,10 +201,10 @@ namespace arm {
 		//printf("MultiplesOfPI: %f\n", MultiplesOfPI);
 		//printf("rotation: %f\n", (position.joints[5]+(180 * MultiplesOfPI / pi)));
 		if (position.joints[5] > 8000 || position.joints[5] < -8000){
-			printf("WARNING: AND ROTATION NEAR MAXIMUM! RESTART ARM OR EXPECT WRONG HANDROTATION SOON");
+			LOG(INFO) << "WARNING: AND ROTATION NEAR MAXIMUM! RESTART ARM OR EXPECT WRONG HANDROTATION SOON";
 		}
 		if (position.joints[5] > 9500){
-			printf("WARNING: AND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL");
+			LOG(INFO) << "WARNING: AND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL";
 			position.joints[5] = 360;
 		}
 
@@ -320,7 +324,7 @@ namespace arm {
 		closeFingers();
 		moveToStartPosition(true);
 
-		printf("Grab Item done! \n");
+		LOG(INFO) << "Grab Item done!";
 	}
 
 	void JacoArm::DropItem(cv::Vec3f DropPosition, int DropHeight){
@@ -333,7 +337,8 @@ namespace arm {
 		moveTo(DropPosition);
 		openFingers();
 		moveToStartPosition(false);
-		printf("Drop Item done! \n");
+
+		LOG(INFO) << "Drop Item done!";
 	}
 
 }//arm

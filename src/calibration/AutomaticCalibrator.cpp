@@ -2,6 +2,8 @@
 
 #include <kinjo/recognition/Recognizer.hpp>
 
+#include <easylogging++.h>
+
 #include <vector>
 #include <iostream>
 #include <map>
@@ -20,7 +22,7 @@ namespace calibration {
 		std::size_t const & uiCalibrationPointCount,
 		std::size_t const & uiCalibrationRotationCount,
 		std::size_t const & uiMinimumValidPositionsAfterFilteringPercent,
-		std::size_t const & fMaximumFilterEuclideanDistancePointToAverage) :
+		float const & fMaximumFilterEuclideanDistancePointToAverage) :
 			m_matCurrentRigidBodyTransformation(cv::Matx44f::zeros()),
 			m_bCalibrationAvailable(false),
 			m_pArm(pArm),
@@ -68,7 +70,7 @@ namespace calibration {
 	 **/
 	void AutomaticCalibrator::calibrationThreadMain()
 	{
-		std::cout << "Calib: Begin calibration..." << std::endl;
+		LOG(INFO) << "Calib: Begin calibration...";
 
 		std::vector<std::pair<cv::Vec3f, cv::Vec3f>> m_vCorrespondences;
 		m_vCorrespondences.reserve(m_uiCalibrationPointCount);
@@ -76,19 +78,19 @@ namespace calibration {
 		// Get the point correspondences.
 		for(std::size_t uiCalibrationPoint(0); uiCalibrationPoint<m_uiCalibrationPointCount; ++uiCalibrationPoint)
 		{
-			std::cout << "Calib: uiCalibrationPoint: " << uiCalibrationPoint << std::endl;
+			LOG(INFO) << "Calib: uiCalibrationPoint: " << uiCalibrationPoint;
 
 			cv::Vec3f v3fAveragedVisionPosition(0.0f, 0.0f, 0.0f);
 			do
 			{
 				auto const v3fArmDesiredPosition(m_pCalibrationPointGenerator->getNextCalibrationPoint());
-				std::cout << "Calib: v3fArmDesiredPosition: " << v3fArmDesiredPosition << std::endl;
+				LOG(INFO) << "Calib: v3fArmDesiredPosition: " << v3fArmDesiredPosition;
 				m_pArm->moveTo(v3fArmDesiredPosition);
-				std::cout << "Calib: reached position: " << m_pArm->getPosition() << std::endl;
+				LOG(INFO) << "Calib: reached position: " << m_pArm->getPosition();
 				// \TODO: Maybe we should check if the position was approximately reached and retry else.
 
 				v3fAveragedVisionPosition = getAveragedCalibrationObjectVisionPosition();
-				std::cout << "Calib: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition << std::endl;
+				LOG(INFO) << "Calib: v3fAveragedVisionPosition: " << v3fAveragedVisionPosition;
 			}
 			// If the object was not recognized, retry.
 			while(v3fAveragedVisionPosition[2] == 0.0f);
@@ -103,14 +105,14 @@ namespace calibration {
 		m_matCurrentRigidBodyTransformation = estimateRigidBodyTransformation(m_vCorrespondences);
 		m_bCalibrationAvailable = true;
 
-		std::cout << "Calib: Finished calibration..." << std::endl;
+		LOG(INFO) << "Calib: Finished calibration...";
 	}
 	/**
 	 *
 	 **/
 	cv::Vec3f AutomaticCalibrator::getAveragedCalibrationObjectVisionPosition() const
 	{
-		std::cout << "Calib: [+] getAveragedCalibrationObjectVisionPosition" << std::endl;
+		LOG(INFO) << "Calib: [+] getAveragedCalibrationObjectVisionPosition";
 
 		std::vector<cv::Vec3f> vv3fVisionPositions;
 
@@ -122,7 +124,7 @@ namespace calibration {
 			// Multiple recognition attempts at the same position/rotation.
 			for(std::size_t uiRecognitionAttempt(0); uiRecognitionAttempt<uiRecognitionAttempts; ++uiRecognitionAttempt)
 			{
-				std::cout << "Calib: uiRecognitionAttempt: " << uiRecognitionAttempt << std::endl;
+				LOG(INFO) << "Calib: uiRecognitionAttempt: " << uiRecognitionAttempt;
 				// We need new images.
 				m_pVision->updateImages(true);
 				// Get current calibration object vision position.
@@ -133,12 +135,12 @@ namespace calibration {
 				// If this is a valid point.
 				if(v2iImagePointPx != cv::Point(0,0))
 				{
-					std::cout << "Calib: v2iImagePointPx: (" << v2iImagePointPx.x << "," << v2iImagePointPx.y << ")" << std::endl;
+					LOG(INFO) << "Calib: v2iImagePointPx: (" << v2iImagePointPx.x << "," << v2iImagePointPx.y << ")";
 					cv::Vec3f const v3fEstimatedVisionPosition(m_pVision->estimateVisionPositionFromImagePointPx(v2iImagePointPx));
 					if(v3fEstimatedVisionPosition[2] != 0.0f)
 					{
 						vv3fVisionPositions.push_back(v3fEstimatedVisionPosition);
-						std::cout << "Calib: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition << std::endl;
+						LOG(INFO) << "Calib: v3fEstimatedVisionPosition: " << v3fEstimatedVisionPosition;
 					}
 				}
 			}
@@ -164,12 +166,12 @@ namespace calibration {
 		// If the object could not be recognized (maybe too far away or out of image).
 		if(vv3fVisionPositions.size() < uiMinimumValidPositionsAfterFilteringCount)
 		{
-			std::cout << "Calib: No valid calibration object found..." << std::endl;
+			LOG(INFO) << "Calib: No valid calibration object found...";
 			// Delete all points from the list to return a zero vector.
 			vv3fVisionPositions.clear();
 		}
 
-		std::cout << "Calib: [-] getAveragedCalibrationObjectVisionPosition" << std::endl;
+		LOG(INFO) << "Calib: [-] getAveragedCalibrationObjectVisionPosition";
 
 		return average(vv3fVisionPositions);
 	}
@@ -180,7 +182,7 @@ namespace calibration {
 		std::vector<cv::Vec3f> & vv3fVisionPositions,
 		float fInlierDistanceMm)
 	{
-		std::cout << "Calib: #points before filtering: " << vv3fVisionPositions.size() << std::endl;
+		LOG(INFO) << "Calib: #points before filtering: " << vv3fVisionPositions.size();
 
 		while(vv3fVisionPositions.size()>1)
 		{
@@ -215,7 +217,7 @@ namespace calibration {
 			}
 		}
 
-		std::cout << "Calib: #points after filtering: " << vv3fVisionPositions.size() << std::endl;
+		LOG(INFO) << "Calib: #points after filtering: " << vv3fVisionPositions.size();
 	}
 	/**
 	 *
@@ -247,7 +249,7 @@ namespace calibration {
 	cv::Matx44f AutomaticCalibrator::estimateRigidBodyTransformation(
 		std::vector<std::pair<cv::Vec3f, cv::Vec3f>> const & vv2v3fCorrespondences)
 	{
-		std::cout << "Calib: [+] estimateRigidBodyTransformation" << std::endl;
+		LOG(INFO) << "Calib: [+] estimateRigidBodyTransformation";
 
 		std::size_t const uiCorrespondenceCount(vv2v3fCorrespondences.size());
 		if(uiCorrespondenceCount < 3)
@@ -311,7 +313,7 @@ namespace calibration {
 		// Compute the translation vector.
 		cv::Vec3f const t(v3CenterLeft - R * v3CenterRight);
 
-		std::cout << "Calib: [-] estimateRigidBodyTransformation" << std::endl;
+		LOG(INFO) << "Calib: [-] estimateRigidBodyTransformation";
 
 		return cv::Matx44f{
 			R(0, 0), R(0, 1), R(0, 2), t(0),

@@ -5,6 +5,8 @@
 
 #include <kinjo/arm/MovementGuardOne.hpp>
 
+#include <easylogging++.h>
+
 #include <memory>                   // std::shared_ptr
 #include <iostream>
 
@@ -21,7 +23,7 @@ namespace arm {
 		}
 		catch (std::exception const e)
 		{
-			std::cerr << e.what() << std::endl;
+			LOG(FATAL) << e.what();
 		}
 
 		// Add search for more Arms here if the Jaco arm is not found!
