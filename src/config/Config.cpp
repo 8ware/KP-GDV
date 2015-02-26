@@ -80,7 +80,7 @@ bool Config::readMatrixFromFile(std::string const & fileName, cv::Matx44f &matri
 			if (irow->IsArray()){
 				size_t colNr = 0;
 				for (rapidjson::Value::ConstValueIterator icol = irow->Begin(); icol != irow->End(); icol++){
-					matrix.row(rowNr).col(colNr).val[0]=(static_cast<float> (icol->GetDouble()));
+					matrix(rowNr, colNr) = (static_cast<float> (icol->GetDouble()));
 					colNr++;
 				}
 			}
