@@ -195,14 +195,16 @@ namespace arm {
 		position.joints[1] -= 1.4f; //this offset prevents the arm from dropping
 		position.joints[2] += 0.6f; //this offset prevents the arm from dropping
 		position.joints[5] += 180.0f * MultiplesOfPI / pi;
-		//printf("MultiplesOfPI: %f\n", MultiplesOfPI);
-		//printf("rotation: %f\n", (position.joints[5]+(180 * MultiplesOfPI / pi)));
 		if (position.joints[5] > 8000 || position.joints[5] < -8000){
-			LOG(INFO) << "WARNING: AND ROTATION NEAR MAXIMUM! RESTART ARM OR EXPECT WRONG HANDROTATION SOON";
+			LOG(WARNING) << "HAND ROTATION NEAR MAXIMUM! RESTART ARM OR EXPECT WRONG HANDROTATION SOON";
 		}
-		if (position.joints[5] > 9500){
-			LOG(INFO) << "WARNING: AND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL";
-			position.joints[5] = 360;
+		if (position.joints[5] > 360 * 25){
+			LOG(WARNING) << "HAND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL";
+			position.joints[5] -= 360 * 25;
+		}
+		if (position.joints[5] < -360 * 25){
+			LOG(WARNING) << "HAND ROTATION NEAR MAXIMUM! ARM WOULD CRASH SOON, ROTATE HAND BACK TO NORMAL";
+			position.joints[5] += 360 * 25;
 		}
 
 		TheJacoArm->set_target_ang(position.joints, position2.finger_position);

@@ -34,21 +34,24 @@ namespace arm {
 		void moveToStartPosition(bool hasFingersClosed) override;
 
         /**
-        * \param vector the absolute grab rotation in Degree
+        * \param vector the absolute grasp rotation, -pi to pi
         */
         void rotateTo(cv::Vec3f vector) override;
 
         /**
-        * \param vector the relative position in centimetres.
+        * \param vector the relative position in millimeter.
         */
         void moveBy(cv::Vec3f vector) override;
 
         /**
-        * \param vector the relative Rotation in Degree.
+        * \param vector the relative Rotation, -pi to pi.
         */
         void rotateBy(cv::Vec3f vector) override;
 
-		void rotateHandBy(float MultiplesOfPI) override;
+		/**
+		* \param pi equals a 180 degree rotation
+		**/
+		void rotateHandBy(float pi) override;
 
         /**
         * \return the absolute position in centimetres.
