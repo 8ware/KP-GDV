@@ -1,5 +1,4 @@
 #include <kinjo/arm/JacoArm.hpp>
-#include <kinjo/arm/MovementGuardOne.hpp>
 
 #include <libkindrv/kindrv.h>   // KinDrv::JacoArm
 

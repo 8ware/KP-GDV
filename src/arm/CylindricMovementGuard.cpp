@@ -1,4 +1,4 @@
-#include <kinjo/arm/MovementGuardOne.hpp>
+#include <kinjo/arm/CylindricMovementGuard.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <easylogging++.h>
@@ -6,11 +6,11 @@
 namespace kinjo {
 namespace arm {
 
-	MovementGuardOne::MovementGuardOne()
+	CylindricMovementGuard::CylindricMovementGuard()
 	{
 	}
 
-	void MovementGuardOne::Init_Deadzones() {
+	void CylindricMovementGuard::Init_Deadzones() {
 		//TODO: Read Values from config file
 		InnerCircleRadius = 0.2f;
 		OuterCircleRadius = 0.7f;
@@ -18,7 +18,7 @@ namespace arm {
 		tableHeight = -0.1f;
 	}
 
-	void MovementGuardOne::Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst){
+	void CylindricMovementGuard::Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst){
 		Init_Deadzones();
 		bool InInnerCircle = false;
 		if (startPos == endPos){
@@ -56,7 +56,7 @@ namespace arm {
 		return;
 	}
 
-	bool MovementGuardOne::LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos) {
+	bool CylindricMovementGuard::LineCircleIntersection(cv::Vec3f startPos, cv::Vec3f endPos) {
 
 		//g: x-> = S + Lambda * (E - S) = S + Lambda * B
 		//define short variable names
@@ -84,7 +84,7 @@ namespace arm {
 		return false;
 	}
 
-	cv::Vec3f MovementGuardOne::CalculateDetour(cv::Vec3f startPos, cv::Vec3f endPos){
+	cv::Vec3f CylindricMovementGuard::CalculateDetour(cv::Vec3f startPos, cv::Vec3f endPos){
 
 		cv::Vec3f S = startPos,
 			B = endPos - startPos,
@@ -115,7 +115,7 @@ namespace arm {
 		return P;
 	}
 
-	bool MovementGuardOne::StartpointLegal(cv::Vec3f startPos, bool *InInnerCircle) {
+	bool CylindricMovementGuard::StartpointLegal(cv::Vec3f startPos, bool *InInnerCircle) {
 		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < InnerCircleRadius) {
 			*InInnerCircle = true;
 			return false;
@@ -127,7 +127,7 @@ namespace arm {
 		return true;
 	}
 
-	bool MovementGuardOne::EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) {
+	bool CylindricMovementGuard::EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) {
 		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCircleRadius){
 			*InInnerCircle = true;
 			LOG(INFO) << "endpoint too close to socket";
@@ -140,7 +140,7 @@ namespace arm {
 		}
 		return true;
 	}
-	bool MovementGuardOne::EndpointNotInTable(cv::Vec3f endPos){
+	bool CylindricMovementGuard::EndpointNotInTable(cv::Vec3f endPos){
 		if (endPos[2] <= tableHeight){
 			LOG(INFO) << "endpoint in table, Z = " << endPos[2];
 			return false;

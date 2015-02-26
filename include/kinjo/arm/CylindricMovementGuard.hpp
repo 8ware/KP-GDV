@@ -6,11 +6,11 @@
 namespace kinjo {
 namespace arm {
 
-	class MovementGuardOne final : public MovementGuard {
+	class CylindricMovementGuard final : public MovementGuard {
 
 	public:
-		MovementGuardOne();
-		~MovementGuardOne() = default;
+		CylindricMovementGuard();
+		~CylindricMovementGuard() = default;
 		void Init_Deadzones() override;
 
 		/**

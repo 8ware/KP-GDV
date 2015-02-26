@@ -8,7 +8,7 @@
 
 #include <kinjo/RenderHelper.hpp>
 #include <kinjo/arm/JacoArm.hpp>
-#include <kinjo/arm/MovementGuardOne.hpp>
+#include <kinjo/arm/CylindricMovementGuard.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
 #include <kinjo/calibration/AutomaticCalibrator.hpp>
 #include <kinjo/calibration/HardCodedCalibrator.hpp>
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
 			bool const bUseMockImplementation(config.getBool("mock", "bUseMockImplementation"));
 			if (!bUseMockImplementation) {
 				std::list<std::shared_ptr<kinjo::arm::MovementGuard>> MovGuardList;
-				MovGuardList.push_back(std::make_shared<kinjo::arm::MovementGuardOne>());
+				MovGuardList.push_back(std::make_shared<kinjo::arm::CylindricMovementGuard>());
 				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList);
 
 				// Load a random calibration point generator if the calibration is not hard coded.
