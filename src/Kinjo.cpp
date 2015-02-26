@@ -15,10 +15,8 @@
 #include <kinjo/calibration/RandomCalibrationPointGenerator.hpp>
 #include <kinjo/recognition/ColorBasedCircleRecognizer.hpp>
 #include <kinjo/recognition/ManualRecognizer.hpp>
-#ifndef _MSC_VER
 #include <kinjo/mock/DirectoryBasedDataProvider.hpp>
 #include <kinjo/mock/TestdataMock.hpp>
-#endif
 #include <kinjo/config/Config.hpp>
 
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
@@ -288,9 +286,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<kinjo::calibration::CalibrationPointGenerator> calibrationPointGenerator;
 		std::shared_ptr<kinjo::calibration::Calibrator> calibrator;
 		std::shared_ptr<kinjo::recognition::Recognizer> recognizer;
-#ifndef _MSC_VER
 		std::shared_ptr<kinjo::mock::DirectoryBasedDataProvider> dataProvider;
-#endif
 
 		std::string sConfigPath;
 		// If there is no command line argument, take the config from the current directory.
@@ -368,7 +364,6 @@ int main(int argc, char* argv[])
 				vision = std::make_shared<kinjo::vision::OpenNiVision>();
 
 			} else {
-#ifndef _MSC_VER
 				std::string const sMockDataDirectory(config.getString("mock", "sMockDataDirectory"));
 				dataProvider = std::make_shared<kinjo::mock::DirectoryBasedDataProvider>(sMockDataDirectory);
 
@@ -381,9 +376,6 @@ int main(int argc, char* argv[])
 
 				cv::Vec3f position = calibrationPointGenerator->getNextCalibrationPoint();
 				arm->moveTo(position);
-#else
-				throw std::logic_error("DirectoryBasedDataProvider not supported on windows!");
-#endif
 			}
 
 			// Load a calibrator.

@@ -1,9 +1,13 @@
-#ifndef _MSC_VER
 #include <kinjo/mock/DirectoryBasedDataProvider.hpp>
 
 #include <iostream>
 #include <algorithm>
+
+#ifndef _MSC_VER
 #include <dirent.h>
+#else
+#include <dirent-win/dirent.h>
+#endif
 
 #include <opencv2/highgui/highgui.hpp>
 
@@ -126,4 +130,3 @@ cv::Vec3f DirectoryBasedDataProvider::checkPosition(cv::Vec3f expected) const {
 
 } // end namespace mock
 } // end namespace kinjo
-#endif
