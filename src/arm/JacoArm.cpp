@@ -68,9 +68,10 @@ namespace arm {
 			if (std::sqrtf((vector[0] - actual2[0]) * (vector[0] - actual2[0])) > 30 ||
 				std::sqrtf((vector[1] - actual2[1]) * (vector[1] - actual2[1])) > 30 ||
 				std::sqrtf((vector[2] - actual2[2]) * (vector[2] - actual2[2])) > 30) {
-				printf("movement failed!\n\n\n");
-				printf("status: %s\n", TheJacoArm->get_status());
+				printf("movement failed! RETRY\n");
+				// printf("status: %s\n", TheJacoArm->get_status());
 				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				moveTo(getPosition());
 				moveTo(vector);
 				//moveToStartPosition(true);
 			}
