@@ -4,8 +4,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>510</x>
-      <y>200</y>
+      <x>60</x>
+      <y>180</y>
       <w>440</w>
       <h>70</h>
     </coordinates>
@@ -19,8 +19,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>470</x>
-      <y>330</y>
+      <x>20</x>
+      <y>310</y>
       <w>160</w>
       <h>50</h>
     </coordinates>
@@ -32,8 +32,8 @@ Vision
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>650</x>
-      <y>330</y>
+      <x>200</x>
+      <y>310</y>
       <w>160</w>
       <h>50</h>
     </coordinates>
@@ -45,8 +45,8 @@ Arm
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>260</y>
+      <x>270</x>
+      <y>240</y>
       <w>210</w>
       <h>170</h>
     </coordinates>
@@ -56,8 +56,8 @@ Arm
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>540</x>
-      <y>260</y>
+      <x>90</x>
+      <y>240</y>
       <w>210</w>
       <h>90</h>
     </coordinates>
@@ -67,8 +67,8 @@ Arm
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>260</y>
+      <x>270</x>
+      <y>240</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
@@ -78,8 +78,8 @@ Arm
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>450</x>
-      <y>410</y>
+      <x>0</x>
+      <y>390</y>
       <w>560</w>
       <h>50</h>
     </coordinates>
@@ -92,8 +92,8 @@ Arm
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>650</y>
+      <x>10</x>
+      <y>630</y>
       <w>260</w>
       <h>50</h>
     </coordinates>
@@ -105,8 +105,8 @@ Arm
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>520</y>
+      <x>10</x>
+      <y>500</y>
       <w>540</w>
       <h>70</h>
     </coordinates>
@@ -119,8 +119,8 @@ Recognizer
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>740</x>
-      <y>650</y>
+      <x>290</x>
+      <y>630</y>
       <w>260</w>
       <h>50</h>
     </coordinates>
@@ -132,8 +132,8 @@ Recognizer
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
-      <y>450</y>
+      <x>270</x>
+      <y>430</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
@@ -143,8 +143,8 @@ Recognizer
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>590</x>
-      <y>580</y>
+      <x>140</x>
+      <y>560</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
@@ -154,12 +154,191 @@ Recognizer
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>860</x>
-      <y>580</y>
+      <x>410</x>
+      <y>560</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>150</y>
+      <w>280</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Grasper
+--
++pickItem( position : Vec3f ) : void
++dropItem( position : Vec3f ) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>830</x>
+      <y>280</y>
+      <w>540</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>SimplePickAndDropGrasper
+--
+--
++SimpleGrasper( arm : Arm, picker : PickStrategy, dropper : DropStrategy )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>780</x>
+      <y>460</y>
+      <w>280</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+PickStrategy
+--
++pickItem( position : Vec3f ) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1130</x>
+      <y>460</y>
+      <w>290</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+DropStrategy
+--
++dropItem( position : Vec3f ) : void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>780</x>
+      <y>570</y>
+      <w>280</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>SimpleTablePickStrategy
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1230</x>
+      <y>590</y>
+      <w>290</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>BoxDropStrategy
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1130</x>
+      <y>640</y>
+      <w>290</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>HandDropStrategy
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1170</x>
+      <y>530</y>
+      <w>30</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1340</x>
+      <y>530</y>
+      <w>30</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>910</x>
+      <y>530</y>
+      <w>30</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1080</x>
+      <y>230</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1320</x>
+      <y>330</y>
+      <w>90</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+r2=-dropper
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>860</x>
+      <y>330</y>
+      <w>80</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+r2=-picker
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>350</x>
+      <y>300</y>
+      <w>500</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+r2=-arm
+m2=1</panel_attributes>
+    <additional_attributes>480.0;20.0;10.0;20.0</additional_attributes>
   </element>
 </diagram>
