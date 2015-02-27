@@ -24,6 +24,15 @@
 #include <kinjo/app/ReadyState.hpp>
 #include <kinjo/app/GraspState.hpp>
 
+#include <kinjo/grasp/Grasper.hpp>
+#include <kinjo/grasp/SimplePickAndDropGrasper.hpp>
+#include <kinjo/grasp/PickStrategy.hpp>
+#include <kinjo/grasp/DropStrategy.hpp>
+#include <kinjo/grasp/SimpleTablePickStrategy.hpp>
+#include <kinjo/grasp/BoxDropStrategy.hpp>
+#include <kinjo/grasp/HandDropStrategy.hpp>
+#include <kinjo/grasp/SimpleTableDropStrategy.hpp>
+
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
 #include <opencv2/highgui/highgui.hpp>
 #include <easylogging++.h>
@@ -375,6 +384,11 @@ int main(int argc, char* argv[])
 			}
 		}
 
+
+		kinjo::grasp::PickStrategy* picker = new kinjo::grasp::SimpleTablePickStrategy(arm.get());
+		kinjo::grasp::DropStrategy* dropper = new kinjo::grasp::BoxDropStrategy(arm.get());
+		kinjo::grasp::Grasper* grasper = new kinjo::grasp::SimplePickAndDropGrasper(picker, dropper);
+
 		std::string matrixFileName = config.getString("hardCodedCalibrator", "matrixFileName");
 
 		bool showDepthImage = config.getBool("GUI", "ShowDepthImage");
@@ -396,7 +410,7 @@ int main(int argc, char* argv[])
 		std::shared_ptr<kinjo::app::State> readyState = std::make_shared<kinjo::app::ReadyState>(
 				&calibStatePtr, &graspStatePtr, calibrator.get(), matrixFileName);
 		std::shared_ptr<kinjo::app::State> graspState = std::make_shared<kinjo::app::GraspState>(&readyStatePtr,
-				arm.get(), vision.get(), calibrator.get(), &graspXOffset, &graspYOffset, &graspZOffset);
+				grasper, vision.get(), calibrator.get(), &graspXOffset, &graspYOffset, &graspZOffset);
 
 		initStatePtr = initState.get();
 		calibStatePtr = calibState.get();

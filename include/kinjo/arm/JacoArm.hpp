@@ -65,9 +65,6 @@ namespace arm {
         void openFingers() override;
         void closeFingers() override;
 
-		void GrabItem(cv::Vec3f ItemPosition) override;
-		void DropItem(cv::Vec3f DropPosition, int DropHeight) override;
-
     private:
 		/**
 		* Helper to wait for the arm finish moving.
@@ -103,7 +100,6 @@ namespace arm {
     private:
         std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
 		std::list<std::shared_ptr<MovementGuard>> MovGuardList;
-		//std::shared_ptr<MovementGuard> MovGuard;
     };//class
     
 }

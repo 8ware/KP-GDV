@@ -63,19 +63,6 @@ namespace arm {
         **/
 		virtual void closeFingers() = 0;
 
-		/**
-		* /param ItemPostion, Position of the Item in the Arms Coordinate System!
-		**/
-		virtual void GrabItem(cv::Vec3f ItemPosition) = 0;
-
-		/**
-		* /param DropPosition, position where to Drop the Item, in Arm coordinate System
-		* /param DropHeight, height in which the Item will be dropped in milimeter
-		* for example a Bottle will need a higher dropHeight than the tennisball, or if we drop the ball inside a Box
-		* we need to add even more height
-		* It is recommended to add a Dephtoffset in vision when placing the ball into a Box
-		**/
-		virtual void DropItem(cv::Vec3f DropPosition, int DropHeight) = 0;
     };
     
 }

@@ -312,34 +312,6 @@ namespace arm {
 		return (static_cast<int> (X * 1000) == static_cast<int>(Y * 1000));
 	}
 
-	void JacoArm::GrabItem(cv::Vec3f ItemPosition){
-		moveToStartPosition(false);
-		openFingers();
-
-		cv::Vec3f const cap = getPosition();
-		cv::Vec3f const zInvariant(ItemPosition[0], ItemPosition[1], ItemPosition[2] + 200);
-		moveTo(zInvariant);
-		moveTo(ItemPosition);
-		closeFingers();
-		moveToStartPosition(true);
-
-		LOG(INFO) << "Grab Item done!";
-	}
-
-	void JacoArm::DropItem(cv::Vec3f DropPosition, int DropHeight){
-		moveToStartPosition(true);
-
-		cv::Vec3f const cap = getPosition();
-		cv::Vec3f const zInvariant(DropPosition[0], DropPosition[1], cap[2]);
-		moveTo(zInvariant);
-		DropPosition[2] += DropHeight;
-		moveTo(DropPosition);
-		openFingers();
-		moveToStartPosition(false);
-
-		LOG(INFO) << "Drop Item done!";
-	}
-
 }//arm
 }//kinjo
 

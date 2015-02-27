@@ -44,8 +44,6 @@ public:
 	void rotateHandBy(float) override {}
 	void openFingers() override {}
 	void closeFingers() override {}
-	void GrabItem(cv::Vec3f) override {}
-	void DropItem(cv::Vec3f, int) override {}
 	// ---
 
 	void updateImages(bool bRequireUpdates) override;

@@ -1,13 +1,14 @@
 #pragma once
 
 #include <queue>
+#include <mutex>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <kinjo/app/State.hpp>
-#include <kinjo/arm/Arm.hpp>
 #include <kinjo/vision/Vision.hpp>
 #include <kinjo/calibration/Calibrator.hpp>
+#include <kinjo/grasp/Grasper.hpp>
 
 
 namespace kinjo {
@@ -35,7 +36,7 @@ public:
 	 * \param zOffset offset in z-direction
 	 */
 	GraspState(app::State** readyState,
-			arm::Arm* arm, vision::Vision* vision, calibration::Calibrator* calibrator,
+			grasp::Grasper* grasper, vision::Vision* vision, calibration::Calibrator* calibrator,
 			int* xOffset, int* yOffset, int* zOffset);
 
 	/**
@@ -51,6 +52,8 @@ public:
 
 private:
 
+	std::mutex* mutex;
+
 	/**
 	 * The pointer to the ready state pointer.
 	 */
@@ -59,7 +62,7 @@ private:
 	/**
 	 * The arm to be used.
 	 */
-	arm::Arm* arm;
+	grasp::Grasper* grasper;
 	/**
 	 * The vision to be used.
 	 */
@@ -85,7 +88,11 @@ private:
 	/**
 	 * The queue of target positions.
 	 */
-	std::queue<cv::Vec3f> queue;
+	std::queue<cv::Vec3f> pickqueue;	
+	/**
+	* The target positions to drop items
+	*/
+	cv::Vec3f dropposition;
 	/**
 	 * The target position which is currently processed.
 	 */

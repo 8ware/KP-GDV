@@ -16,15 +16,18 @@ namespace kinjo {
 namespace app {
 
 GraspState::GraspState(State** readyState,
-		arm::Arm* arm, vision::Vision* vision, calibration::Calibrator* calibrator,
+		grasp::Grasper* grasper, vision::Vision* vision, calibration::Calibrator* calibrator,
 		int* xOffset, int* yOffset, int* zOffset) {
+	this->mutex = new std::mutex();
+	this->mutex->lock();
+
 	this->designator = "GRASPING";
 	this->infos.push_back("Press 'a' to abort grasping!");
 
 	this->next = this;
 	this->readyState = readyState;
 
-	this->arm = arm;
+	this->grasper = grasper;
 	this->vision = vision;
 	this->calibrator = calibrator;
 
@@ -34,35 +37,69 @@ GraspState::GraspState(State** readyState,
 }
 
 void GraspState::process(int mouseEvent, cv::Point point) {
-	if (mouseEvent != CV_EVENT_LBUTTONDBLCLK)
-		return;
+	if (mouseEvent == CV_EVENT_LBUTTONDBLCLK){
 
-	cv::Matx44f const mat44fRigidBodyTransformation
+		cv::Matx44f const mat44fRigidBodyTransformation
 			= calibrator->getRigidBodyTransformation();
 
-	LOG->debug("Clicked image pixel position: %v", point);
+		LOG->debug("Clicked image pixel position: %v", point);
 
-	cv::Vec3f const v3fVisionPosition
+		cv::Vec3f const v3fVisionPosition
 			= vision->estimateVisionPositionFromImagePointPx(point);
 
-	if(v3fVisionPosition[2] > 0.0f) {
-		LOG->debug("Resulting vision position: %v", v3fVisionPosition);
+		if (v3fVisionPosition[2] > 0.0f) {
+			LOG->debug("Resulting vision position: %v", v3fVisionPosition);
 
-		cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
-		LOG->debug("Resulting arm position: %v", v3fArmPosition);
+			cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
+			LOG->debug("Resulting arm position: %v", v3fArmPosition);
 
-		v3fArmPosition[0] += static_cast<float>(*xOffset);
-		v3fArmPosition[1] += static_cast<float>(*yOffset);
-		v3fArmPosition[2] += static_cast<float>(*zOffset);
-		LOG->debug("Resulting arm position with offset: %v", v3fArmPosition);
+			v3fArmPosition[0] += static_cast<float>(*xOffset);
+			v3fArmPosition[1] += static_cast<float>(*yOffset);
+			v3fArmPosition[2] += static_cast<float>(*zOffset);
+			LOG->debug("Resulting arm position with offset: %v", v3fArmPosition);
 
-		queue.push(v3fArmPosition);
-		LOG->info("Enqueued target %v", v3fArmPosition);
-		graspAsync();
-	} else {
-		LOG->warn("Clicked position with unknown depth: can not move there!");
-		if (!this->activeThread)
-			this->next = *this->readyState;
+			pickqueue.push(v3fArmPosition);
+			LOG->info("Enqueued target %v", v3fArmPosition);
+			graspAsync();
+		}
+		else {
+			LOG->warn("Clicked position with unknown depth: can not move there!");
+			if (!this->activeThread)
+				this->next = *this->readyState;
+		}
+	}
+	else if (mouseEvent == CV_EVENT_RBUTTONDBLCLK){
+
+		cv::Matx44f const mat44fRigidBodyTransformation
+			= calibrator->getRigidBodyTransformation();
+
+		LOG->debug("Clicked image pixel position: %v", point);
+
+		cv::Vec3f const v3fVisionPosition
+			= vision->estimateVisionPositionFromImagePointPx(point);
+
+		if (v3fVisionPosition[2] > 0.0f) {
+			LOG->debug("Resulting vision position: %v", v3fVisionPosition);
+			/*
+			cv::Vec3f v3fArmPosition(mat44fRigidBodyTransformation * v3fVisionPosition);
+			LOG->debug("Resulting arm position: %v", v3fArmPosition);
+			
+			v3fArmPosition[0] += static_cast<float>(*xOffset);
+			v3fArmPosition[1] += static_cast<float>(*yOffset);
+			v3fArmPosition[2] += static_cast<float>(*zOffset);
+			LOG->debug("Resulting arm position with offset: %v", v3fArmPosition);
+			*/
+			if (!this->dropposition[0])
+				this->mutex->unlock();
+			this->dropposition =v3fVisionPosition;
+			LOG->info("Set target drop visionposition %v", v3fVisionPosition);
+			graspAsync();
+		}
+		else {
+			LOG->warn("Clicked position with unknown depth: can not move there!");
+			if (!this->activeThread)
+				this->next = *this->readyState;
+		}
 	}
 }
 
@@ -80,22 +117,20 @@ void GraspState::graspAsync() {
 }
 
 void GraspState::grasp() {
-	while (!this->queue.empty()) {
-		this->currentTargetPosition = queue.front();
-		queue.pop();
+	while (!this->pickqueue.empty()) {
+		this->currentTargetPosition = pickqueue.front();
+		pickqueue.pop();
 		LOG->info("Dequeued target position %v", this->currentTargetPosition);
 
 		std::stringstream stream;
 		stream << "Target at position " << this->currentTargetPosition << " mm";
 		this->details = stream.str();
 
-		//arm->moveToStartPosition(false);
-		//arm->openFingers();
-
-		arm->GrabItem(currentTargetPosition);
-
-		//arm->closeFingers();
-		//arm->moveToStartPosition(true);
+		this->grasper->pickItem(currentTargetPosition);
+		this->mutex->lock();
+		this->grasper->dropItem(calibrator->getRigidBodyTransformation(), this->dropposition);
+		this->mutex->unlock();
+		//arm->GrabItem(currentTargetPosition);
 	}
 
 	this->activeThread = false;
