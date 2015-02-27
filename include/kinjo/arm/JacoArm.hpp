@@ -20,7 +20,8 @@ namespace arm {
     {
 
     public:
-		JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList);
+		JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList,
+			float maxMovementErrorDeviation);
 		virtual ~JacoArm() = default;
 
         /**
@@ -98,6 +99,11 @@ namespace arm {
 		void LowerHand(int Distance) const;
 
     private:
+		/**
+		 * Maximum deviation between reached and desired position indicating an
+		 * probable error.
+		 */
+		float maxMovementErrorDeviation;
         std::shared_ptr<KinDrv::JacoArm> TheJacoArm;
 		std::list<std::shared_ptr<MovementGuard>> MovGuardList;
     };//class

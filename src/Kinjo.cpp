@@ -331,7 +331,8 @@ int main(int argc, char* argv[])
 			if (!bUseMockImplementation) {
 				std::list<std::shared_ptr<kinjo::arm::MovementGuard>> MovGuardList;
 				MovGuardList.push_back(std::make_shared<kinjo::arm::CylindricMovementGuard>());
-				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList);
+				float maxMovementErrorDeviation = config.getFloat("JacoArm", "MaxMovementErrorDeviation");
+				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList, maxMovementErrorDeviation);
 
 				// Load a random calibration point generator if the calibration is not hard coded.
 				if(!bUseHardCodedCalibration) {

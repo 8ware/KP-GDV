@@ -18,6 +18,7 @@
 	},
 
 	"JacoArm" : {
+		"MaxMovementErrorDeviation" : 50.0,
 		"fingers closed X" : 0,
 		"fingers closed Y" : 0,
 		"fingers closed Z" : 0,
