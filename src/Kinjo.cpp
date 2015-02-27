@@ -26,7 +26,6 @@
 #include <kinjo/grasp/DropStrategy.hpp>
 #include <kinjo/grasp/SimpleTablePickStrategy.hpp>
 #include <kinjo/grasp/BoxDropStrategy.hpp>
-#include <kinjo/grasp/HandDropStrategy.hpp>
 #include <kinjo/grasp/SimpleTableDropStrategy.hpp>
 
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
