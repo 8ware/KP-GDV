@@ -177,7 +177,12 @@ append_recursive_files_add_to_source_group(${KINJO_SUFFIXED_SOURCE_DIR} "cpp" KI
 ADD_EXECUTABLE(${KINJO_TARGET_NAME}
 	${KINJO_HPP_FILES_ALL}
 	${KINJO_CPP_FILES_ALL})
-
+	
+# Under windows, opencv includes <windows.h> which defines min and max as macros.
+# To enable their usage as functions we have to prevent this.
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	TARGET_COMPILE_DEFINITIONS(${KINJO_TARGET_NAME} PUBLIC NOMINMAX)
+ENDIF()
 TARGET_COMPILE_OPTIONS(${KINJO_TARGET_NAME} ${COMPILE_OPTIONS})
 TARGET_INCLUDE_DIRECTORIES(${KINJO_TARGET_NAME} PUBLIC ${KINJO_INCLUDE_DIR}
 	${EXTERNAL_INCLUDE_DIRS}

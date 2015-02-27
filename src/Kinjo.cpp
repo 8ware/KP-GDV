@@ -2,10 +2,6 @@
 * This code has been developed during the WS 14/15 KP-CGV at the TU-Dresden
 **/
 
-// Under windows, opencv includes <windows.h> which defines min and max as macros.
-// To enable their usage as functions we have to prevent this.
-#define NOMINMAX
-
 #include <kinjo/RenderHelper.hpp>
 #include <kinjo/arm/JacoArm.hpp>
 #include <kinjo/arm/CylindricMovementGuard.hpp>
