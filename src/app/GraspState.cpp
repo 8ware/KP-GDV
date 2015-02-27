@@ -33,14 +33,6 @@ GraspState::GraspState(State** readyState,
 	this->zOffset = zOffset;
 }
 
-void GraspState::process(cv::Mat& rgbImage, cv::Mat& depthImage) {
-//	if (this->activeThread) {
-//		std::stringstream stream;
-//		stream << "Grasping target at position " << this->currentTargetPosition;
-//		renderTextCenter(rgbImage, cv::Scalar(0, 255, 0), stream.str(), 1.0, 3);
-//	}
-}
-
 void GraspState::process(int mouseEvent, cv::Point point) {
 	if (mouseEvent != CV_EVENT_LBUTTONDBLCLK)
 		return;
@@ -75,11 +67,14 @@ void GraspState::process(int mouseEvent, cv::Point point) {
 }
 
 void GraspState::graspAsync() {
-	if (this->activeThread)
+	if (this->activeThread) {
+		LOG->debug("Grasping thread already running...");
 		return;
+	}
 
 	this->activeThread = true;
 
+	LOG->debug("Starting grapsing thread...");
 	std::thread thread(&GraspState::grasp, this);
 	thread.detach();
 }
@@ -110,6 +105,7 @@ void GraspState::grasp() {
 void GraspState::process(int key) {
 	switch (key) {
 		case 'a':
+			LOG->trace("Key 'a' was pressed");
 			// TODO abort grasping
 			this->next = *this->readyState;
 			break;
