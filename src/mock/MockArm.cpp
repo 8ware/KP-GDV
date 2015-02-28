@@ -1,4 +1,4 @@
-#include <kinjo/arm/MockArm.hpp>
+#include <kinjo/mock/MockArm.hpp>
 
 //#include <libkindrv/kindrv.h>   //// KinDrv::MockArm
 
@@ -6,7 +6,7 @@
 #include <iostream>
 
 namespace kinjo {
-	namespace arm {
+	namespace mock {
 
 		static const float pi = 3.14159265358979323846f;
 

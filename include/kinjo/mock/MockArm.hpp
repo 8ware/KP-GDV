@@ -10,9 +10,9 @@ namespace KinDrv {
 }
 
 namespace kinjo {
-	namespace arm {
+	namespace mock {
 
-		class MockArm final : public Arm
+		class MockArm final : public arm::Arm
 		{
 
 		public:
