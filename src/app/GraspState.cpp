@@ -4,10 +4,9 @@
 #include <thread>
 
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
+#include <opencv2/highgui/highgui.hpp>	// CV_EVENT_{L,R}BUTTONDBLCLK
 
 #include <easylogging++.h>
-
-#include <kinjo/RenderHelper.hpp>
 
 
 static el::Logger* LOG = el::Loggers::getLogger("GraspState");

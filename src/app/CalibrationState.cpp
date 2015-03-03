@@ -5,8 +5,6 @@
 
 #include <easylogging++.h>
 
-#include <kinjo/RenderHelper.hpp>
-
 
 static el::Logger* LOG = el::Loggers::getLogger("CalibState");
 

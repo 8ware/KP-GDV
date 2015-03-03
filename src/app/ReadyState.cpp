@@ -2,9 +2,9 @@
 
 #include <iostream>
 
+#include <opencv2/highgui/highgui.hpp>	// CV_EVENT_{L,R}BUTTONDBLCLK
 #include <easylogging++.h>
 
-#include <kinjo/RenderHelper.hpp>
 #include <kinjo/util/Config.hpp>
 
 
