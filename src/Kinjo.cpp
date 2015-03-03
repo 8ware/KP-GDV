@@ -13,7 +13,7 @@
 #include <kinjo/recognition/ManualRecognizer.hpp>
 #include <kinjo/mock/DirectoryBasedDataProvider.hpp>
 #include <kinjo/mock/TestdataMock.hpp>
-#include <kinjo/config/Config.hpp>
+#include <kinjo/util/Config.hpp>
 
 #include <kinjo/app/InitialState.hpp>
 #include <kinjo/app/ColoredCircleBasedCalibrationState.hpp>
@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Load the configuration.
-		kinjo::config::Config config(sConfigPath);
+		kinjo::util::Config config(sConfigPath);
 
 		el::Configurations logConf(config.getString("Logging", "ConfigFile"));
 		el::Loggers::reconfigureAllLoggers(logConf);
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 			// Load a calibrator.
 			if(bUseHardCodedCalibration) {
 				std::string const sMatrixFilePath(config.getString("hardCodedCalibrator", "matrixFileName"));
-				cv::Matx44f mat44fRigidBodyTransformation(kinjo::config::Config::readMatrixFromFile(sMatrixFilePath));
+				cv::Matx44f mat44fRigidBodyTransformation(kinjo::util::Config::readMatrixFromFile(sMatrixFilePath));
 				calibrator = std::make_shared<kinjo::calibration::HardCodedCalibrator>(mat44fRigidBodyTransformation);
 			}
 			else {

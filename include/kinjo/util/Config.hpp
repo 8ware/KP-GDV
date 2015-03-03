@@ -4,9 +4,10 @@
 #include <rapidjson/document.h>
 
 #include <opencv/cv.h>
+//#include <opencv2/core/core.hpp>
 
 namespace kinjo {
-namespace config {
+namespace util {
 
 class Config final {
 
@@ -29,5 +30,5 @@ private:
 	rapidjson::Value::ConstValueIterator getValue(std::string const & section, std::string const & attribute);
 };
 
-} //end of namespace config
+} //end of namespace util
 } //end of namespace kinjo

@@ -5,7 +5,7 @@
 #include <easylogging++.h>
 
 #include <kinjo/RenderHelper.hpp>
-#include <kinjo/config/Config.hpp>
+#include <kinjo/util/Config.hpp>
 
 
 static el::Logger* LOG = el::Loggers::getLogger("ReadyState");
@@ -49,7 +49,7 @@ void ReadyState::process(int key) {
 			LOG->trace("Key 's' was pressed");
 			LOG->info("Saved calibration matrix to '%v'", this->matrixFilename);
 			cv::Matx44f calibMatrix = calibrator->getRigidBodyTransformation();
-			config::Config::writeMatrixToFile(this->matrixFilename, calibMatrix);
+			util::Config::writeMatrixToFile(this->matrixFilename, calibMatrix);
 			break;
 	}
 }

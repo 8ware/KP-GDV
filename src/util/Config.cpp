@@ -5,14 +5,14 @@
 #include <stdexcept>
 #include <vector>
 
-#include "kinjo/config/Config.hpp"
+#include "kinjo/util/Config.hpp"
 
 #include "rapidjson/prettywriter.h"	// for stringify JSON
 
 #include <opencv2/core/affine.hpp>		// cv::Matx44f * cv::Vec3f
 
 namespace kinjo {
-namespace config {
+namespace util {
 
 Config::Config(std::string const & filename) {
 		std::stringstream ss;
@@ -125,5 +125,5 @@ bool Config::writeMatrixToFile(std::string const & fileName, cv::Matx44f &matrix
 	return true;
 }
 
-} //end of namespace config
+} //end of namespace util
 } //end of namespace kinjo
