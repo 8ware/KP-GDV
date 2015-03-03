@@ -1,7 +1,7 @@
 #include <kinjo/app/ColoredCircleBasedCalibrationState.hpp>
 
 #include <kinjo/recognition/ColorBasedCircleRecognizer.hpp>
-#include <kinjo/RenderHelper.hpp>
+#include <kinjo/util/RenderHelper.hpp>
 
 
 namespace kinjo {
@@ -40,8 +40,8 @@ void ColoredCircleBasedCalibrationState::process(cv::Mat& rgbImage, cv::Mat& dep
 					= vision->estimateVisionPositionFromImagePointPx(v2iCenter);
 
 			// Display its coordinates.
-			renderPosition(depthImage, v2iCenter, cv::Scalar(255 << 8), v3fVisionPosition);
-			renderPosition(rgbImage, v2iCenter, cv::Scalar(0, 255, 0), v3fVisionPosition);
+			util::renderPosition(depthImage, v2iCenter, cv::Scalar(255 << 8), v3fVisionPosition);
+			util::renderPosition(rgbImage, v2iCenter, cv::Scalar(0, 255, 0), v3fVisionPosition);
 		}
 	}
 }

@@ -1,8 +1,9 @@
 
-#include <kinjo/RenderHelper.hpp>
+#include <kinjo/util/RenderHelper.hpp>
 
 
-namespace kinjo{
+namespace kinjo {
+namespace util {
 
 /**
 * Renders a double circle.
@@ -110,4 +111,6 @@ void renderInfos(cv::Mat& image, std::vector<std::string> lines) {
 	}
 }
 
-}
+} // end namespace util
+} // end namespace kinjo
+

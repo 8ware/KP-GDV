@@ -2,7 +2,7 @@
 * This code has been developed during the WS 14/15 KP-CGV at the TU-Dresden
 **/
 
-#include <kinjo/RenderHelper.hpp>
+#include <kinjo/util/RenderHelper.hpp>
 #include <kinjo/arm/JacoArm.hpp>
 #include <kinjo/arm/CylindricMovementGuard.hpp>
 #include <kinjo/vision/OpenNiVision.hpp>
@@ -193,32 +193,32 @@ namespace kinjo
 			}
 
 			const std::vector<std::string> infos = state->getInfos();
-			renderInfos(rgbImage, infos);
+			util::renderInfos(rgbImage, infos);
 
 			// Render current arm position(in arm coordinate system).
 			cv::Vec3f const v3fArmPosition = arm->getPosition();
 			cv::Point posPoint(0 + rgbImage.cols - 220, 30);
-			renderPosition(rgbImage, posPoint, rgbColor, v3fArmPosition, "ARM");
+			util::renderPosition(rgbImage, posPoint, rgbColor, v3fArmPosition, "ARM");
 
 			// Render a raster into the image.
 			if (showGrid)
-				renderRaster(rgbImage, rgbGray);
+				util::renderRaster(rgbImage, rgbGray);
 
 			// Show depth, color and selected point.
 			if(0 <= mouseState.point.x && mouseState.point.x < depthImage.cols
 				&& 0 <= mouseState.point.y && mouseState.point.y < depthImage.rows)
 			{
-				renderDoubleCircle(depthImage, mouseState.point, depthColor);
-				renderDoubleCircle(rgbImage, mouseState.point, rgbColor);
+				util::renderDoubleCircle(depthImage, mouseState.point, depthColor);
+				util::renderDoubleCircle(rgbImage, mouseState.point, rgbColor);
 
 				cv::Vec3f const v3fVisionPosition(
 					vision->estimateVisionPositionFromImagePointPx(mouseState.point));
 				if(v3fVisionPosition[2u] > 0)
 				{
-					renderPosition(depthImage, mouseState.point, depthColor, v3fVisionPosition);
-					renderPosition(rgbImage, mouseState.point, rgbColor, v3fVisionPosition);
+					util::renderPosition(depthImage, mouseState.point, depthColor, v3fVisionPosition);
+					util::renderPosition(rgbImage, mouseState.point, rgbColor, v3fVisionPosition);
 					cv::Point visPoint(0 + rgbImage.cols - 215, 45);
-					renderPosition(rgbImage, visPoint, rgbColor, v3fVisionPosition, "VIS");
+					util::renderPosition(rgbImage, visPoint, rgbColor, v3fVisionPosition, "VIS");
 				}
 			}
 

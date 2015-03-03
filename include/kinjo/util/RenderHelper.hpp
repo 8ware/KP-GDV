@@ -1,9 +1,10 @@
 #pragma once
 
-
 #include <opencv2/highgui/highgui.hpp>
 
+
 namespace kinjo {
+namespace util {
 
 	/**
 	* Renders a double circle.
@@ -39,4 +40,6 @@ namespace kinjo {
 	 */
 	void renderInfos(cv::Mat& image, std::vector<std::string> lines);
 
-}
+} // end namespace util
+} // end namespace kinjo
+
