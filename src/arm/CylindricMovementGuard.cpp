@@ -20,12 +20,11 @@ namespace arm {
 
 	void CylindricMovementGuard::Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst){
 		Init_Deadzones();
-		bool InInnerCircle = false;
 		if (startPos == endPos){
 			*HandlingResult = 0;
 			return;
 		}
-		if (!EndpointLegal(endPos, &InInnerCircle)){
+		if (!EndpointLegal(endPos)){
 			*HandlingResult = 2;
 			return;
 		}
@@ -37,7 +36,7 @@ namespace arm {
 			return;
 		}
 			
-		if (!StartpointLegal(startPos, &InInnerCircle)){
+		if (!StartpointLegal(startPos)){
 			*HandlingResult = 3;
 			return;
 		}
@@ -115,28 +114,34 @@ namespace arm {
 		return P;
 	}
 
-	bool CylindricMovementGuard::StartpointLegal(cv::Vec3f startPos, bool *InInnerCircle) {
+	bool CylindricMovementGuard::StartpointLegal(cv::Vec3f startPos) {
 		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < InnerCircleRadius) {
-			*InInnerCircle = true;
+			LOG(INFO) << "startpoint too close to socket, use physical joystick"; 
 			return false;
 		}
 		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) > OuterCircleRadius) {
-			*InInnerCircle = false;
+			LOG(INFO) << "startpoint too far away, something is wrong"; 
 			return false;
+		}
+		if (maxHeight > startPos[2]){
+			LOG(INFO) << "startpoint too high, something is wrong";
+			//return false; //TODO: test this first!
 		}
 		return true;
 	}
 
-	bool CylindricMovementGuard::EndpointLegal(cv::Vec3f endPos, bool *InInnerCircle) {
+	bool CylindricMovementGuard::EndpointLegal(cv::Vec3f endPos) {
 		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCircleRadius){
-			*InInnerCircle = true;
 			LOG(INFO) << "endpoint too close to socket";
 			return false;
 		}
 		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) > OuterCircleRadius){
-			*InInnerCircle = false;
 			LOG(INFO) << "endpoint not reachable, too far away";
 			return false;
+		}
+		if (maxHeight > endPos[2]){
+			LOG(INFO) << "endpoint too high";
+			//return false; // TODO: test this first!
 		}
 		return true;
 	}
