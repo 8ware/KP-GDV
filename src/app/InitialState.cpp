@@ -2,15 +2,13 @@
 
 #include <iostream>
 
-#include <easylogging++.h>
-
-
-static el::Logger* LOG = el::Loggers::getLogger("InitState");
 
 namespace kinjo {
 namespace app {
 
 InitialState::InitialState(State** calibState) {
+	this->log = el::Loggers::getLogger("InitialState");
+
 	this->designator = "INITIALIZED";
 	this->infos.push_back("Press 'c' to start calibration!");
 
@@ -21,7 +19,7 @@ InitialState::InitialState(State** calibState) {
 void InitialState::process(int key) {
 	switch (key) {
 		case 'c':
-			LOG->trace("Key 'c' was pressed");
+			log->trace("Key 'c' was pressed");
 			this->next = *this->calibState;
 			break;
 	}

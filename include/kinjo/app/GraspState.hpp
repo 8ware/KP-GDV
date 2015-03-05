@@ -10,6 +10,8 @@
 #include <kinjo/calibration/Calibrator.hpp>
 #include <kinjo/grasp/Grasper.hpp>
 
+#include <easylogging++.h>
+
 
 namespace kinjo {
 namespace app {
@@ -51,6 +53,10 @@ public:
 	void process(int key) override;
 
 private:
+	/**
+	 * The logger.
+	 */
+	el::Logger* log;
 
 	std::mutex* mutex;
 

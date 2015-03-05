@@ -3,16 +3,14 @@
 #include <iostream>
 #include <thread>
 
-#include <easylogging++.h>
-
-
-static el::Logger* LOG = el::Loggers::getLogger("CalibState");
 
 namespace kinjo {
 namespace app {
 
 CalibrationState::CalibrationState(State** initState, State** readyState,
 		arm::Arm* arm, calibration::Calibrator* calibrator) {
+	this->log = el::Loggers::getLogger("CalibState");
+
 	this->designator = "CALIBRATING";
 	this->infos.push_back("Press 'a' to abort calibration!");
 
@@ -37,7 +35,7 @@ void CalibrationState::initializeAsync() {
 void CalibrationState::process(cv::Mat& rgbImage, cv::Mat& depthImage) {
 	if(calibrator->getIsValidTransformationAvailable()) {
 		cv::Matx44f calibMatrix = calibrator->getRigidBodyTransformation();
-		LOG->info("Rigid Body Transformation Matrix:\n%v", calibMatrix);
+		log->info("Rigid Body Transformation Matrix:\n%v", calibMatrix);
 
 		this->next = *this->readyState;
 	}
@@ -46,7 +44,7 @@ void CalibrationState::process(cv::Mat& rgbImage, cv::Mat& depthImage) {
 void CalibrationState::process(int key) {
 	switch (key) {
 		case 'a':
-			LOG->trace("Key 'a' was pressed");
+			log->trace("Key 'a' was pressed");
 			// TODO abort calibration
 			this->next = *this->initState;
 			break;

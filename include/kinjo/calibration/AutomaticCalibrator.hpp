@@ -7,6 +7,8 @@
 #include <kinjo/recognition/Recognizer.hpp>
 #include <kinjo/calibration/CalibrationPointGenerator.hpp>
 
+#include <easylogging++.h>
+
 #include <thread>
 
 namespace kinjo {
@@ -91,6 +93,11 @@ namespace calibration {
 		cv::Vec3f getAveragedCalibrationObjectVisionPosition() const;
 
 	private:
+		/**
+		 * The logger.
+		 */
+		el::Logger* log;
+
 		std::thread m_Thread;
 
 		cv::Matx44f m_matCurrentRigidBodyTransformation;

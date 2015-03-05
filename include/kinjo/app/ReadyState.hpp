@@ -5,6 +5,8 @@
 #include <kinjo/app/State.hpp>
 #include <kinjo/calibration/Calibrator.hpp>
 
+#include <easylogging++.h>
+
 
 namespace kinjo {
 namespace app {
@@ -40,6 +42,10 @@ public:
 	void process(int key) override;
 
 private:
+	/**
+	 * The logger.
+	 */
+	el::Logger* log;
 
 	/**
 	 * The pointer to the calibration state pointer.
