@@ -6,20 +6,19 @@
 namespace kinjo {
 namespace arm {
 
-	CylindricMovementGuard::CylindricMovementGuard()
+	CylindricMovementGuard::CylindricMovementGuard(
+		float InnerCylinderRadius,
+		float OuterCylinderRadius,
+		float TableHeight,
+		float MaxHeight) :
+		InnerCylinderRadius(InnerCylinderRadius),
+		OuterCylinderRadius(OuterCylinderRadius),
+		tableHeight(TableHeight),
+		maxHeight(MaxHeight)
 	{
 	}
 
-	void CylindricMovementGuard::Init_Deadzones() {
-		//TODO: Read Values from config file
-		InnerCircleRadius = 0.2f;
-		OuterCircleRadius = 0.7f;
-		maxHeight = 0.8f;
-		tableHeight = -0.1f;
-	}
-
 	void CylindricMovementGuard::Handle_Deathzones(cv::Vec3f startPos, cv::Vec3f endPos, int *HandlingResult, cv::Vec3f *PosToTravelFirst){
-		Init_Deadzones();
 		if (startPos == endPos){
 			*HandlingResult = 0;
 			return;
@@ -31,8 +30,7 @@ namespace arm {
 			
 
 		if (!EndpointNotInTable(endPos)){
-			//4 arm was send inside the table(be more careful!)
-			*HandlingResult = 2;
+			*HandlingResult = 4;
 			return;
 		}
 			
@@ -77,7 +75,7 @@ namespace arm {
 		P = S + Lambda * B;
 		float distance = sqrt(P.dot(P)); //Distance between 0 0 0 and the closest point
 		//if thats lesser than the Radius AND between Startpoint and Enpoint, we have an intersection
-		if (distance < InnerCircleRadius && Lambda>0.0f && Lambda < 1.0f){
+		if (distance < InnerCylinderRadius && Lambda>0.0f && Lambda < 1.0f){
 			return true;
 		}
 		return false;
@@ -107,7 +105,7 @@ namespace arm {
 
 		//Z level of P still is zero, we interpolate the Z between Start and End Point
 		P = P / sqrt(P.dot(P));
-		P = P * InnerCircleRadius * 1.5f;
+		P = P * InnerCylinderRadius * 1.5f;
 		S = startPos;
 		B = endPos - startPos;
 		P[2] = S[2] + Lambda * B[2];
@@ -115,33 +113,32 @@ namespace arm {
 	}
 
 	bool CylindricMovementGuard::StartpointLegal(cv::Vec3f startPos) {
-		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < InnerCircleRadius) {
+		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) < InnerCylinderRadius) {
 			LOG(INFO) << "startpoint too close to socket, use physical joystick"; 
 			return false;
 		}
-		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) > OuterCircleRadius) {
+		if (sqrt(startPos[0] * startPos[0] + startPos[1] * startPos[1] + startPos[2] * startPos[2]) > OuterCylinderRadius) {
 			LOG(INFO) << "startpoint too far away, something is wrong"; 
 			return false;
 		}
-		if (maxHeight > startPos[2]){
+		if (maxHeight < startPos[2]){
 			LOG(INFO) << "startpoint too high, something is wrong";
-			//return false; //TODO: test this first!
 		}
 		return true;
 	}
 
 	bool CylindricMovementGuard::EndpointLegal(cv::Vec3f endPos) {
-		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCircleRadius){
+		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) < InnerCylinderRadius){
 			LOG(INFO) << "endpoint too close to socket";
 			return false;
 		}
-		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) > OuterCircleRadius){
+		if (sqrt(endPos[0] * endPos[0] + endPos[1] * endPos[1] + endPos[2] * endPos[2]) > OuterCylinderRadius){
 			LOG(INFO) << "endpoint not reachable, too far away";
 			return false;
 		}
-		if (maxHeight > endPos[2]){
+		if (maxHeight < endPos[2]){
 			LOG(INFO) << "endpoint too high";
-			//return false; // TODO: test this first!
+			return false;
 		}
 		return true;
 	}

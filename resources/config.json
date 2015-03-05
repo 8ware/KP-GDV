@@ -1,6 +1,6 @@
 {
 	"Logging" : {
-		"ConfigFile" : "../resources/logging.conf"
+		"ConfigFile" : "resources/logging.conf"
 	},
 
 	"GUI" : {
@@ -14,11 +14,15 @@
 
 	"mock" : {
 		"bUseMockImplementation" : false,
-		"sMockDataDirectory" : "<TODO:>"
+		"sMockDataDirectory" : "../data_6"
 	},
 
 	"JacoArm" : {
 		"MaxMovementErrorDeviation" : 50.0,
+		"InnerCylinderRadius" : 0.2,
+		"OuterCylinderRadius" : 0.7,
+		"MaxHeight" : 0.8,
+		"TableHeight" : -0.038, 
 		"fingers closed X" : 0,
 		"fingers closed Y" : 0,
 		"fingers closed Z" : 0,
@@ -42,7 +46,7 @@
 	},
 
 	"calibration" : {
-		"bUseHardCodedCalibration" : false,
+		"bUseHardCodedCalibration" : true,
 		"uiRandomCalibrationPointGeneratorSeed" : 1337
 	},
 		"hardCodedCalibrator" : {

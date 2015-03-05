@@ -14,11 +14,13 @@ namespace arm {
 	static const float pi = static_cast<float>(std::atan2(0, -1));
 
 	JacoArm::JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList,
-		float maxMovementErrorDeviation)
+		float maxMovementErrorDeviation,
+		float tableHeight)
 	{
 		TheJacoArm = std::make_shared<KinDrv::JacoArm>();
 		this->MovGuardList = MovGuardList;
 		this->maxMovementErrorDeviation = maxMovementErrorDeviation;
+		this->tableHeight = tableHeight;
 		
 		LOG(INFO) << "JacoArm found, using Jaco Arm.";
 	}
@@ -100,6 +102,12 @@ namespace arm {
 			// 3 startpoint in a deadzone
 			LOG(INFO) << "Startpoint is in a deadzone";
 			break;
+		case 4: 
+			// 4 arm was send into table, I send it close to it.
+			LOG(INFO) << "Arm was send into table, target position adjusted";
+			Position_end[2] = (tableHeight+0.001f);
+			moveTo(Position_end*1000);
+			break;
 		default:
 			LOG(INFO) << "Something went terribly wrong in deadzone handling!";
 			break;
@@ -129,7 +137,7 @@ namespace arm {
 		else {
 			moveTo({ 0.0f, -500.0f, 400.0f });
 			waitArmFinishMovement();
-			TheJacoArm->set_target_cart(0.0f, -0.5f, 0.4f, pi, 0.0f, 0.0f, 40.0f, 40.0f, 40.0f);
+			TheJacoArm->set_target_cart(0.0f, -0.5f, 0.4f, pi, 0.0f, 0.0f, 64.0f, 64.0f, 64.0f);
 		}
 		waitArmFinishMovement();
 		TheJacoArm->stop_api_ctrl();

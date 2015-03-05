@@ -329,9 +329,14 @@ int main(int argc, char* argv[])
 			bool const bUseMockImplementation(config.getBool("mock", "bUseMockImplementation"));
 			if (!bUseMockImplementation) {
 				std::list<std::shared_ptr<kinjo::arm::MovementGuard>> MovGuardList;
-				MovGuardList.push_back(std::make_shared<kinjo::arm::CylindricMovementGuard>());
+				MovGuardList.push_back(std::make_shared<kinjo::arm::CylindricMovementGuard>(
+					config.getFloat("JacoArm", "InnerCylinderRadius"),
+					config.getFloat("JacoArm", "OuterCylinderRadius"),
+					config.getFloat("JacoArm", "TableHeight"),
+					config.getFloat("JacoArm", "MaxHeight")));
 				float maxMovementErrorDeviation = config.getFloat("JacoArm", "MaxMovementErrorDeviation");
-				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList, maxMovementErrorDeviation);
+				float tableHeight = config.getFloat("JacoArm", "TableHeight");
+				arm = std::make_shared<kinjo::arm::JacoArm>(MovGuardList, maxMovementErrorDeviation, tableHeight);
 
 				// Load a random calibration point generator if the calibration is not hard coded.
 				if(!bUseHardCodedCalibration) {

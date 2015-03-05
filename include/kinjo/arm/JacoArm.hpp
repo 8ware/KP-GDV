@@ -31,7 +31,8 @@ namespace arm {
 		 *        inaccuracy the arm can have without causing an error
 		 */
 		JacoArm(std::list<std::shared_ptr<MovementGuard>> MovGuardList,
-			float maxMovementErrorDeviation);
+			float maxMovementErrorDeviation,
+			float tableHeight);
 
 		/**
 		 * default Destructor
@@ -99,6 +100,11 @@ namespace arm {
 		 * probable error.
 		 */
 		float maxMovementErrorDeviation;
+
+		/**
+		 * this is the offset to the arms coordinate system at which the arm hits the table
+		 */
+		float tableHeight;
 
 		/**
 		 * The reference to the JacoArm API

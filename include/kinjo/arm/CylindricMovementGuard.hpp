@@ -9,7 +9,11 @@ namespace arm {
 	class CylindricMovementGuard final : public MovementGuard {
 
 	public:
-		CylindricMovementGuard();
+		CylindricMovementGuard(
+			float innerCylinderRadius,
+			float outerCylinderRadius,
+			float tableHeight,
+			float maxHeight);
 		~CylindricMovementGuard() = default;
 
 
@@ -26,10 +30,6 @@ namespace arm {
 		 * The Following functions are helper functions
 		 */
 	private:
-		/**
-		 * initializes the size of the deadzones
-		 */
-		void Init_Deadzones();
 
 		/**
 		 * private member funktion to calculate if line between startpos and
@@ -66,8 +66,8 @@ namespace arm {
 		bool EndpointNotInTable(cv::Vec3f endPos);
 
 	private:
-		float InnerCircleRadius; ///< radius of the inner cylinder
-		float OuterCircleRadius; ///< radius of the outer cylinder
+		float InnerCylinderRadius; ///< radius of the inner cylinder
+		float OuterCylinderRadius; ///< radius of the outer cylinder
 		float maxHeight;         ///< the height the arm can't reach anymore
 		float tableHeight;       ///< distance between cartesian coordinates
 								 ///< and table
