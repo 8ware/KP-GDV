@@ -14,6 +14,11 @@
 namespace kinjo {
 namespace util {
 
+/**
+* Constructor for the Config class
+* the constructor converts the json file into a format that can be processed in c++
+* \value relative path from build folder to .json file 
+**/
 Config::Config(std::string const & filename) {
 		std::stringstream ss;
 		std::ifstream ifs;
@@ -27,6 +32,9 @@ Config::Config(std::string const & filename) {
 			throw std::invalid_argument("json parse error");
 	}
 
+/**
+* \return iterator pointing to specific value
+**/
 rapidjson::Value::ConstValueIterator Config::getValue(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstMemberIterator itr = doc.FindMember(section.c_str());
 	if (itr != doc.MemberEnd()){
@@ -39,26 +47,41 @@ rapidjson::Value::ConstValueIterator Config::getValue(std::string const & sectio
 	return NULL;
 }
 
+/**
+* \return a specific string value from the config file
+ **/
 std::string Config::getString(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetString();
 }
 
+/**
+* \return a specific float value from the config file
+**/
 float Config::getFloat(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return static_cast<float> (iterator->GetDouble());
 }
 
+/**
+* \return a specific int value from the config file
+**/
 int Config::getInt(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetInt();
 }
 
+/**
+* \return a specific bool value from the config file
+**/
 bool Config::getBool(std::string const & section, std::string const & attribute) {
 	rapidjson::Value::ConstValueIterator iterator = getValue(section, attribute);
 	return iterator->GetBool();
 }
 
+/**
+* \return the values of the given file in matrix format
+**/
 cv::Matx44f Config::readMatrixFromFile(std::string const & fileName){
 	//read File
 	std::stringstream ss;
@@ -99,6 +122,10 @@ cv::Matx44f Config::readMatrixFromFile(std::string const & fileName){
 
 }
 
+/**
+* writes given matrix to the given file
+* \return true if succeeded
+**/
 bool Config::writeMatrixToFile(std::string const & fileName, cv::Matx44f &matrix){
 	//write matrix to document
 	rapidjson::Document d;
