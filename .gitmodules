@@ -1,0 +1,6 @@
+[submodule "external/rapidjson"]
+	path = external/rapidjson
+	url = git://github.com/miloyip/rapidjson.git
+[submodule "external/easylogging"]
+	path = external/easylogging
+	url = git://github.com/easylogging/easyloggingpp.git

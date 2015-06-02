@@ -1,0 +1,90 @@
+{
+	"Logging" : {
+		"ConfigFile" : "resources/logging.conf"
+	},
+
+	"GUI" : {
+		"ShowDepthImage" : false,
+		"ShowGrid" : true
+	},
+
+	"other" : {
+		"bMinimalVisionOnly" : false
+	},
+
+	"mock" : {
+		"bUseMockImplementation" : false,
+		"sMockDataDirectory" : "../data_6"
+	},
+
+	"JacoArm" : {
+		"MaxMovementErrorDeviation" : 50.0,
+		"InnerCylinderRadius" : 0.2,
+		"OuterCylinderRadius" : 0.7,
+		"MaxHeight" : 0.8,
+		"TableHeight" : -0.038, 
+		"fingers closed X" : 0,
+		"fingers closed Y" : 0,
+		"fingers closed Z" : 0,
+		"fingers open X" : 55,
+		"fingers open Y" : 55,
+		"fingers open Z" : 55
+	},
+	"MockArm" : {
+		"offset position" : 0.1,
+		"offset rotation" : 0.2,
+		"offset fingers" : 10,
+		"initial position X" : 0.050,
+		"initial position Y" : 0.050,
+		"initial position Z" : 0.050,
+		"initial rotation X" : 1,
+		"initial rotation Y" : 1,
+		"initial rotation Z" : 1,
+		"initial fingerpos X" : 0,
+		"initial fingerpos Y" : 0,
+		"initial fingerpos Z" : 0
+	},
+
+	"calibration" : {
+		"bUseHardCodedCalibration" : true,
+		"uiRandomCalibrationPointGeneratorSeed" : 1337
+	},
+		"hardCodedCalibrator" : {
+		"matrixFileName" : "CalibrationMatrix.json"
+	},
+	"automaticCalibrator" : {
+		"uiCalibrationPointCount" : 10,
+		"uiCalibrationRotationCount" : 3,
+		"uiMinimumValidPositionsAfterFilteringPercent" : 30,
+		"fMaximumFilterEuclideanDistancePointToAverage" : 100.0
+	},
+
+	"recognition" : {
+		"bUseManualRecognizer" : false
+	},
+	"colorBasedCircleRecognizer" : {
+		"uiRecognitionAttemptCount" : 5,
+		"iMorphSizeDilatePx" : 4,
+		"iMorphSizeErodePx" : 8,
+		"iGaussianBlurFilterWidthHalf" : 8,
+		"iInvRatioAccuSize" : 2,
+		"iMinCircleDistImageHeightPercent" : 50,
+		"iCannyEdgeThreshold" : 100,
+		"iHoughAccuThreshold" : 15,
+		"iMinCircleRadiusImageHeightPercent" : 1,
+		"iMaxCircleRadiusImageHeightPercent" : 25,
+		"iMinHuePercent" : 11,
+		"iMaxHuePercent" : 15,
+		"iMinSatPercent" : 30,
+		"iMinValPercent" : 40
+	},
+
+	"vision" : {
+	},
+
+	"grasping" : {
+		"x-offset" : 0,
+		"y-offset" : -10,
+		"z-offset" : 0
+	}
+}
